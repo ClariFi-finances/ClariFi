@@ -1,4 +1,4 @@
 
-namespace ClariFi.API.Models;
+namespace API.Models;
 
 public interface IEntity { int Id { get; set; } }

@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using ClariFi.API.Data;
-using ClariFi.API.Models;
-using ClariFi.API.Services.Interfaces;
+using API.Models;
+using API.Services.Interfaces;
+using API.Data;
 
-namespace ClariFi.API.Services;
+namespace API.Services;
 
 public class BaseService<T>(AppDbContext context) : IBaseService<T> where T : class, IEntity
 {

@@ -1,7 +1,7 @@
 using Mapster;
-using ClariFi.API.Models;
+using API.Models;
 
-namespace ClariFi.API.Configuration;
+namespace API.Data.Configs;
 
 public class MapsterConfig : IRegister
 {

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using ClariFi.API.Models;
-using ClariFi.API.Services.Interfaces;
 using MapsterMapper;
+using API.Models;
+using API.Services.Interfaces;
 
-namespace ClariFi.API.Controllers;
+namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

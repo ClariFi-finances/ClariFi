@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using ClariFi.API.Models;
+using API.Models;
 
-namespace ClariFi.API.Data;
+namespace API.Data;
 
     public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {

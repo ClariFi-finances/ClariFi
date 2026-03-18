@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using ClariFi.API.Data;
-using ClariFi.API.Services; using ClariFi.API.Services.Interfaces;
+using API.Data;
+using API.Services; using API.Services.Interfaces;
 using Mapster;
-using MapsterMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 // Set your enviroment variables with this, replace the defaults with your credentials:
