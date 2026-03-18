@@ -1,41 +1,36 @@
-var builder = WebApplication.CreateBuilder(args);
+using Microsoft.EntityFrameworkCore;
+using ClariFi.API.Data;
+using ClariFi.API.Services; using ClariFi.API.Services.Interfaces;
+using Mapster;
+using MapsterMapper;
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+var builder = WebApplication.CreateBuilder(args);
+// Set your enviroment variables with this, replace the defaults with your credentials:
+// export Host=localhost;Database=my_db;Username=my_user;Password=my_password"
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// ---- DATABASE
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString)); 
+// ---- SWAGGER
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+// ---- MAPSTER
+builder.Services.AddMapster();
+// ---- BUSINESS LOGIC
+builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
+
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.UseAuthorization();
+app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
