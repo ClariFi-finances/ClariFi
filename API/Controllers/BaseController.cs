@@ -1,14 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using MapsterMapper;
-using API.Models;
-using API.Services.Interfaces;
-
 namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 public class BaseController<T, TCreateDto>(IBaseService<T> service, IMapper mapper) : ControllerBase 
-    where T : class, IEntity where TCreateDto : class, IEntity
+    where T : class, IEntity where TCreateDto : class
     {
     [HttpGet]
     public virtual async Task<IActionResult> GetAll() => Ok(await service.GetAllAsync());

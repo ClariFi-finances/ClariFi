@@ -1,8 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using API.Data;
-using API.Services; using API.Services.Interfaces;
-using Mapster;
-
 var builder = WebApplication.CreateBuilder(args);
 // Set your enviroment variables with this, replace the defaults with your credentials:
 // export Host=localhost;Database=my_db;Username=my_user;Password=my_password"
@@ -15,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 // ---- MAPSTER
-builder.Services.AddMapster();
+builder.Services.AddMapsterConfiguration();
 // ---- BUSINESS LOGIC
 builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
 

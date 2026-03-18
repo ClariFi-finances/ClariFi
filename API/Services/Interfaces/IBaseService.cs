@@ -1,5 +1,3 @@
-using API.Models;
-
 namespace API.Services.Interfaces;
 
 public interface IBaseService<T> where T : class, IEntity

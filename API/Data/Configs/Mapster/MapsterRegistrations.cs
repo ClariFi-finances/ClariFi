@@ -1,9 +1,6 @@
-using Mapster;
-using API.Models;
+namespace API.Data.Configs.Mapster;
 
-namespace API.Data.Configs;
-
-public class MapsterConfig : IRegister
+public class MapsterRegistrations : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
