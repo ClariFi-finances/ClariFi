@@ -1,0 +1,9 @@
+global using Mapster;
+global using MapsterMapper;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.EntityFrameworkCore;
+global using API.Models;
+global using API.Data;
+global using API.Data.Configs.Mapster;
+global using API.Services;
+global using API.Services.Interfaces;
