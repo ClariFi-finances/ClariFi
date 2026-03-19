@@ -1,10 +1,19 @@
 var builder = WebApplication.CreateBuilder(args);
-// Set your enviroment variables with this, replace the defaults with your credentials:
-// export Host=localhost;Database=my_db;Username=my_user;Password=my_password"
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var builder = WebApplication.CreateBuilder(args);
+
+// To set your credentials, run:
+// dotnet user-secrets init
+// dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=ClariFi;Username=giovanisims;Password=admin"
+// check with: dotnet user-secrets list
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 // ---- DATABASE
-builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString)); 
+builder.Services.AddDbContext<AppDbContext>(options 
+    => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")
+)); 
 // ---- SWAGGER
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
