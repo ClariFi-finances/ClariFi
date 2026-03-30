@@ -1,14 +1,46 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace API.Data;
 
-    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+{
+    public DbSet<User> Users { get; set; }
+    public DbSet<PaymentMethod> PaymentMethods { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-
-        // Models go here like this: public DbSet<foo> bar {get;set;}
-
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.Entity<API.Models.User>(entity => 
         {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-        }
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Password).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.CPF).IsRequired().HasMaxLength(11);
+            entity.HasIndex(e => e.CPF).IsUnique();
+        });
+
+        modelBuilder.Entity<API.Models.PaymentMethod>(entity =>
+        {
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Type).IsRequired();
+            entity.Property(e => e.UserId).IsRequired();
+        });
+
+        modelBuilder.Entity<API.Models.Transaction>(entity =>
+        {
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Amount).IsRequired();
+            entity.Property(e => e.Date).IsRequired();
+            entity.Property(e => e.Type).IsRequired();
+            entity.Property(e => e.Category).IsRequired();
+            entity.Property(e => e.InstallmentInfo).HasMaxLength(255);
+            entity.Property(e => e.UserId).IsRequired();
+            entity.Property(e => e.PaymentMethodId).IsRequired();
+        });
+
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
+}

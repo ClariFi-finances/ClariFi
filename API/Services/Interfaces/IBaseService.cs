@@ -1,6 +1,6 @@
 namespace API.Services.Interfaces;
 
-public interface IBaseService<T> where T : class, IEntity
+public interface IBaseService<T> where T : BaseEntity
 {
     Task<IEnumerable<T>> GetAllAsync();
     Task<T?> GetByIdAsync(int id, params string[] includes);

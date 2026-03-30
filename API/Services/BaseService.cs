@@ -1,8 +1,8 @@
 namespace API.Services;
 
-public class BaseService<T>(AppDbContext context) : IBaseService<T> where T : class, IEntity
+public class BaseService<T>(AppDbContext context) : IBaseService<T> where T : BaseEntity
 {
-    protected readonly AppDbContext _context = context;
+    private readonly AppDbContext _context = context;
 
     public virtual async Task<IEnumerable<T>> GetAllAsync() => await _context.Set<T>().ToListAsync();
 
