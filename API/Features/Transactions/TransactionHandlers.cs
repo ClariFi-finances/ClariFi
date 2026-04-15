@@ -9,18 +9,12 @@ public record GetTransactionsQuery() : IRequest<IEnumerable<Transaction>>;
 public record UpdateTransactionCommand(int Id, string Title, string Description, decimal Amount, TransactionCategory Category, DateTime Date) : IRequest<bool>;
 public record DeleteTransactionCommand(int Id) : IRequest<bool>;
 
-public class TransactionHandlers : 
+public class PaymentMethodHandlers(IRepository<Transaction> repository) :
     IRequestHandler<CreateTransactionCommand, Transaction>,
     IRequestHandler<GetTransactionsQuery, IEnumerable<Transaction>>,
     IRequestHandler<UpdateTransactionCommand, bool>,
     IRequestHandler<DeleteTransactionCommand, bool>
 {
-    private readonly IRepository<Transaction> _repository;
-
-    public TransactionHandlers(IRepository<Transaction> repository)
-    {
-        _repository = repository;
-    }
 
     public async Task<Transaction> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
     {
@@ -28,34 +22,32 @@ public class TransactionHandlers :
             request.Title, request.Description, request.Amount, request.Date, 
             request.Type, request.Category, request.UserId, request.PaymentMethodId, request.InstallmentInfo);
         
-        await _repository.AddAsync(transaction);
-        await _repository.SaveChangesAsync();
+        await repository.AddAsync(transaction, cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
         return transaction;
     }
 
     public async Task<IEnumerable<Transaction>> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
     {
-        return await _repository.GetAllAsync();
+        return await repository.GetAllAsync(cancellationToken);
     }
 
     public async Task<bool> Handle(UpdateTransactionCommand request, CancellationToken cancellationToken)
     {
-        var transaction = await _repository.GetByIdAsync(request.Id);
-        if (transaction is null) return false;
+        if (await repository.GetByIdAsync(request.Id, cancellationToken) is not { } transaction) return false;
 
         transaction.UpdateDetails(request.Title, request.Description, request.Amount, request.Category, request.Date);
-        await _repository.UpdateAsync(transaction);
-        await _repository.SaveChangesAsync();
+        await repository.UpdateAsync(transaction);
+        await repository.SaveChangesAsync(cancellationToken);
         return true;
     }
 
     public async Task<bool> Handle(DeleteTransactionCommand request, CancellationToken cancellationToken)
     {
-        var transaction = await _repository.GetByIdAsync(request.Id);
-        if (transaction is null) return false;
-
-        await _repository.DeleteAsync(transaction);
-        await _repository.SaveChangesAsync();
+        if (await repository.GetByIdAsync(request.Id, cancellationToken) is not { } transaction) return false;
+        
+        await repository.DeleteAsync(transaction);
+        await repository.SaveChangesAsync(cancellationToken);
         return true;
     }
 }
