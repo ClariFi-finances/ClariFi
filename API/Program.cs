@@ -2,6 +2,8 @@ using API.Extensions;
 using API.Models;
 using API.Infrastructure.Repositories;
 using API.Features.Users;
+using API.Features.PaymentMethods;
+using API.Features.Transactions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,11 +46,13 @@ app.MapGroup("/api/users")
     .MapUserEndpoints()
     .WithTags("Users");
 
-/* 
-// Migrate other features to domain-specific modules similarly
 app.MapGroup("/api/paymentmethods")
-    ...
-*/
+    .MapPaymentMethodEndpoints()
+    .WithTags("PaymentMethods");
+
+app.MapGroup("/api/transactions")
+    .MapTransactionEndpoints()
+    .WithTags("Transactions");
 
 app.UseHttpsRedirection();
 app.UseAuthorization();

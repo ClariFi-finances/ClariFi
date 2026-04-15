@@ -20,21 +20,44 @@ public enum TransactionCategory
 
 public class Transaction : BaseEntity
 {
-    public required string Title { get; set; }
-    public required string Description { get; set; }
-    public required decimal Amount { get; set; }
-    public required DateTime Date { get; set; }
-    public required TransactionType Type { get; set; }
-    public required TransactionCategory Category { get; set; }
-    public string? InstallmentInfo { get; set; }
+    public string Title { get; private set; }
+    public string Description { get; private set; }
+    public decimal Amount { get; private set; }
+    public DateTime Date { get; private set; }
+    public TransactionType Type { get; private set; }
+    public TransactionCategory Category { get; private set; }
+    public string? InstallmentInfo { get; private set; }
 
     [System.Text.Json.Serialization.JsonIgnore]
-    public User? User { get; }
-    public required int UserId { get; set; }
-
+    public User? User { get; private set; }
+    public int UserId { get; private set; }
 
     [System.Text.Json.Serialization.JsonIgnore]
-    public PaymentMethod? PaymentMethod { get; }
-    public required int PaymentMethodId { get; set; }
+    public PaymentMethod? PaymentMethod { get; private set; }
+    public int PaymentMethodId { get; private set; }
 
+    protected Transaction() { } // EF Constructor
+
+    public Transaction(string title, string description, decimal amount, DateTime date, 
+        TransactionType type, TransactionCategory category, int userId, int paymentMethodId, string? installmentInfo = null)
+    {
+        Title = title;
+        Description = description;
+        Amount = amount;
+        Date = date;
+        Type = type;
+        Category = category;
+        UserId = userId;
+        PaymentMethodId = paymentMethodId;
+        InstallmentInfo = installmentInfo;
+    }
+
+    public void UpdateDetails(string title, string description, decimal amount, TransactionCategory category, DateTime date)
+    {
+        Title = title;
+        Description = description;
+        Amount = amount;
+        Category = category;
+        Date = date;
+    }
 }
