@@ -1,5 +1,7 @@
 using API.Extensions;
 using API.Models;
+using API.Infrastructure.Repositories;
+using API.Features.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,9 +29,7 @@ builder.Services.AddMapsterConfiguration();
 
 // ---- BUSINESS LOGIC
 builder.Services.AddAuthorization(); 
-builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
-
-
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 var app = builder.Build();
 
@@ -39,23 +39,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Example using actual DTOs once you build them:
+// Example using explicit Feature Endpoints mapped instead of generic CRUD
 app.MapGroup("/api/users")
-    .MapCrud<User, User>()
+    .MapUserEndpoints()
     .WithTags("Users");
 
-// Example using the entity as its own DTO for quick testing purposes:
+/* 
+// Migrate other features to domain-specific modules similarly
 app.MapGroup("/api/paymentmethods")
-    .MapCrud<PaymentMethod, PaymentMethod>()
-    .WithTags("PaymentMethods");
-
-app.MapGroup("/api/transactions")
-    .MapCrud<Transaction, Transaction>()
-    .WithTags("Transactions");
-
+    ...
+*/
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
-app.MapControllers();
 
 app.Run();
