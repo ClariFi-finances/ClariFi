@@ -1,7 +1,4 @@
-using API.Infrastructure.Repositories;
-using API.Models;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 
 namespace API.Features.Transactions;
 
@@ -9,7 +6,7 @@ public static class TransactionEndpoints
 {
     public static RouteGroupBuilder MapTransactionEndpoints(this RouteGroupBuilder group)
     {
-        group.MapPost("/", async ([FromBody] CreateTransactionCommand command, [FromServices] IMediator mediator) =>
+        group.MapPost("/log", async ([FromBody] CreateTransactionCommand command, [FromServices] IMediator mediator) =>
         {
             var transaction = await mediator.Send(command);
             return Results.Created($"/api/transactions/{transaction.Id}", transaction);
@@ -20,7 +17,7 @@ public static class TransactionEndpoints
             return Results.Ok(await mediator.Send(new GetTransactionsQuery()));
         });
 
-        group.MapPut("/{id:int}", async (int id, [FromBody] UpdateTransactionDto dto, [FromServices] IMediator mediator) =>
+        group.MapPut("/{id:int}/adjust", async (int id, [FromBody] UpdateTransactionDto dto, [FromServices] IMediator mediator) =>
         {
             var command = new UpdateTransactionCommand(id, dto.Title, dto.Description, dto.Amount, dto.Category, dto.Date);
             var result = await mediator.Send(command);

@@ -1,5 +1,4 @@
 using API.Infrastructure.Repositories;
-using API.Models;
 using MediatR;
 
 namespace API.Features.Transactions;
