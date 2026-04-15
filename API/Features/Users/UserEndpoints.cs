@@ -1,6 +1,4 @@
 using API.Infrastructure.Repositories;
-using API.Models;
-using Microsoft.AspNetCore.Mvc;
 
 namespace API.Features.Users;
 

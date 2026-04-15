@@ -1,9 +1,11 @@
-using API.Extensions;
 using API.Models;
+using API.Data;
+using API.Data.Configs.Mapster;
 using API.Infrastructure.Repositories;
 using API.Features.Users;
 using API.Features.PaymentMethods;
 using API.Features.Transactions;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,13 +14,12 @@ var builder = WebApplication.CreateBuilder(args);
 // dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=ClariFi;Username=giovanisims;Password=admin"
 // check with: dotnet user-secrets list
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
 // ---- DATABASE
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+                       ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<AppDbContext>(options 
     => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")
+                         ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")
 )); 
 
 // ---- SWAGGER
@@ -33,6 +34,9 @@ builder.Services.AddMapsterConfiguration();
 builder.Services.AddAuthorization(); 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
+// ---- MEDIATR
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -41,7 +45,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Example using explicit Feature Endpoints mapped instead of generic CRUD
 app.MapGroup("/api/users")
     .MapUserEndpoints()
     .WithTags("Users");
