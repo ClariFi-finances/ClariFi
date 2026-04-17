@@ -14,18 +14,18 @@ public class UserHandlers(IRepository<User> repository) :
     public async Task<User> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
         var user = new User(request.Name, request.Email, request.Password, request.Cpf);
-        await repository.AddAsync(user);
-        await repository.SaveChangesAsync();
+        await repository.AddAsync(user, cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
         return user;
     }
 
     public async Task<bool> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)
     {
-        if (await repository.GetByIdAsync(request.Id) is not { } user) return false;
+        if (await repository.GetByIdAsync(request.Id, cancellationToken) is not { } user) return false;
 
         user.UpdateProfile(request.Name, request.Email);
         await repository.UpdateAsync(user);
-        await repository.SaveChangesAsync();
+        await repository.SaveChangesAsync(cancellationToken);
         return true;
     }
 }
