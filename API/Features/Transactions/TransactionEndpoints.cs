@@ -13,8 +13,8 @@ public static class TransactionEndpoints
             return Results.Created($"/api/transactions/{transaction.Id}", transaction);
         });
 
-        group.MapGet("/", async ([FromServices] IMediator mediator) 
-            => Results.Ok(await mediator.Send(new GetTransactionsQuery())));
+        group.MapGet("/", async ([FromServices] IMediator mediator) =>
+            Results.Ok(await mediator.Send(new GetTransactionsQuery())));
 
         group.MapPut("/{id:int}/adjust", async (int id, [FromBody] UpdateTransactionDto dto, [FromServices] IMediator mediator) =>
              await mediator.Send(new UpdateTransactionCommand(id, dto.Title, dto.Description, dto.Amount, dto.Category, dto.Date))
