@@ -2,6 +2,11 @@ using MediatR;
 
 namespace API.Features.Transactions;
 
+public record CreateTransactionDto(string Title, string Description, decimal Amount, DateTime Date, 
+    TransactionType Type, TransactionCategory Category, int UserId, int PaymentMethodId, string? InstallmentInfo = null);
+
+public record UpdateTransactionDto(string Title, string Description, decimal Amount, TransactionCategory Category, DateTime Date);
+
 public static class TransactionEndpoints
 {
     public static RouteGroupBuilder MapTransactionEndpoints(this RouteGroupBuilder group)
@@ -34,7 +39,3 @@ public static class TransactionEndpoints
     }
 }
 
-public record CreateTransactionDto(string Title, string Description, decimal Amount, DateTime Date, 
-    TransactionType Type, TransactionCategory Category, int UserId, int PaymentMethodId, string? InstallmentInfo = null);
-
-public record UpdateTransactionDto(string Title, string Description, decimal Amount, TransactionCategory Category, DateTime Date);

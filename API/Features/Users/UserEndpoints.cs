@@ -2,6 +2,8 @@ using MediatR;
 
 namespace API.Features.Users;
 
+public record UpdateProfileDto(string Name, string Email);
+
 public static class UserEndpoints
 {
     public static RouteGroupBuilder MapUserEndpoints(this RouteGroupBuilder group)
@@ -17,11 +19,7 @@ public static class UserEndpoints
             var result = await mediator.Send(new UpdateUserProfileCommand(id, dto.Name, dto.Email));
             return result ? Results.NoContent() : Results.NotFound();
         });
-
-        // Add login endpoint here
-
+        
         return group;
     }
 }
-
-public record UpdateProfileDto(string Name, string Email);
