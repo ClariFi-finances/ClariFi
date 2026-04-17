@@ -35,7 +35,12 @@ public class Transaction : BaseEntity
     public PaymentMethod? PaymentMethod { get; private set; }
     public int PaymentMethodId { get; private set; }
 
-    protected Transaction() { } // EF Constructor
+    // EF Constructor
+    protected Transaction()
+    {
+        Title = null!;
+        Description = null!;
+    } 
 
     public Transaction(string title, string description, decimal amount, DateTime date, 
         TransactionType type, TransactionCategory category, int userId, int paymentMethodId, string? installmentInfo = null)

@@ -18,7 +18,11 @@ public class PaymentMethod : BaseEntity
     public User? User { get; private set; }
     public int UserId { get; private set; }
 
-    protected PaymentMethod() { } // EF Constructor
+    // EF Constructor
+    protected PaymentMethod()
+    {
+        Name = string.Empty;
+    }
 
     public PaymentMethod(string name, PaymentMethodType type, int userId)
     {

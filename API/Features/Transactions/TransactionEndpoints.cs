@@ -1,6 +1,7 @@
 using MediatR;
 
 namespace API.Features.Transactions;
+
 public record UpdateTransactionDto(string Title, string Description, decimal Amount, TransactionCategory Category, DateTime Date);
 
 public static class TransactionEndpoints

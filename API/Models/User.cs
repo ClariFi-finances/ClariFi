@@ -1,10 +1,9 @@
-using System.Text.Json.Serialization;
 
 namespace API.Models;
 
 public class User : BaseEntity
 {
-    public string Name { get; private set; }
+    public  string Name { get; private set; }
     public string Email { get; private set; }
     public string Password { get; private set; }
     public string Cpf { get; private set; }
@@ -15,7 +14,14 @@ public class User : BaseEntity
     private readonly List<Transaction> _transactions = new();
     public IReadOnlyCollection<Transaction> Transactions => _transactions.AsReadOnly();
 
-    protected User() { } // EF Constructor
+    // EF Constructor
+    protected User() 
+    {
+        Name = null!;
+        Email = null!;
+        Password = null!;
+        Cpf = null!;
+    } 
 
     public User(string name, string email, string password, string cpf)
     {
@@ -27,13 +33,7 @@ public class User : BaseEntity
 
     public void UpdateProfile(string name, string email)
     {
-        // Business logic / validation here
         Name = name;
         Email = email;
-    }
-
-    public void AddPaymentMethod(PaymentMethod method)
-    {
-        _paymentMethods.Add(method);
     }
 }
