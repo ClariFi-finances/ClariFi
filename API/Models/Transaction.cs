@@ -5,7 +5,6 @@ public enum TransactionType
     Income,
     Expense
 }
-
 public enum TransactionCategory
 {
     Health,

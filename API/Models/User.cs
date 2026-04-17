@@ -7,7 +7,7 @@ public class User : BaseEntity
     public string Name { get; private set; }
     public string Email { get; private set; }
     public string Password { get; private set; }
-    public string CPF { get; private set; }
+    public string Cpf { get; private set; }
 
     private readonly List<PaymentMethod> _paymentMethods = new();
     public IReadOnlyCollection<PaymentMethod> PaymentMethods => _paymentMethods.AsReadOnly();
@@ -22,7 +22,7 @@ public class User : BaseEntity
         Name = name;
         Email = email;
         Password = password;
-        CPF = cpf;
+        Cpf = cpf;
     }
 
     public void UpdateProfile(string name, string email)
