@@ -20,6 +20,7 @@ public static class UserEndpoints
             return result ? Results.NoContent() : Results.NotFound();
         });
         
+        
         return group;
     }
 }

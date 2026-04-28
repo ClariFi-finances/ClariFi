@@ -1,11 +1,7 @@
-using API.Models;
-using API.Data;
-using API.Data.Configs.Mapster;
 using API.Infrastructure.Repositories;
 using API.Features.Users;
 using API.Features.PaymentMethods;
 using API.Features.Transactions;
-using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,8 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 // check with: dotnet user-secrets list
 
 // ---- DATABASE
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-                       ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<AppDbContext>(options 
     => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection") 
                          ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.")
@@ -37,7 +31,19 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 // ---- MEDIATR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
+// ---- CORS Configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSwagger", policy =>
+    {
+        policy.WithOrigins("http://localhost:5080", "https://localhost:7109")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -57,7 +63,10 @@ app.MapGroup("/api/transactions")
     .MapTransactionEndpoints()
     .WithTags("Transactions");
 
+app.UseCors("AllowSwagger"); 
 app.UseHttpsRedirection();
 app.UseAuthorization();
+
+await DataSeeder.SeedDataAsync(app.Services);
 
 app.Run();
