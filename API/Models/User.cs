@@ -31,9 +31,10 @@ public class User : BaseEntity
         Cpf = cpf;
     }
 
-    public void UpdateProfile(string name, string email)
+    public void UpdateProfile(string name, string email, string cpf)
     {
         Name = name;
         Email = email;
+        Cpf = cpf;
     }
 }

@@ -28,9 +28,7 @@ public class PaymentMethodHandlers(IRepository<Transaction> repository) :
     }
 
     public async Task<IEnumerable<Transaction>> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
-    {
-        return await repository.GetAllAsync(cancellationToken);
-    }
+        => await repository.GetAllAsync(cancellationToken);
 
     public async Task<bool> Handle(UpdateTransactionCommand request, CancellationToken cancellationToken)
     {
