@@ -187,17 +187,8 @@ export function RegisterScreen({ onSwitchToLogin }: RegisterScreenProps) {
         </form>
 
         <div className="auth-divider">
-          <span>Já tem uma conta?</span>
+          <span>Já tem uma conta? <a onClick={onSwitchToLogin} className="auth-link-text">Entrar</a></span>
         </div>
-
-        <button
-          type="button"
-          className="auth-secondary-button"
-          onClick={onSwitchToLogin}
-          disabled={isLoading}
-        >
-          Entrar
-        </button>
       </div>
     </div>
   )
