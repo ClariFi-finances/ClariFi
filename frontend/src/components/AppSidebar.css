@@ -1,0 +1,237 @@
+.app-sidebar {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #090909;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 20px 16px;
+}
+
+.app-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  color: #000000;
+  font-size: 18px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-title {
+  color: var(--text-h);
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.brand-subtitle {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  margin-top: 4px;
+}
+
+.new-transaction-btn {
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  padding: 14px 12px;
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: #000000;
+  background: var(--accent-gold);
+  margin-bottom: 16px;
+}
+
+.new-transaction-btn:hover {
+  filter: brightness(1.04);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav-item {
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 14px;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  text-align: left;
+}
+
+.nav-item:not(:disabled):hover {
+  color: var(--text-h);
+  background: #131313;
+}
+
+.nav-item:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.nav-item.active {
+  color: var(--accent-gold);
+  background: rgba(255, 215, 0, 0.1);
+  border-color: rgba(255, 215, 0, 0.2);
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.sidebar-user {
+  margin-top: auto;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  text-align: left;
+}
+
+.sidebar-user:hover {
+  border-color: var(--border-hover);
+}
+
+.sidebar-user.active {
+  border-color: rgba(255, 215, 0, 0.3);
+  background: rgba(255, 215, 0, 0.06);
+}
+
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 215, 0, 0.18);
+  color: var(--accent-gold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.user-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.user-label {
+  font-size: var(--text-base);
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.user-email {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-sidebar {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .desktop-sidebar {
+    display: none;
+  }
+
+  .mobile-sidebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 25;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: center;
+    height: 78px;
+    border-top: 1px solid var(--border);
+    background: #070707;
+    padding: 0 6px;
+  }
+
+  .mobile-nav-item {
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-muted);
+    min-height: 66px;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    line-height: 1;
+  }
+
+  .mobile-nav-item:disabled {
+    opacity: 0.85;
+    cursor: default;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--accent-gold);
+  }
+
+  .mobile-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .mobile-action-btn {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto;
+    margin-top: -20px;
+    border: none;
+    border-radius: 50%;
+    background: var(--accent-gold);
+    color: #000000;
+    font-size: 34px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+  }
+
+  .mobile-action-btn:hover {
+    filter: brightness(1.03);
+  }
+}

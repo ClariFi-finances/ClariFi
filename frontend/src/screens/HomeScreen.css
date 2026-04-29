@@ -1,8 +1,8 @@
 /* Home Screen - ClariFi Design System v1.0 */
 
 .home-container {
-  min-height: 100vh;
-  background: var(--bg-primary);
+  min-height: 100%;
+  background: transparent;
   display: flex;
   flex-direction: column;
 }

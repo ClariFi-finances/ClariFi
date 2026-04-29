@@ -4,6 +4,7 @@ import { LoginScreen } from '@/screens/LoginScreen'
 import { RegisterScreen } from '@/screens/RegisterScreen'
 import { HomeScreen } from '@/screens/HomeScreen'
 import { ProfileScreen } from '@/screens/ProfileScreen'
+import { AppShell } from '@/components/AppShell'
 import './App.css'
 
 function App() {
@@ -34,13 +35,13 @@ function App() {
 
   // Authenticated - show app screens
   return (
-    <>
+    <AppShell>
       {activeScreen === 'profile' ? (
         <ProfileScreen onLogout={() => setActiveScreen('home')} />
       ) : (
         <HomeScreen />
       )}
-    </>
+    </AppShell>
   )
 }
 
