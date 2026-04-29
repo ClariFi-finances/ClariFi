@@ -4,11 +4,13 @@ using MediatR;
 namespace API.Features.Users;
 
 public record RegisterUserCommand(string Name, string Email, string Password, string Cpf) : IRequest<User>;
+public record LoginUserCommand(string Email, string Password) : IRequest<User?>;
 public record UpdateUserProfileCommand(int Id, string Name, string Email, string Cpf) : IRequest<bool>;
 public record GetAllUsersQuery() : IRequest<IEnumerable<User>>;
 
 public class UserHandlers(IRepository<User> repository) :
     IRequestHandler<RegisterUserCommand, User>,
+    IRequestHandler<LoginUserCommand, User?>,
     IRequestHandler<UpdateUserProfileCommand, bool>,
     IRequestHandler<GetAllUsersQuery, IEnumerable<User>>
 {
@@ -22,6 +24,15 @@ public class UserHandlers(IRepository<User> repository) :
         await repository.AddAsync(user, cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
         return user;
+    }
+    
+    public async Task<User?> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+    {
+        var users = await repository.GetAllAsync(cancellationToken);
+
+        return users.FirstOrDefault(user =>
+            user.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase) &&
+            user.Password == request.Password);
     }
 
     public async Task<bool> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)

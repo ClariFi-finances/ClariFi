@@ -3,6 +3,8 @@ using MediatR;
 namespace API.Features.Users;
 
 public record UpdateProfileDto(string Name, string Email, string Cpf);
+public record LoginDto(string Email, string Password);
+public record UserLoginResponseDto(int Id, string Name, string Email, string Cpf);
 
 public static class UserEndpoints
 {
@@ -12,6 +14,14 @@ public static class UserEndpoints
         {
             var user = await mediator.Send(command);
             return Results.Created($"/api/users/{user.Id}", user);
+        });
+        
+        group.MapPost("/login", async ([FromBody] LoginDto dto, [FromServices] IMediator mediator) =>
+        {
+            var user = await mediator.Send(new LoginUserCommand(dto.Email, dto.Password));
+            return user is null
+                ? Results.Unauthorized()
+                : Results.Ok(new UserLoginResponseDto(user.Id, user.Name, user.Email, user.Cpf));
         });
 
         group.MapPut("/{id:int}/update-profile", async (int id, [FromBody] UpdateProfileDto dto, [FromServices] IMediator mediator) => 
