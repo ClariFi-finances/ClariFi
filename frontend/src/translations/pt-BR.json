@@ -125,6 +125,21 @@
     "profileUpdateSuccess": "Suas informações foram salvas com sucesso!",
     "invalidName": "Nome Inválido",
     "invalidEmail": "Email Inválido"
+  },
+  "sidebar": {
+    "brandTitle": "ClariFi",
+    "brandSubtitle": "Gestão Financeira",
+    "newTransaction": "Nova Transação",
+    "userLabel": "Usuário",
+    "mobileNavAriaLabel": "Navegação principal",
+    "nav": {
+      "home": "Início",
+      "reports": "Relatórios",
+      "goals": "Metas",
+      "transactions": "Transações",
+      "settings": "Configurações",
+      "profile": "Perfil"
+    }
   }
 }
 

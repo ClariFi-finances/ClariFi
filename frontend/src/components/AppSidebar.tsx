@@ -1,5 +1,6 @@
 import { useAuth } from '@/context/AuthContext'
 import { useApp } from '@/context/AppContext'
+import { useI18n } from '@/hooks/useI18n'
 import './AppSidebar.css'
 
 type NavItem = {
@@ -21,6 +22,7 @@ const NAV_ITEMS: NavItem[] = [
 export function AppSidebar() {
   const { user } = useAuth()
   const { activeScreen, setActiveScreen } = useApp()
+  const { t } = useI18n()
 
   return (
     <>
@@ -30,13 +32,13 @@ export function AppSidebar() {
             <img className="brand-icon-img" src="../public/favicon.svg" alt="ClariFi" />
           </div>
           <div>
-            <p className="brand-title">Clarifi</p>
-            <p className="brand-subtitle">Gestao Financeira</p>
+            <p className="brand-title">{t('sidebar.brandTitle', 'ClariFi')}</p>
+            <p className="brand-subtitle">{t('sidebar.brandSubtitle', 'Financial Management')}</p>
           </div>
         </div>
 
         <button className="new-transaction-btn" type="button">
-          + Nova Transacao
+          + {t('sidebar.newTransaction', 'New Transaction')}
         </button>
 
         <nav className="sidebar-nav">
@@ -53,7 +55,7 @@ export function AppSidebar() {
                 onClick={() => item.targetScreen && setActiveScreen(item.targetScreen)}
               >
                 <span className="nav-icon">{item.icon}</span>
-                <span>{item.label}</span>
+                <span>{t(`sidebar.nav.${item.id}`, item.label)}</span>
               </button>
             )
           })}
@@ -66,31 +68,31 @@ export function AppSidebar() {
         >
           <span className="user-avatar">{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
           <span className="user-content">
-            <span className="user-label">Usuario</span>
+            <span className="user-label">{t('sidebar.userLabel', 'User')}</span>
             <span className="user-email">{user?.email || 'usuario@email.com'}</span>
           </span>
         </button>
       </aside>
 
-      <nav className="mobile-sidebar" aria-label="Navegacao principal">
+      <nav className="mobile-sidebar" aria-label={t('sidebar.mobileNavAriaLabel', 'Main navigation')}>
         <button
           className={`mobile-nav-item ${activeScreen === 'home' ? 'active' : ''}`}
           type="button"
           onClick={() => setActiveScreen('home')}
         >
           <span className="mobile-icon">⌂</span>
-          <span>Inicio</span>
+          <span>{t('sidebar.nav.home', 'Home')}</span>
         </button>
         <button className="mobile-nav-item" type="button" disabled>
           <span className="mobile-icon">◫</span>
-          <span>Relatorios</span>
+          <span>{t('sidebar.nav.reports', 'Reports')}</span>
         </button>
-        <button className="mobile-action-btn" type="button" aria-label="Nova transacao">
+        <button className="mobile-action-btn" type="button" aria-label={t('sidebar.newTransaction', 'New Transaction')}>
           <span>+</span>
         </button>
         <button className="mobile-nav-item" type="button" disabled>
           <span className="mobile-icon">◎</span>
-          <span>Metas</span>
+          <span>{t('sidebar.nav.goals', 'Goals')}</span>
         </button>
         <button
           className={`mobile-nav-item ${activeScreen === 'profile' ? 'active' : ''}`}
@@ -98,7 +100,7 @@ export function AppSidebar() {
           onClick={() => setActiveScreen('profile')}
         >
           <span className="mobile-icon">◉</span>
-          <span>Perfil</span>
+          <span>{t('sidebar.nav.profile', 'Profile')}</span>
         </button>
       </nav>
     </>
