@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import { validateName, validateEmail, showConfirmDialog, showErrorAlert, showSuccessAlert } from '@/utils/validation'
+import { useI18n } from '@/hooks/useI18n'
+import { validateName, validateEmail, showConfirmDialog, showErrorAlert, showSuccessAlert, showLoadingAlert, hideAlert } from '@/utils/validation'
 import './AuthScreens.css'
 
 interface ProfileScreenProps {
@@ -8,15 +9,16 @@ interface ProfileScreenProps {
 }
 
 export function ProfileScreen({ onLogout }: ProfileScreenProps) {
-  const { user, logout, isLoading } = useAuth()
+  const { user, logout, isLoading, updateProfile } = useAuth()
+  const { t } = useI18n()
   const [isEditing, setIsEditing] = useState(false)
   const [editedName, setEditedName] = useState(user?.name || '')
   const [editedEmail, setEditedEmail] = useState(user?.email || '')
 
   const handleLogout = async () => {
     const confirmed = await showConfirmDialog(
-      'Sair da Conta',
-      'Tem certeza que deseja sair?'
+      t('profile.confirmLogout'),
+      t('profile.confirmLogoutMessage')
     )
     if (confirmed) {
       logout()
@@ -28,20 +30,30 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
     // Validate name
     const nameValidation = validateName(editedName)
     if (!nameValidation.valid) {
-      await showErrorAlert('Nome Inválido', nameValidation.error || '')
+      await showErrorAlert(t('profile.invalidName'), nameValidation.error || '')
       return
     }
 
     // Validate email
     const emailValidation = validateEmail(editedEmail)
     if (!emailValidation.valid) {
-      await showErrorAlert('Email Inválido', emailValidation.error || '')
+      await showErrorAlert(t('profile.invalidEmail'), emailValidation.error || '')
       return
     }
 
-    // TODO: Implement API call to update user profile
-    await showSuccessAlert('Perfil Atualizado', 'Suas informações foram salvas com sucesso!')
-    setIsEditing(false)
+    if (!user) return
+
+    try {
+      showLoadingAlert(t('profile.updating'), t('profile.updatingMessage') || 'Atualizando perfil...')
+      await updateProfile(user.id, editedName, editedEmail, user.cpf)
+      hideAlert()
+      await showSuccessAlert(t('profile.profileUpdated'), t('profile.profileUpdateSuccess'))
+      setIsEditing(false)
+    } catch (err) {
+      hideAlert()
+      const errorMessage = err instanceof Error ? err.message : t('profile.updateError') || 'Erro ao atualizar perfil'
+      await showErrorAlert(t('profile.updateFailed') || 'Erro', errorMessage)
+    }
   }
 
   if (!user) {
@@ -59,7 +71,7 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
   return (
     <div className="profile-container">
       <div className="profile-header">
-        <h1>Perfil</h1>
+        <h1>{t('profile.title')}</h1>
       </div>
 
       <div className="profile-content">
@@ -74,7 +86,7 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
           {isEditing ? (
             <div className="profile-edit-form">
               <div className="form-group">
-                <label className="form-label">Nome</label>
+                <label className="form-label">{t('profile.name')}</label>
                 <input
                   type="text"
                   value={editedName}
@@ -85,7 +97,7 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Email</label>
+                <label className="form-label">{t('profile.email')}</label>
                 <input
                   type="text"
                   value={editedEmail}
@@ -101,14 +113,14 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
                   onClick={handleSaveEdit}
                   disabled={isLoading}
                 >
-                  Salvar
+                  {t('profile.settings')}
                 </button>
                 <button
                   className="auth-secondary-button"
                   onClick={() => setIsEditing(false)}
                   disabled={isLoading}
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>
@@ -124,7 +136,7 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
                 onClick={() => setIsEditing(true)}
                 disabled={isLoading}
               >
-                Editar Perfil
+                {t('profile.editProfile')}
               </button>
             </div>
           )}
@@ -133,33 +145,33 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
         {/* User Details */}
         <div className="profile-details">
           <div className="detail-item">
-            <span className="detail-label">CPF</span>
+            <span className="detail-label">{t('profile.cpf')}</span>
             <span className="detail-value">{formatCPF(user.cpf)}</span>
           </div>
           <div className="detail-item">
-            <span className="detail-label">ID do Usuário</span>
+            <span className="detail-label">{t('profile.userId')}</span>
             <span className="detail-value">#{user.id}</span>
           </div>
         </div>
 
         {/* Settings Section */}
         <div className="profile-section">
-          <h3>Configurações</h3>
+          <h3>{t('profile.settings')}</h3>
           <div className="settings-list">
             <button className="settings-item">
-              <span>Gerenciar Categorias</span>
+              <span>{t('profile.manageCategories')}</span>
               <span className="arrow">›</span>
             </button>
             <button className="settings-item">
-              <span>Receitas Fixas</span>
+              <span>{t('profile.fixedIncome')}</span>
               <span className="arrow">›</span>
             </button>
             <button className="settings-item">
-              <span>Gerenciar Reservas</span>
+              <span>{t('profile.manageReserves')}</span>
               <span className="arrow">›</span>
             </button>
             <button className="settings-item">
-              <span>Privacidade e Segurança</span>
+              <span>{t('profile.privacyAndSecurity')}</span>
               <span className="arrow">›</span>
             </button>
           </div>
@@ -167,8 +179,8 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
 
         {/* App Info */}
         <div className="profile-footer">
-          <p>ClariFi v1.0.0</p>
-          <p className="footer-subtitle">Gestão financeira pessoal</p>
+          <p>{t('profile.version')}</p>
+          <p className="footer-subtitle">{t('profile.subtitle')}</p>
         </div>
       </div>
 
@@ -179,7 +191,7 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
           onClick={handleLogout}
           disabled={isLoading}
         >
-          Sair da conta
+          {t('profile.logout')}
         </button>
       </div>
     </div>

@@ -1,0 +1,130 @@
+{
+  "common": {
+    "ok": "OK",
+    "yes": "Sim",
+    "no": "Não",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "edit": "Editar",
+    "delete": "Deletar",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "warning": "Aviso",
+    "info": "Informação",
+    "required": "obrigatório"
+  },
+  "auth": {
+    "tagline": "Gerencie suas finanças com inteligência",
+    "login": {
+      "title": "Entrar",
+      "email": "Email",
+      "emailPlaceholder": "seu@email.com",
+      "password": "Senha",
+      "passwordPlaceholder": "••••••••",
+      "submitButton": "Entrar",
+      "submitting": "Entrando...",
+      "noAccount": "Não tem uma conta?",
+      "createAccount": "Criar Conta",
+      "invalidEmail": "Email Inválido",
+      "invalidPassword": "Senha Inválida",
+      "successTitle": "Sucesso!",
+      "successMessage": "Bem-vindo de volta!",
+      "errorTitle": "Erro ao Entrar",
+      "errorMessage": "Falha ao entrar",
+      "loadingTitle": "Entrando...",
+      "loadingMessage": "Por favor, aguarde."
+    },
+    "register": {
+      "title": "Criar Conta",
+      "subtitle": "Junte-se ao ClariFi agora",
+      "fullName": "Nome Completo",
+      "fullNamePlaceholder": "Seu nome",
+      "email": "Email",
+      "emailPlaceholder": "seu@email.com",
+      "cpf": "CPF",
+      "cpfPlaceholder": "000.000.000-00",
+      "password": "Senha",
+      "passwordPlaceholder": "••••••••",
+      "confirmPassword": "Confirmar Senha",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submitButton": "Criar Conta",
+      "submitting": "Criando Conta...",
+      "hasAccount": "Já tem uma conta?",
+      "signIn": "Entrar",
+      "invalidName": "Nome Inválido",
+      "invalidEmail": "Email Inválido",
+      "invalidCPF": "CPF Inválido",
+      "invalidPassword": "Senha Inválida",
+      "invalidPasswordConfirmation": "Confirmação de Senha",
+      "successTitle": "Conta Criada!",
+      "successMessage": "Bem-vindo ao ClariFi!",
+      "errorTitle": "Erro ao Registrar",
+      "errorMessage": "Falha ao criar conta",
+      "loadingTitle": "Criando Conta...",
+      "loadingMessage": "Por favor, aguarde."
+    }
+  },
+  "validation": {
+    "email": {
+      "required": "Email é obrigatório",
+      "invalid": "Email inválido"
+    },
+    "password": {
+      "required": "Senha é obrigatória",
+      "minLength": "Senha deve ter no mínimo 6 caracteres"
+    },
+    "passwordConfirmation": {
+      "notMatch": "As senhas não coincidem"
+    },
+    "name": {
+      "required": "Nome é obrigatório",
+      "minLength": "Nome deve ter no mínimo 2 caracteres"
+    },
+    "cpf": {
+      "required": "CPF é obrigatório",
+      "invalidLength": "CPF deve conter 11 dígitos",
+      "invalid": "CPF inválido"
+    }
+  },
+  "home": {
+    "greeting": "Olá,",
+    "welcome": "Bem-vindo de volta",
+    "notification": "🔔",
+    "availableBalance": "Saldo Disponível",
+    "revenue": "Receitas",
+    "expenses": "Despesas",
+    "expense": "Despesa",
+    "income": "Receita",
+    "goals": "Metas",
+    "recentTransactions": "Transações Recentes",
+    "viewAll": "Ver todas",
+    "today": "Hoje",
+    "viewProfile": "Ver Meu Perfil →",
+    "grocery": "Supermercado",
+    "salary": "Salário"
+  },
+  "profile": {
+    "title": "Perfil",
+    "name": "Nome",
+    "email": "Email",
+    "cpf": "CPF",
+    "userId": "ID do Usuário",
+    "editProfile": "Editar Perfil",
+    "settings": "Configurações",
+    "manageCategories": "Gerenciar Categorias",
+    "fixedIncome": "Receitas Fixas",
+    "manageReserves": "Gerenciar Reservas",
+    "privacyAndSecurity": "Privacidade e Segurança",
+    "logout": "Sair da conta",
+    "version": "ClariFi v1.0.0",
+    "subtitle": "Gestão financeira pessoal",
+    "confirmLogout": "Sair da Conta",
+    "confirmLogoutMessage": "Tem certeza que deseja sair?",
+    "profileUpdated": "Perfil Atualizado",
+    "profileUpdateSuccess": "Suas informações foram salvas com sucesso!",
+    "invalidName": "Nome Inválido",
+    "invalidEmail": "Email Inválido"
+  }
+}
+

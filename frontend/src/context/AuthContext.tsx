@@ -16,9 +16,11 @@ interface AuthContextType {
   register: (name: string, email: string, password: string, cpf: string) => Promise<void>
   logout: () => void
   clearError: () => void
+  updateProfile: (id: number, name: string, email: string, cpf: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const API_BASE_URL = 'http://localhost:5080/api'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -40,28 +42,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch('http://localhost:5080/api/users', {
-        method: 'GET',
+      const response = await fetch(`${API_BASE_URL}/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       })
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Invalid credentials')
+        }
         throw new Error('Failed to login')
       }
 
-      const users = await response.json()
-      const foundUser = users.find(
-        (u: any) => u.email === email && u.password === password
-      )
+      const userData = await response.json()
+      const token = `token_${userData.id}_${Date.now()}`
 
-      if (!foundUser) {
-        throw new Error('Invalid credentials')
-      }
-
-      const token = `token_${foundUser.id}_${Date.now()}`
       setToken(token)
-      setUser(foundUser)
+      setUser({
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        cpf: userData.cpf,
+      })
       localStorage.setItem('auth_token', token)
-      localStorage.setItem('auth_user', JSON.stringify(foundUser))
+      localStorage.setItem('auth_user', JSON.stringify({
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        cpf: userData.cpf,
+      }))
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed'
       setError(errorMessage)
@@ -80,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch('http://localhost:5080/api/users', {
+      const response = await fetch(`${API_BASE_URL}/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,8 +105,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email,
           password,
           cpf,
-          paymentMethods: [],
-          transactions: [],
         }),
       })
 
@@ -102,12 +115,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const newUser = await response.json()
       const token = `token_${newUser.id}_${Date.now()}`
+
       setToken(token)
-      setUser(newUser)
+      setUser({
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        cpf: newUser.cpf,
+      })
       localStorage.setItem('auth_token', token)
-      localStorage.setItem('auth_user', JSON.stringify(newUser))
+      localStorage.setItem('auth_user', JSON.stringify({
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        cpf: newUser.cpf,
+      }))
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Registration failed'
+      setError(errorMessage)
+      throw err
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const updateProfile = async (id: number, name: string, email: string, cpf: string) => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/${id}/update-profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          cpf,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile')
+      }
+
+      const updatedUser = {
+        id,
+        name,
+        email,
+        cpf,
+      }
+
+      setUser(updatedUser)
+      localStorage.setItem('auth_user', JSON.stringify(updatedUser))
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Profile update failed'
       setError(errorMessage)
       throw err
     } finally {
@@ -137,6 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         clearError,
+        updateProfile,
       }}
     >
       {children}

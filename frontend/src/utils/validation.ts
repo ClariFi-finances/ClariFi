@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2'
+import {I18n} from "@/utils/i18n.ts";
 
 export interface ValidationResult {
   valid: boolean
@@ -75,7 +76,7 @@ export function showErrorAlert(title: string, message: string) {
     background: '#121212',
     color: '#FFFFFF',
     confirmButtonColor: '#FFD700',
-    confirmButtonText: 'OK',
+    confirmButtonText: I18n.t('common.ok'),
   })
 }
 
@@ -87,7 +88,7 @@ export function showSuccessAlert(title: string, message: string) {
     background: '#121212',
     color: '#FFFFFF',
     confirmButtonColor: '#FFD700',
-    confirmButtonText: 'OK',
+    confirmButtonText: I18n.t('common.ok'),
   })
 }
 
@@ -99,7 +100,7 @@ export function showWarningAlert(title: string, message: string) {
     background: '#121212',
     color: '#FFFFFF',
     confirmButtonColor: '#FFD700',
-    confirmButtonText: 'OK',
+    confirmButtonText: I18n.t('common.ok'),
   })
 }
 
@@ -111,7 +112,7 @@ export function showInfoAlert(title: string, message: string) {
     background: '#121212',
     color: '#FFFFFF',
     confirmButtonColor: '#FFD700',
-    confirmButtonText: 'OK',
+    confirmButtonText: I18n.t('common.ok'),
   })
 }
 
@@ -146,8 +147,8 @@ export function showConfirmDialog(
     showCancelButton: true,
     confirmButtonColor: '#FFD700',
     cancelButtonColor: '#404040',
-    confirmButtonText: 'Sim',
-    cancelButtonText: 'Não',
+    confirmButtonText: I18n.t('common.yes'),
+    cancelButtonText: I18n.t('common.no'),
   }).then((result) => result.isConfirmed)
 }
 

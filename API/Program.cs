@@ -34,22 +34,38 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Progr
 // ---- CORS Configuration
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSwagger", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5080", "https://localhost:7109")
+        policy
+            .WithOrigins(
+                "http://localhost:5173",  
+                "http://localhost:5080"  
+            )
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
 });
 
-var app = builder.Build();
+// ---- SWAGGER com CORS
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "ClariFi API", Version = "v1" });
+});
 
+var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowFrontend");
+
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
+
+app.UseAuthorization();
 
 app.MapGroup("/api/users")
     .MapUserEndpoints()
@@ -62,10 +78,6 @@ app.MapGroup("/api/paymentmethods")
 app.MapGroup("/api/transactions")
     .MapTransactionEndpoints()
     .WithTags("Transactions");
-
-app.UseCors("AllowSwagger"); 
-app.UseHttpsRedirection();
-app.UseAuthorization();
 
 await DataSeeder.SeedDataAsync(app.Services);
 

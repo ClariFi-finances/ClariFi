@@ -1,0 +1,130 @@
+{
+  "common": {
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "required": "required"
+  },
+  "auth": {
+    "tagline": "Manage your finances with intelligence",
+    "login": {
+      "title": "Sign In",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "submitButton": "Sign In",
+      "submitting": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create Account",
+      "invalidEmail": "Invalid Email",
+      "invalidPassword": "Invalid Password",
+      "successTitle": "Success!",
+      "successMessage": "Welcome back!",
+      "errorTitle": "Sign In Error",
+      "errorMessage": "Failed to sign in",
+      "loadingTitle": "Signing in...",
+      "loadingMessage": "Please wait."
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Join ClariFi now",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "cpf": "CPF",
+      "cpfPlaceholder": "000.000.000-00",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submitButton": "Create Account",
+      "submitting": "Creating Account...",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign In",
+      "invalidName": "Invalid Name",
+      "invalidEmail": "Invalid Email",
+      "invalidCPF": "Invalid CPF",
+      "invalidPassword": "Invalid Password",
+      "invalidPasswordConfirmation": "Password Confirmation",
+      "successTitle": "Account Created!",
+      "successMessage": "Welcome to ClariFi!",
+      "errorTitle": "Registration Error",
+      "errorMessage": "Failed to create account",
+      "loadingTitle": "Creating Account...",
+      "loadingMessage": "Please wait."
+    }
+  },
+  "validation": {
+    "email": {
+      "required": "Email is required",
+      "invalid": "Invalid email"
+    },
+    "password": {
+      "required": "Password is required",
+      "minLength": "Password must be at least 6 characters"
+    },
+    "passwordConfirmation": {
+      "notMatch": "Passwords do not match"
+    },
+    "name": {
+      "required": "Name is required",
+      "minLength": "Name must be at least 2 characters"
+    },
+    "cpf": {
+      "required": "CPF is required",
+      "invalidLength": "CPF must contain 11 digits",
+      "invalid": "Invalid CPF"
+    }
+  },
+  "home": {
+    "greeting": "Hello,",
+    "welcome": "Welcome back",
+    "notification": "🔔",
+    "availableBalance": "Available Balance",
+    "revenue": "Revenue",
+    "expenses": "Expenses",
+    "expense": "Expense",
+    "income": "Income",
+    "goals": "Goals",
+    "recentTransactions": "Recent Transactions",
+    "viewAll": "View all",
+    "today": "Today",
+    "viewProfile": "View My Profile →",
+    "grocery": "Grocery Store",
+    "salary": "Salary"
+  },
+  "profile": {
+    "title": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "cpf": "CPF",
+    "userId": "User ID",
+    "editProfile": "Edit Profile",
+    "settings": "Settings",
+    "manageCategories": "Manage Categories",
+    "fixedIncome": "Fixed Income",
+    "manageReserves": "Manage Reserves",
+    "privacyAndSecurity": "Privacy and Security",
+    "logout": "Sign Out",
+    "version": "ClariFi v1.0.0",
+    "subtitle": "Personal financial management",
+    "confirmLogout": "Sign Out",
+    "confirmLogoutMessage": "Are you sure you want to sign out?",
+    "profileUpdated": "Profile Updated",
+    "profileUpdateSuccess": "Your information has been saved successfully!",
+    "invalidName": "Invalid Name",
+    "invalidEmail": "Invalid Email"
+  }
+}
+
