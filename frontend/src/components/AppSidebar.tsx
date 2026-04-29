@@ -26,7 +26,9 @@ export function AppSidebar() {
     <>
       <aside className="app-sidebar desktop-sidebar">
         <div className="app-sidebar-brand">
-          <div className="brand-icon">C</div>
+          <div className="brand-icon">
+            <img className="brand-icon-img" src="../public/favicon.svg" alt="ClariFi" />
+          </div>
           <div>
             <p className="brand-title">Clarifi</p>
             <p className="brand-subtitle">Gestao Financeira</p>
