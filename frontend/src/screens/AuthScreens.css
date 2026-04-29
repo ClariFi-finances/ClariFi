@@ -24,6 +24,13 @@
   text-align: center;
 }
 
+.auth-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
 .auth-title {
   font-size: var(--text-2xl);
   font-weight: 900;

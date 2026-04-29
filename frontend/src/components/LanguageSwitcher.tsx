@@ -1,5 +1,5 @@
 import { useI18n } from '@/hooks/useI18n'
-import { Language } from '@/utils/i18n'
+import { type Language } from '@/utils/i18n'
 import './LanguageSwitcher.css'
 
 export function LanguageSwitcher() {

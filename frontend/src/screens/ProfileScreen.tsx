@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useI18n } from '@/hooks/useI18n'
-import { validateName, validateEmail, showConfirmDialog, showErrorAlert, showSuccessAlert } from '@/utils/validation'
+import { validateName, validateEmail, showConfirmDialog, showErrorAlert, showSuccessAlert, showLoadingAlert, hideAlert } from '@/utils/validation'
 import './AuthScreens.css'
 
 interface ProfileScreenProps {
@@ -9,7 +9,7 @@ interface ProfileScreenProps {
 }
 
 export function ProfileScreen({ onLogout }: ProfileScreenProps) {
-  const { user, logout, isLoading } = useAuth()
+  const { user, logout, isLoading, updateProfile } = useAuth()
   const { t } = useI18n()
   const [isEditing, setIsEditing] = useState(false)
   const [editedName, setEditedName] = useState(user?.name || '')
@@ -41,9 +41,19 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
       return
     }
 
-    // TODO: Implement API call to update user profile
-    await showSuccessAlert(t('profile.profileUpdated'), t('profile.profileUpdateSuccess'))
-    setIsEditing(false)
+    if (!user) return
+
+    try {
+      showLoadingAlert(t('profile.updating'), t('profile.updatingMessage') || 'Atualizando perfil...')
+      await updateProfile(user.id, editedName, editedEmail, user.cpf)
+      hideAlert()
+      await showSuccessAlert(t('profile.profileUpdated'), t('profile.profileUpdateSuccess'))
+      setIsEditing(false)
+    } catch (err) {
+      hideAlert()
+      const errorMessage = err instanceof Error ? err.message : t('profile.updateError') || 'Erro ao atualizar perfil'
+      await showErrorAlert(t('profile.updateFailed') || 'Erro', errorMessage)
+    }
   }
 
   if (!user) {
