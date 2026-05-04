@@ -38,6 +38,8 @@
   color: #000000;
   font-weight: 700;
   font-size: var(--text-sm);
+  display: flex;
+  align-items: center;
 }
 
 .primary-btn:hover {
