@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useAuth } from '@/context/AuthContext'
-import { useApp } from '@/context/AppContext'
+import { useAuth } from '@/context/useAuth'
+import { useApp } from '@/context/useApp'
 import { showConfirmDialog } from '@/utils/validation'
 import './SettingsScreen.css'
 

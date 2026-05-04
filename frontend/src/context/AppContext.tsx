@@ -1,6 +1,6 @@
 import { createContext, useState, type ReactNode } from 'react'
 
-type Screen = 'login' | 'register' | 'home' | 'profile' | 'settings'
+export type Screen = 'login' | 'register' | 'home' | 'profile' | 'settings'
 
 export interface AppContextType {
   activeScreen: Screen
