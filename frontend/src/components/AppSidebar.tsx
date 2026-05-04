@@ -9,7 +9,7 @@ type NavItem = {
   id: string
   label: string
   icon: string
-  targetScreen?: 'home' | 'profile'
+  targetScreen?: 'home' | 'profile' | 'settings'
   disabled?: boolean
 }
 
@@ -18,7 +18,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'reports', label: 'Relatorios', icon: 'reports', disabled: true },
   { id: 'goals', label: 'Metas', icon: 'goals', disabled: true },
   { id: 'transactions', label: 'Transacoes', icon: 'transactions', disabled: true },
-  { id: 'settings', label: 'Configuracoes', icon: 'settings', disabled: true },
+  { id: 'settings', label: 'Configuracoes', icon: 'settings', targetScreen: 'settings' },
 ]
 
 const NAV_ICON_MAP: Record<string, ReactElement> = {
