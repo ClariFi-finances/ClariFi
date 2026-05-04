@@ -27,7 +27,7 @@ export function useI18n() {
 
   const t = useCallback((key: string, defaultValue?: string) => {
     return I18n.t(key, defaultValue)
-  }, [language])
+  }, [])
 
   const changeLanguage = useCallback((lang: Language) => {
     I18n.setLanguage(lang)
@@ -50,4 +50,3 @@ export function useI18n() {
     getLanguageLabel,
   }
 }
-

@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useAuth } from '@/context/AuthContext'
- import { useI18n } from '@/hooks/useI18n'
+import { useAuth } from '@/context/useAuth'
+import { useI18n } from '@/hooks/useI18n'
 import {
   validateName,
   validateEmail,
@@ -195,4 +195,3 @@ export function RegisterScreen({ onSwitchToLogin }: RegisterScreenProps) {
     </div>
   )
 }
-

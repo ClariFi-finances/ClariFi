@@ -1,5 +1,7 @@
-import { useAuth } from '@/context/AuthContext'
-import { useApp } from '@/context/AppContext'
+import type { ReactElement } from 'react'
+import { useAuth } from '@/context/useAuth'
+import { BarChart3, Home, Plus, Settings, Target, User } from 'lucide-react'
+import { useApp } from '@/context/useApp'
 import { useI18n } from '@/hooks/useI18n'
 import './AppSidebar.css'
 
@@ -12,12 +14,20 @@ type NavItem = {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'home', label: 'Inicio', icon: '⌂', targetScreen: 'home' },
-  { id: 'reports', label: 'Relatorios', icon: '◫', disabled: true },
-  { id: 'goals', label: 'Metas', icon: '◎', disabled: true },
-  { id: 'transactions', label: 'Transacoes', icon: '$', disabled: true },
-  { id: 'settings', label: 'Configuracoes', icon: '⚙', targetScreen: 'settings' },
+  { id: 'home', label: 'Inicio', icon: 'home', targetScreen: 'home' },
+  { id: 'reports', label: 'Relatorios', icon: 'reports', disabled: true },
+  { id: 'goals', label: 'Metas', icon: 'goals', disabled: true },
+  { id: 'transactions', label: 'Transacoes', icon: 'transactions', disabled: true },
+  { id: 'settings', label: 'Configuracoes', icon: 'settings', disabled: true },
 ]
+
+const NAV_ICON_MAP: Record<string, ReactElement> = {
+  home: <Home size={18} />,
+  reports: <BarChart3 size={18} />,
+  goals: <Target size={18} />,
+  transactions: <BarChart3 size={18} />,
+  settings: <Settings size={18} />,
+}
 
 export function AppSidebar() {
   const { user } = useAuth()
@@ -38,7 +48,8 @@ export function AppSidebar() {
         </div>
 
         <button className="new-transaction-btn" type="button">
-          + {t('sidebar.newTransaction', 'New Transaction')}
+          <Plus size={18} />
+          {t('sidebar.newTransaction', 'New Transaction')}
         </button>
 
         <nav className="sidebar-nav">
@@ -54,7 +65,7 @@ export function AppSidebar() {
                 disabled={isDisabled}
                 onClick={() => item.targetScreen && setActiveScreen(item.targetScreen)}
               >
-                <span className="nav-icon">{item.icon}</span>
+                <span className="nav-icon">{NAV_ICON_MAP[item.icon]}</span>
                 <span>{t(`sidebar.nav.${item.id}`, item.label)}</span>
               </button>
             )
@@ -80,18 +91,18 @@ export function AppSidebar() {
           type="button"
           onClick={() => setActiveScreen('home')}
         >
-          <span className="mobile-icon">⌂</span>
+          <Home size={18} className="mobile-icon" />
           <span>{t('sidebar.nav.home', 'Home')}</span>
         </button>
         <button className="mobile-nav-item" type="button" disabled>
-          <span className="mobile-icon">◫</span>
+          <BarChart3 size={18} className="mobile-icon" />
           <span>{t('sidebar.nav.reports', 'Reports')}</span>
         </button>
         <button className="mobile-action-btn" type="button" aria-label={t('sidebar.newTransaction', 'New Transaction')}>
-          <span>+</span>
+          <Plus size={22} />
         </button>
         <button className="mobile-nav-item" type="button" disabled>
-          <span className="mobile-icon">◎</span>
+          <Target size={18} className="mobile-icon" />
           <span>{t('sidebar.nav.goals', 'Goals')}</span>
         </button>
         <button
@@ -99,7 +110,7 @@ export function AppSidebar() {
           type="button"
           onClick={() => setActiveScreen('profile')}
         >
-          <span className="mobile-icon">◉</span>
+          <User size={18} className="mobile-icon" />
           <span>{t('sidebar.nav.profile', 'Profile')}</span>
         </button>
       </nav>

@@ -1,8 +1,8 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useState, type ReactNode } from 'react'
 
 type Screen = 'login' | 'register' | 'home' | 'profile' | 'settings'
 
-interface AppContextType {
+export interface AppContextType {
   activeScreen: Screen
   setActiveScreen: (screen: Screen) => void
 }
@@ -19,12 +19,4 @@ export function AppProvider({ children }: { children: ReactNode }) {
   )
 }
 
-export function useApp() {
-  const context = useContext(AppContext)
-  if (!context) {
-    throw new Error('useApp must be used within an AppProvider')
-  }
-  return context
-}
-
-
+export { AppContext }

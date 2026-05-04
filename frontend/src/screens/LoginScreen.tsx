@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/context/useAuth'
 import { useI18n } from '@/hooks/useI18n'
 import { validateEmail, validatePassword, showErrorAlert, showLoadingAlert, hideAlert, showSuccessAlert } from '@/utils/validation'
 import clarifiLogotype from '@/assets/clarifiLogotype.svg'
@@ -101,4 +101,3 @@ export function LoginScreen({ onSwitchToRegister }: LoginScreenProps) {
     </div>
   )
 }
-

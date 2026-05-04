@@ -56,6 +56,9 @@
   color: #000000;
   background: var(--accent-gold-dark);
   margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .new-transaction-btn:hover {
