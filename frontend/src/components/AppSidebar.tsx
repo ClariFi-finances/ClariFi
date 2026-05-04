@@ -16,7 +16,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'reports', label: 'Relatorios', icon: '◫', disabled: true },
   { id: 'goals', label: 'Metas', icon: '◎', disabled: true },
   { id: 'transactions', label: 'Transacoes', icon: '$', disabled: true },
-  { id: 'settings', label: 'Configuracoes', icon: '⚙', disabled: true },
+  { id: 'settings', label: 'Configuracoes', icon: '⚙', targetScreen: 'settings' },
 ]
 
 export function AppSidebar() {
