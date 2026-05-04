@@ -1,0 +1,260 @@
+.settings-screen {
+  padding: var(--spacing-2xl);
+  max-width: 1200px;
+  margin: 0 auto;
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+.settings-header {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.settings-header h1 {
+  font-size: var(--text-2xl);
+  color: var(--text-h);
+  margin-bottom: var(--spacing-xs);
+}
+
+.settings-header p {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.settings-content {
+  display: flex;
+  gap: var(--spacing-2xl);
+  align-items: flex-start;
+}
+
+.settings-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.left-col {
+  flex: 0 0 380px;
+}
+
+.right-col {
+  flex: 1;
+}
+
+.settings-section h3 {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-bottom: var(--spacing-md);
+}
+
+.settings-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+}
+
+/* User Profile Card */
+.user-profile-card {
+  gap: var(--spacing-lg);
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 215, 0, 0.1);
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-2xl);
+  font-weight: 600;
+}
+
+.profile-info h2 {
+  font-size: var(--text-lg);
+  margin-bottom: 2px;
+}
+
+.profile-info p {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.edit-profile-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--accent-gold);
+  padding: var(--spacing-sm);
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: var(--text-sm);
+}
+
+.edit-profile-btn:hover {
+  border-color: var(--accent-gold);
+  background: rgba(255, 215, 0, 0.05);
+}
+
+/* Appearance Card / Theme Options */
+.appearance-section .theme-options {
+  display: flex;
+  gap: var(--spacing-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: var(--spacing-xs);
+}
+
+.theme-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  padding: var(--spacing-md) var(--spacing-sm);
+  border-radius: 8px;
+}
+
+.theme-btn:hover {
+  color: var(--text);
+  background: var(--bg-tertiary);
+}
+
+.theme-btn.active {
+  background: rgba(255, 215, 0, 0.1);
+  color: var(--accent-gold);
+}
+
+/* Version Text */
+.app-version {
+  text-align: center;
+  margin-top: var(--spacing-2xl);
+}
+
+.app-version .version-title {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.app-version .version-subtitle {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: var(--text-xs);
+}
+
+/* List Cards (Financas, Preferencias) */
+.list-card {
+  padding: var(--spacing-md);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.list-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.item-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.item-content {
+  flex: 1;
+}
+
+.item-content h4 {
+  font-size: var(--text-base);
+  color: var(--text-h);
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+.item-content p {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.item-arrow {
+  color: var(--text-muted);
+  opacity: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+/* Logout Button */
+.logout-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-md);
+  color: var(--danger);
+  padding: var(--spacing-lg);
+  font-weight: 500;
+  justify-content: flex-start;
+  margin-top: auto;
+  cursor: pointer;
+  background: var(--bg-secondary);
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.logout-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .settings-content {
+    flex-direction: column;
+  }
+  .left-col {
+    flex: 1;
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .list-card {
+    grid-template-columns: 1fr;
+  }
+}
