@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/context/useAuth'
 import { useI18n } from '@/hooks/useI18n'
 import { validateName, validateEmail, showConfirmDialog, showErrorAlert, showSuccessAlert, showLoadingAlert, hideAlert } from '@/utils/validation'
 import './AuthScreens.css'
@@ -197,4 +197,3 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
     </div>
   )
 }
-

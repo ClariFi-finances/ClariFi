@@ -1,5 +1,5 @@
-import { useAuth } from '@/context/AuthContext'
-import { useApp } from '@/context/AppContext'
+import { useAuth } from '@/context/useAuth'
+import { useApp } from '@/context/useApp'
 import { LoginScreen } from '@/screens/LoginScreen'
 import { RegisterScreen } from '@/screens/RegisterScreen'
 import { HomeScreen } from '@/screens/HomeScreen'

@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { createContext, useState, useEffect, type ReactNode } from 'react'
+import { API_BASE_URL } from '@/config/api'
 
 export interface User {
   id: number
@@ -7,7 +8,7 @@ export interface User {
   cpf: string
 }
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null
   token: string | null
   isLoading: boolean
@@ -20,7 +21,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
-const API_BASE_URL = 'http://localhost:5080/api'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -208,12 +208,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
-}
-
-
+export { AuthContext }
