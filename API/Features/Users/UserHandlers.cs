@@ -62,8 +62,47 @@ public class UserHandlers(
     {
         var users = await repository.GetAllAsync(cancellationToken);
 
-        return users.FirstOrDefault(user =>
-            user.CognitoId == request.CognitoId);
+        var user = users.FirstOrDefault(u => u.CognitoId == request.CognitoId);
+        
+        if (user != null)
+        {
+            var categories = await categoryRepository.GetAllAsync(cancellationToken);
+            if (!categories.Any(c => c.UserId == user.Id))
+            {
+                var defaultCategories = new[]
+                {
+                    new Category("Food", null, null, user.Id),
+                    new Category("Housing", null, null, user.Id),
+                    new Category("Transport", null, null, user.Id),
+                    new Category("Health", null, null, user.Id),
+                    new Category("Leisure", null, null, user.Id),
+                    new Category("Bills", null, null, user.Id),
+                };
+                foreach (var category in defaultCategories)
+                {
+                    await categoryRepository.AddAsync(category, cancellationToken);
+                }
+                await repository.SaveChangesAsync(cancellationToken);
+            }
+
+            var paymentMethods = await paymentMethodRepository.GetAllAsync(cancellationToken);
+            if (!paymentMethods.Any(p => p.UserId == user.Id))
+            {
+                var defaultPaymentMethods = new[]
+                {
+                    new PaymentMethod("Cash", PaymentMethodType.Cash, user.Id),
+                    new PaymentMethod("Credit Card", PaymentMethodType.Credit, user.Id),
+                    new PaymentMethod("Debit Card", PaymentMethodType.Debit, user.Id),
+                };
+                foreach (var paymentMethod in defaultPaymentMethods)
+                {
+                    await paymentMethodRepository.AddAsync(paymentMethod, cancellationToken);
+                }
+                await repository.SaveChangesAsync(cancellationToken);
+            }
+        }
+
+        return user;
     }
     
     public async Task<bool> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)

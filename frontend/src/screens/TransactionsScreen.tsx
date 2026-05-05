@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowDownCircle, ArrowUpCircle, Search, Trash2 } from 'lucide-react'
 import { useAuth } from '@/context/useAuth'
-import { API_BASE_URL, getAuthHeaders } from '@/config/api'
+import { getAuthHeaders } from '@/config/api'
+import { apiRequest, getErrorMessage } from '@/utils/apiClient'
 import { useI18n } from '@/hooks/useI18n'
 import './TransactionsScreen.css'
 
@@ -178,14 +179,14 @@ export function TransactionsScreen() {
       <section className="filters-bar">
         <div className="search-box">
           <Search size={18} />
-          <input 
-            type="text" 
-            placeholder={t('home.searchPlaceholder', 'Buscar transações...')} 
+          <input
+            type="text"
+            placeholder={t('home.searchPlaceholder', 'Buscar transações...')}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
           />
         </div>
-        
+
         <div className="filters-group">
           <select value={periodFilter} onChange={e => setPeriodFilter(e.target.value as Period)}>
             <option value="month">{t('transactions.periodMonth', 'Último Mês')}</option>
@@ -221,12 +222,12 @@ export function TransactionsScreen() {
                   const isExpense = item.type === 1 || item.type === 'Expense'
                   const category = categories.find(c => c.id === item.categoryId)
                   const pm = paymentMethods.find(p => p.id === item.paymentMethodId)
-                  
+
                   return (
                     <div key={item.id} className="transaction-card">
                       <div className="card-left">
-                        <div 
-                          className="category-icon" 
+                        <div
+                          className="category-icon"
                           style={{ backgroundColor: category?.color || 'var(--border)' }}
                         >
                           {isExpense ? <ArrowDownCircle size={20} /> : <ArrowUpCircle size={20} />}

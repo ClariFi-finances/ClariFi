@@ -4,6 +4,7 @@ import { AreaChart, Area, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } f
 import { useApp } from '@/context/useApp'
 import { useAuth } from '@/context/useAuth'
 import { API_BASE_URL, getAuthHeaders } from '@/config/api'
+import { apiRequest, getErrorMessage } from '@/utils/apiClient'
 import { useI18n } from '@/hooks/useI18n'
 import { TransactionModal } from '@/components/TransactionModal'
 import './HomeScreen.css'
@@ -144,21 +145,33 @@ export function HomeScreen() {
     if (!user) {
       return []
     }
-    return transactions.filter(transaction => transaction.userId === user.id)
+    return transactions.filter(transaction => {
+      const uId = 'userId' in transaction ? transaction.userId : (transaction as any).UserId;
+      const myId = 'id' in user ? user.id : (user as any).Id;
+      return String(uId) === String(myId);
+    })
   }, [transactions, user])
 
   const userPaymentMethods = useMemo(() => {
     if (!user) {
       return []
     }
-    return paymentMethods.filter(method => method.userId === user.id)
+    return paymentMethods.filter(method => {
+      const uId = 'userId' in method ? method.userId : (method as any).UserId;
+      const myId = 'id' in user ? user.id : (user as any).Id;
+      return String(uId) === String(myId);
+    })
   }, [paymentMethods, user])
 
   const userCategories = useMemo(() => {
     if (!user) {
       return []
     }
-    return categories.filter(category => category.userId === user.id)
+    return categories.filter(category => {
+      const uId = 'userId' in category ? category.userId : (category as any).UserId;
+      const myId = 'id' in user ? user.id : (user as any).Id;
+      return String(uId) === String(myId);
+    })
   }, [categories, user])
 
   const sortedTransactions = useMemo(() => {
@@ -176,7 +189,7 @@ export function HomeScreen() {
       const date = new Date(transaction.date)
       return date >= monthStart && date < monthEnd
     }),
-  [monthEnd, monthStart, sortedTransactions])
+    [monthEnd, monthStart, sortedTransactions])
 
   const totals = useMemo(() => {
     const income = currentMonthTransactions
@@ -231,7 +244,7 @@ export function HomeScreen() {
     const data = []
     let runningIncome = 0
     let runningExpense = 0
-    
+
     const transactionsByDay = new Map<number, { income: number, expense: number }>()
     currentMonthTransactions.forEach(transaction => {
       const day = new Date(transaction.date).getDate()
@@ -249,10 +262,10 @@ export function HomeScreen() {
       const dayData = transactionsByDay.get(i) || { income: 0, expense: 0 }
       runningIncome += dayData.income
       runningExpense += dayData.expense
-      data.push({ 
-        name: i.toString(), 
-        income: runningIncome, 
-        expense: runningExpense 
+      data.push({
+        name: i.toString(),
+        income: runningIncome,
+        expense: runningExpense
       })
     }
 
@@ -268,7 +281,7 @@ export function HomeScreen() {
     return sortedTransactions.filter(transaction => {
       const categoryName = userCategories.find(c => c.id === transaction.categoryId)?.name ?? String(transaction.categoryId)
       return transaction.title.toLowerCase().includes(query) ||
-      categoryName.toLowerCase().includes(query)
+        categoryName.toLowerCase().includes(query)
     })
   }, [sortedTransactions, searchQuery])
 
@@ -485,14 +498,14 @@ export function HomeScreen() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} 
-                      dy={10} 
+                    <XAxis
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+                      dy={10}
                     />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ backgroundColor: 'var(--surface-color)', borderColor: 'var(--border)', borderRadius: 8, color: 'var(--text-primary)' }}
                       itemStyle={{ color: 'var(--text-primary)' }}
                       formatter={(value: any) => showValues ? formatter.format(value as number) : '••••••'}

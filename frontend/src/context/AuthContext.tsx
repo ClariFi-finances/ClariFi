@@ -63,8 +63,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (userRes.ok) {
             const data = await userRes.json()
             setInternalUser({
-              id: data.id,
-              cognitoId: data.cognitoId,
+              id: data.id ?? data.Id,
+              cognitoId: data.cognitoId ?? data.CognitoId,
               name,
               email,
               cpf: '00000000000'

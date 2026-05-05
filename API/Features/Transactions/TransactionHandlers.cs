@@ -9,7 +9,7 @@ public record GetTransactionsQuery() : IRequest<IEnumerable<Transaction>>;
 public record UpdateTransactionCommand(int Id, string Title, string Description, decimal Amount, int CategoryId, DateTime Date) : IRequest<bool>;
 public record DeleteTransactionCommand(int Id) : IRequest<bool>;
 
-public class PaymentMethodHandlers(IRepository<Transaction> repository) :
+public class TransactionHandlers(IRepository<Transaction> repository) :
     IRequestHandler<CreateTransactionCommand, Transaction>,
     IRequestHandler<GetTransactionsQuery, IEnumerable<Transaction>>,
     IRequestHandler<UpdateTransactionCommand, bool>,
