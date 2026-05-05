@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowDownCircle, ArrowUpCircle, Search, Trash2 } from 'lucide-react'
 import { useAuth } from '@/context/useAuth'
-import { API_BASE_URL } from '@/config/api'
+import { API_BASE_URL, getAuthHeaders } from '@/config/api'
 import { useI18n } from '@/hooks/useI18n'
 import './TransactionsScreen.css'
 
@@ -50,11 +50,7 @@ export function TransactionsScreen() {
   const [categoryFilter, setCategoryFilter] = useState<number | 'all'>('all')
   const [periodFilter, setPeriodFilter] = useState<Period>('month')
 
-  const headers = useMemo(() => {
-    const baseHeaders: Record<string, string> = { 'Content-Type': 'application/json' }
-    if (token) baseHeaders['Authorization'] = `Bearer ${token}`
-    return baseHeaders
-  }, [token])
+  const headers = useMemo(() => getAuthHeaders(token, user?.cognitoId), [token, user])
 
   useEffect(() => {
     if (!user) return

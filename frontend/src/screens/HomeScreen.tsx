@@ -3,7 +3,7 @@ import { ArrowDownCircle, ArrowUpCircle, Bell, Camera, Plus } from 'lucide-react
 import { AreaChart, Area, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useApp } from '@/context/useApp'
 import { useAuth } from '@/context/useAuth'
-import { API_BASE_URL } from '@/config/api'
+import { API_BASE_URL, getAuthHeaders } from '@/config/api'
 import { useI18n } from '@/hooks/useI18n'
 import { TransactionModal } from '@/components/TransactionModal'
 import './HomeScreen.css'
@@ -57,15 +57,7 @@ export function HomeScreen() {
   const quickMenuButtonRef = useRef<HTMLButtonElement | null>(null)
   const quickMenuFabRef = useRef<HTMLButtonElement | null>(null)
 
-  const headers = useMemo(() => {
-    const baseHeaders: Record<string, string> = {
-      'Content-Type': 'application/json',
-    }
-    if (token) {
-      baseHeaders['Authorization'] = `Bearer ${token}`
-    }
-    return baseHeaders
-  }, [token])
+  const headers = useMemo(() => getAuthHeaders(token, user?.cognitoId), [token, user])
 
   useEffect(() => {
     if (!user) {

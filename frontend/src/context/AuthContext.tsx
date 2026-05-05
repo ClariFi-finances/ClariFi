@@ -1,8 +1,11 @@
 import { createContext, type ReactNode } from 'react'
 import { useAuth as useCognitoAuth } from 'react-oidc-context'
+import { API_BASE_URL } from '@/config/api'
+import { useEffect, useState } from 'react'
 
 export interface User {
   id: number | string
+  cognitoId?: string
   name: string
   email: string
   cpf: string
@@ -24,6 +27,62 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const cognitoAuth = useCognitoAuth()
+  const [internalUser, setInternalUser] = useState<User | null>(null)
+  const [internalLoading, setInternalLoading] = useState(true)
+
+  useEffect(() => {
+    async function syncBackendUser() {
+      if (cognitoAuth.isAuthenticated && cognitoAuth.user?.profile.sub) {
+        try {
+          const cognitoId = cognitoAuth.user.profile.sub
+          const email = cognitoAuth.user.profile.email || ''
+          const name = cognitoAuth.user.profile.name || email.split('@')[0] || 'User'
+
+          // Try to login to get internal user ID
+          let userRes = await fetch(`${API_BASE_URL}/users/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${cognitoAuth.user.access_token}`
+            },
+            body: JSON.stringify({ cognitoId })
+          })
+
+          if (userRes.status === 401 || userRes.status === 404) {
+            // User doesn't exist, register them
+            userRes = await fetch(`${API_BASE_URL}/users/register`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${cognitoAuth.user.access_token}`
+              },
+              body: JSON.stringify({ cognitoId })
+            })
+          }
+
+          if (userRes.ok) {
+            const data = await userRes.json()
+            setInternalUser({
+              id: data.id,
+              cognitoId: data.cognitoId,
+              name,
+              email,
+              cpf: '00000000000'
+            })
+          }
+        } catch (e) {
+          console.error('Failed to sync backend user', e)
+        }
+      } else {
+        setInternalUser(null)
+      }
+      setInternalLoading(false)
+    }
+
+    if (!cognitoAuth.isLoading) {
+      syncBackendUser()
+    }
+  }, [cognitoAuth.isAuthenticated, cognitoAuth.isLoading, cognitoAuth.user])
 
   const login = async () => {
     await cognitoAuth.signinRedirect()
@@ -55,17 +114,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     cognitoAuth.removeUser();
   }
 
-  const activeUser: User | null = cognitoAuth.isAuthenticated 
-    ? {
-        id: cognitoAuth.user?.profile.sub || '',
-        name: cognitoAuth.user?.profile.name || cognitoAuth.user?.profile.email?.split('@')[0] || 'User',
-        email: cognitoAuth.user?.profile.email || '',
-        cpf: '00000000000', // Default dummy cpf as it's not provided by Cognito
-      }
-    : null
-
+  const activeUser: User | null = internalUser
   const activeToken = cognitoAuth.isAuthenticated ? cognitoAuth.user?.access_token || null : null
-  const activeIsLoading = cognitoAuth.isLoading || cognitoAuth.activeNavigator === "signinRedirect"
+  const activeIsLoading = cognitoAuth.isLoading || cognitoAuth.activeNavigator === "signinRedirect" || internalLoading
   const activeError = cognitoAuth.error ? cognitoAuth.error.message : null
 
   return (

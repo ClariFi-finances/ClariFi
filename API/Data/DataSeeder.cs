@@ -21,9 +21,6 @@ public static class DataSeeder
             // 1. Generate Fake Users
             var userFaker = new Faker<User>()
                 .CustomInstantiator(f => new User(
-                    f.Person.FullName,
-                    f.Person.Email,
-                    f.Random.Replace("###########"), // Fake 11 digit CPF
                     f.Random.Guid().ToString() // Fake CognitoId
                 ));
 

@@ -15,11 +15,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         
         modelBuilder.Entity<API.Models.User>(entity => 
         {
-            entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
-            entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
             entity.Property(e => e.CognitoId).IsRequired().HasMaxLength(255);
-            entity.Property(e => e.Cpf).IsRequired().HasMaxLength(11);
-            entity.HasIndex(e => e.Cpf).IsUnique();
             entity.HasIndex(e => e.CognitoId).IsUnique();
         });
 
