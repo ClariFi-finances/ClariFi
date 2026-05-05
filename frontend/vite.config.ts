@@ -23,7 +23,7 @@ async function fetchSSMParams() {
     response.Parameters?.forEach((param) => {
       if (param.Name === "/clarifi/frontend/cognito_authority") configParams['VITE_COGNITO_AUTHORITY'] = param.Value || ""
       if (param.Name === "/clarifi/frontend/cognito_client_id") configParams['VITE_COGNITO_CLIENT_ID'] = param.Value || ""
-      if (param.Name === "/clarifi/frontend/http_cognito_redirect_uri") configParams['VITE_HTTP_COGNITO_REDIRECT_URL'] = param.Value || ""
+      if (param.Name === "/clarifi/frontend/http_cognito_redirect_uri") configParams['VITE_HTTP_COGNITO_REDIRECT_URI'] = param.Value || ""
       if (param.Name === "/clarifi/frontend/cognito_domain") configParams['VITE_COGNITO_DOMAIN'] = param.Value || ""
     })
     
