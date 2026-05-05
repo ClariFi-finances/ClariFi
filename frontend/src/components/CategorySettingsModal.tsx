@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { API_BASE_URL } from '@/config/api'
+import { apiRequest, getErrorMessage } from '@/utils/apiClient'
 import { useAuth } from '@/context/useAuth'
 import { Trash2, Plus } from 'lucide-react'
 import EmojiPicker, { Theme } from 'emoji-picker-react'
@@ -29,37 +29,39 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (isOpen) {
-      fetchCategories()
+    if (!isOpen) return
+
+    let isActive = true
+    const loadCategories = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const data = await apiRequest<Category[]>('/categories')
+        if (!isActive) return
+        setCategories(data)
+      } catch (err) {
+        if (!isActive) return
+        setError(getErrorMessage(err, 'Erro desconhecido'))
+      } finally {
+        if (isActive) setIsLoading(false)
+      }
+    }
+
+    loadCategories()
+
+    return () => {
+      isActive = false
     }
   }, [isOpen])
-
-  const fetchCategories = async () => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const response = await fetch(`${API_BASE_URL}/categories`)
-      if (!response.ok) throw new Error('Falha ao carregar categorias')
-      const data = await response.json()
-      setCategories(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const handleDelete = async (id: number) => {
     if (!window.confirm('Tem certeza que deseja excluir esta categoria?')) return
 
     try {
-      const response = await fetch(`${API_BASE_URL}/categories/${id}/remove`, {
-        method: 'DELETE',
-      })
-      if (!response.ok) throw new Error('Falha ao excluir categoria')
+      await apiRequest<void>(`/categories/${id}/remove`, { method: 'DELETE' })
       setCategories(prev => prev.filter(c => c.id !== id))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao excluir')
+      setError(getErrorMessage(err, 'Erro ao excluir'))
     }
   }
 
@@ -73,21 +75,17 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
     const finalName = newEmoji.trim() ? `${newEmoji.trim()} ${newName.trim()}` : newName.trim()
 
     try {
-      const response = await fetch(`${API_BASE_URL}/categories/add`, {
+      const newCat = await apiRequest<Category>('/categories/add', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: {
           name: finalName,
-          userId: user.id
-        })
+          userId: user.id,
+        },
       })
-
-      if (!response.ok) throw new Error('Falha ao adicionar categoria')
-      const newCat = await response.json()
       setCategories(prev => [...prev, newCat])
       setNewName('')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao adicionar')
+      setError(getErrorMessage(err, 'Erro ao adicionar'))
     } finally {
       setIsAdding(false)
     }

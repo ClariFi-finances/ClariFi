@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowDownCircle, ArrowUpCircle, Filter, Search, Trash2, Calendar, ChevronRight } from 'lucide-react'
 import { useAuth } from '@/context/useAuth'
-import { API_BASE_URL } from '@/config/api'
+import { apiRequest, getErrorMessage } from '@/utils/apiClient'
 import { useI18n } from '@/hooks/useI18n'
 import './TransactionsScreen.css'
 
@@ -58,36 +58,41 @@ export function TransactionsScreen() {
 
   useEffect(() => {
     if (!user) return
-    const controller = new AbortController()
+    let isActive = true
     const loadData = async () => {
       setIsLoading(true)
       try {
-        const [tRes, cRes, pRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/transactions`, { signal: controller.signal, headers }),
-          fetch(`${API_BASE_URL}/categories`, { signal: controller.signal, headers }),
-          fetch(`${API_BASE_URL}/paymentmethods`, { signal: controller.signal, headers }),
+        const [transactionsData, categoriesData, paymentMethodsData] = await Promise.all([
+          apiRequest<ApiTransaction[]>('/transactions', { headers }),
+          apiRequest<ApiCategory[]>('/categories', { headers }),
+          apiRequest<ApiPaymentMethod[]>('/paymentmethods', { headers }),
         ])
-        if (!tRes.ok || !cRes.ok || !pRes.ok) throw new Error(t('common.loadError', 'Erro ao carregar dados'))
-        setTransactions(await tRes.json())
-        setCategories(await cRes.json())
-        setPaymentMethods(await pRes.json())
+
+        if (!isActive) return
+
+        setTransactions(transactionsData)
+        setCategories(categoriesData)
+        setPaymentMethods(paymentMethodsData)
       } catch (err) {
-        if (err instanceof Error && err.name !== 'AbortError') setError(err.message)
+        if (!isActive) return
+        setError(getErrorMessage(err, t('common.loadError', 'Erro ao carregar dados')))
       } finally {
-        setIsLoading(false)
+        if (isActive) setIsLoading(false)
       }
     }
     loadData()
-    return () => controller.abort()
+    return () => {
+      isActive = false
+    }
   }, [headers, t, user])
 
   const handleDelete = async (id: number) => {
     if (!confirm(t('common.confirmDelete', 'Tem certeza que deseja excluir esta transação?'))) return
     try {
-      const res = await fetch(`${API_BASE_URL}/transactions/${id}`, { method: 'DELETE', headers })
-      if (res.ok) setTransactions(prev => prev.filter(t => t.id !== id))
+      await apiRequest<void>(`/transactions/${id}`, { method: 'DELETE', headers })
+      setTransactions(prev => prev.filter(t => t.id !== id))
     } catch (err) {
-      alert(t('common.deleteError', 'Erro ao excluir transação'))
+      alert(getErrorMessage(err, t('common.deleteError', 'Erro ao excluir transação')))
     }
   }
 
