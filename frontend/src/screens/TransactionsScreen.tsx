@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowDownCircle, ArrowUpCircle, Search, Trash2 } from 'lucide-react'
 import { useAuth } from '@/context/useAuth'
-import { API_BASE_URL, getAuthHeaders } from '@/config/api'
+import { getAuthHeaders } from '@/config/api'
+import { apiRequest, getErrorMessage } from '@/utils/apiClient'
 import { useI18n } from '@/hooks/useI18n'
 import './TransactionsScreen.css'
 

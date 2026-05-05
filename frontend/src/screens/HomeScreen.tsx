@@ -3,7 +3,8 @@ import { ArrowDownCircle, ArrowUpCircle, Bell, Camera, Plus } from 'lucide-react
 import { AreaChart, Area, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useApp } from '@/context/useApp'
 import { useAuth } from '@/context/useAuth'
-import { API_BASE_URL, getAuthHeaders } from '@/config/api'
+import { getAuthHeaders } from '@/config/api'
+import { apiRequest, getErrorMessage } from '@/utils/apiClient'
 import { useI18n } from '@/hooks/useI18n'
 import { TransactionModal } from '@/components/TransactionModal'
 import './HomeScreen.css'
@@ -191,7 +192,7 @@ export function HomeScreen() {
       expense,
       balance: income - expense,
     }
-  }, [currentMonthTransactions])
+  }, [currentMonthTransactions, userCategories])
 
   const previousMonthTotals = useMemo(() => {
     const previousStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
@@ -270,7 +271,7 @@ export function HomeScreen() {
       return transaction.title.toLowerCase().includes(query) ||
       categoryName.toLowerCase().includes(query)
     })
-  }, [sortedTransactions, searchQuery])
+  }, [sortedTransactions, searchQuery, userCategories])
 
   const formatter = useMemo(() => {
     const locale = language === 'pt-BR' ? 'pt-BR' : 'en-US'

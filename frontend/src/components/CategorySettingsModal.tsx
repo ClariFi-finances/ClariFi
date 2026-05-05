@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import EmojiPicker, { Theme, type EmojiClickData } from 'emoji-picker-react'
 import { Plus, Pencil, Trash2, X, Loader2 } from 'lucide-react'
-import { API_BASE_URL, getAuthHeaders } from '@/config/api'
+import { getAuthHeaders } from '@/config/api'
+import { apiRequest, getErrorMessage } from '@/utils/apiClient'
 import { useAuth } from '@/context/useAuth'
 import { useI18n } from '@/hooks/useI18n'
 import './CategorySettingsModal.css'
@@ -40,20 +41,23 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
     const loadCategories = async () => {
       setIsLoading(true)
       setError(null)
+      if (!user) {
+        setCategories([])
+        setIsLoading(false)
+        return
+      }
       try {
-        const response = await fetch(`${API_BASE_URL}/categories?userId=${user?.id}`, { headers })
-        if (!response.ok) throw new Error('Failed to fetch categories')
-        const data = await response.json()
+        const data = await apiRequest<Category[]>(`/categories?userId=${user.id}`, { headers })
         setCategories(data)
       } catch (err) {
-        setError(err instanceof Error ? err.message : t('categoryModal.unknownError', 'Erro desconhecido'))
+        setError(getErrorMessage(err, t('categoryModal.unknownError', 'Erro desconhecido')))
       } finally {
         setIsLoading(false)
       }
     }
 
     loadCategories()
-  }, [isOpen, headers, user?.id, t])
+  }, [isOpen, headers, user, t])
 
   const handleDelete = async (id: number) => {
     if (!window.confirm(t('categoryModal.confirmDelete', 'Tem certeza que deseja excluir esta categoria?'))) return
@@ -62,15 +66,10 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
     setError(null)
     
     try {
-      const response = await fetch(`${API_BASE_URL}/categories/${id}/remove`, {
-        method: 'DELETE',
-        headers
-      })
-      
-      if (!response.ok) throw new Error('Falha ao excluir categoria')
+      await apiRequest<void>(`/categories/${id}/remove`, { method: 'DELETE', headers })
       setCategories(prev => prev.filter(c => c.id !== id))
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('categoryModal.deleteError', 'Erro ao excluir'))
+      setError(getErrorMessage(err, t('categoryModal.deleteError', 'Erro ao excluir')))
     } finally {
       setIsDeleting(null)
     }
@@ -86,8 +85,8 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
     try {
       const isEditing = !!editingCategory
       const url = isEditing 
-        ? `${API_BASE_URL}/categories/${editingCategory.id}/update` 
-        : `${API_BASE_URL}/categories/add`
+        ? `/categories/${editingCategory.id}/update`
+        : '/categories/add'
         
       const payload = isEditing 
         ? {
@@ -102,28 +101,34 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
             userId: user.id,
           }
 
-      const response = await fetch(url, {
-        method: isEditing ? 'PUT' : 'POST',
-        headers,
-        body: JSON.stringify(payload),
-      })
-      
-      if (!response.ok) throw new Error('Falha ao adicionar/editar categoria')
-      const updatedCat = await response.json()
-      
-      setCategories(prev => {
-        if (isEditing) {
-          return prev.map(cat => cat.id === updatedCat.id ? updatedCat : cat)
-        }
-        return [...prev, updatedCat]
-      })
+      if (isEditing) {
+        await apiRequest<void>(url, {
+          method: 'PUT',
+          headers,
+          body: payload,
+        })
+        setCategories(prev =>
+          prev.map(cat =>
+            cat.id === editingCategory.id
+              ? { ...cat, name: payload.name, icon: payload.icon ?? undefined, color: payload.color ?? undefined }
+              : cat,
+          ),
+        )
+      } else {
+        const createdCat = await apiRequest<Category>(url, {
+          method: 'POST',
+          headers,
+          body: payload,
+        })
+        setCategories(prev => [...prev, createdCat])
+      }
       
       setNewName('')
       setNewEmoji('🏷️')
       setEditingCategory(null)
       setIsFormOpen(false)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('categoryModal.saveError', 'Erro ao salvar'))
+      setError(getErrorMessage(err, t('categoryModal.saveError', 'Erro ao salvar')))
     } finally {
       setIsSubmitting(false)
     }
