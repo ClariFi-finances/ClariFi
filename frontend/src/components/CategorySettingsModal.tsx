@@ -3,6 +3,7 @@ import EmojiPicker, { Theme, type EmojiClickData } from 'emoji-picker-react'
 import { Plus, Pencil, Trash2, X, Loader2 } from 'lucide-react'
 import { API_BASE_URL, getAuthHeaders } from '@/config/api'
 import { useAuth } from '@/context/useAuth'
+import { useI18n } from '@/hooks/useI18n'
 import './CategorySettingsModal.css'
 
 export interface Category {
@@ -36,51 +37,29 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
   useEffect(() => {
     if (!isOpen) return
 
-    let isActive = true
     const loadCategories = async () => {
       setIsLoading(true)
       setError(null)
       try {
-        const url = user ? `/categories?userId=${user.id}` : '/categories'
-        const data = await apiRequest<Category[]>(url)
-        if (!isActive) return
+        const response = await fetch(`${API_BASE_URL}/categories?userId=${user?.id}`, { headers })
+        if (!response.ok) throw new Error('Failed to fetch categories')
+        const data = await response.json()
         setCategories(data)
       } catch (err) {
-        if (!isActive) return
-        setError(getErrorMessage(err, t('categoryModal.unknownError', 'Erro desconhecido')))
+        setError(err instanceof Error ? err.message : t('categoryModal.unknownError', 'Erro desconhecido'))
       } finally {
-        if (isActive) setIsLoading(false)
+        setIsLoading(false)
       }
     }
 
-  const fetchCategories = async () => {
-    if (!user) return
-    
-    setIsLoading(true)
-    setError(null)
-    
-    try {
-      const response = await fetch(`${API_BASE_URL}/categories`, { headers })
-      if (!response.ok) {
-        throw new Error('Failed to fetch categories')
-      }
-      const data = await response.json()
-      setCategories(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido')
-    } finally {
-      setIsLoading(false)
     loadCategories()
-
-    return () => {
-      isActive = false
-    }
-  }, [isOpen])
+  }, [isOpen, headers, user?.id, t])
 
   const handleDelete = async (id: number) => {
     if (!window.confirm(t('categoryModal.confirmDelete', 'Tem certeza que deseja excluir esta categoria?'))) return
 
     setIsDeleting(id)
+    setError(null)
     
     try {
       const response = await fetch(`${API_BASE_URL}/categories/${id}/remove`, {
@@ -91,13 +70,9 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
       if (!response.ok) throw new Error('Falha ao excluir categoria')
       setCategories(prev => prev.filter(c => c.id !== id))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao excluir')
+      setError(err instanceof Error ? err.message : t('categoryModal.deleteError', 'Erro ao excluir'))
     } finally {
       setIsDeleting(null)
-      await apiRequest<void>(`/categories/${id}/remove`, { method: 'DELETE' })
-      setCategories(prev => prev.filter(c => c.id !== id))
-    } catch (err) {
-      setError(getErrorMessage(err, t('categoryModal.deleteError', 'Erro ao excluir')))
     }
   }
 
@@ -135,25 +110,20 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
       
       if (!response.ok) throw new Error('Falha ao adicionar/editar categoria')
       const updatedCat = await response.json()
+      
       setCategories(prev => {
         if (isEditing) {
           return prev.map(cat => cat.id === updatedCat.id ? updatedCat : cat)
         }
         return [...prev, updatedCat]
       })
-      const newCat = await apiRequest<Category>('/categories/add', {
-        method: 'POST',
-        body: {
-          name: finalName,
-          userId: user.id,
-        },
-      })
-      setCategories(prev => [...prev, newCat])
+      
       setNewName('')
       setNewEmoji('🏷️')
       setEditingCategory(null)
+      setIsFormOpen(false)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao adicionar/editar')
+      setError(err instanceof Error ? err.message : t('categoryModal.saveError', 'Erro ao salvar'))
     } finally {
       setIsSubmitting(false)
     }
@@ -193,7 +163,7 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
                       setNewEmoji(cat.icon || '🏷️')
                       setIsFormOpen(true)
                     }}
-                    title="Editar"
+                    title={t('common.edit', 'Editar')}
                   >
                     <Pencil size={16} />
                   </button>
@@ -201,26 +171,32 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
                     type="button" 
                     className="icon-btn delete-btn"
                     onClick={() => handleDelete(cat.id)}
-                    title="Excluir"
+                    title={t('categoryModal.deleteTooltip', 'Excluir')}
                     disabled={isDeleting === cat.id}
                   >
-                    {isDeleting === cat.id ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
+                    {isDeleting === cat.id ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={18} />}
                   </button>
                 </div>
-                <button 
-                  type="button" 
-                  className="icon-btn delete-btn"
-                  onClick={() => handleDelete(cat.id)}
-                  title={t('categoryModal.deleteTooltip', 'Excluir')}
-                >
-                  <Trash2 size={16} />
-                </button>
               </div>
             ))
           )}
         </div>
 
-        {isFormOpen && (
+        {!isFormOpen ? (
+          <button 
+            type="button" 
+            className="primary-btn add-category-trigger"
+            onClick={() => {
+              setEditingCategory(null)
+              setNewName('')
+              setNewEmoji('🏷️')
+              setIsFormOpen(true)
+            }}
+          >
+            <Plus size={18} />
+            {t('categoryModal.addBtn', 'Adicionar Categoria')}
+          </button>
+        ) : (
           <form className="add-category-form" onSubmit={handleAddEditSubmit}>
             <div className="emoji-picker-container">
               <button 
@@ -228,7 +204,7 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
                 className="emoji-btn" 
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 disabled={isSubmitting}
-                title="Escolha um emoji"
+                title={t('categoryModal.chooseEmoji', 'Escolha um emoji')}
               >
                 {newEmoji}
               </button>
@@ -248,53 +224,29 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
             <input
               type="text"
               className="name-input"
-              placeholder="Nova categoria..."
+              placeholder={t('categoryModal.newCategoryPlaceholder', 'Nova categoria...')}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               disabled={isSubmitting}
               required
             />
-            <button type="submit" className="primary-btn add-btn" disabled={isSubmitting || !newName.trim()}>
-              {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
-              {editingCategory ? 'Salvar' : 'Adicionar'}
-            </button>
-            <button 
-              type="button" 
-              className="secondary-btn cancel-btn"
-              onClick={() => setIsFormOpen(false)}
-            >
-              <X size={16} />
-              Cancelar
-            </button>
+            <div className="form-actions">
+              <button type="submit" className="primary-btn add-btn" disabled={isSubmitting || !newName.trim()}>
+                {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
+                {editingCategory ? t('common.save', 'Salvar') : t('common.add', 'Adicionar')}
+              </button>
+              <button 
+                type="button" 
+                className="secondary-btn cancel-btn"
+                onClick={() => setIsFormOpen(false)}
+                disabled={isSubmitting}
+              >
+                <X size={16} />
+                {t('common.cancel', 'Cancelar')}
+              </button>
+            </div>
           </form>
         )}
-            
-            {showEmojiPicker && (
-              <div className="emoji-picker-dropdown">
-                <EmojiPicker 
-                  theme={Theme.DARK} 
-                  onEmojiClick={(emojiData: EmojiClickData) => {
-                    setNewEmoji(emojiData.emoji)
-                    setShowEmojiPicker(false)
-                  }} 
-                />
-              </div>
-            )}
-          </div>
-          <input
-            type="text"
-            className="name-input"
-            placeholder={t('categoryModal.newCategoryPlaceholder', 'Nova categoria...')}
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            disabled={isAdding}
-            required
-          />
-          <button type="submit" className="primary-btn add-btn" disabled={isAdding || !newName.trim()}>
-            <Plus size={18} />
-            {t('categoryModal.addBtn', 'Adicionar')}
-          </button>
-        </form>
       </div>
     </div>
   )
