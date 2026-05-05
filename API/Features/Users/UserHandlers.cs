@@ -29,12 +29,12 @@ public class UserHandlers(
 
         var defaultCategories = new[]
         {
-            new Category("Food", null, null, user.Id),
-            new Category("Housing", null, null, user.Id),
-            new Category("Transport", null, null, user.Id),
-            new Category("Health", null, null, user.Id),
-            new Category("Leisure", null, null, user.Id),
-            new Category("Bills", null, null, user.Id),
+            new Category("🍔 Food", null, null, user.Id),
+            new Category("🏠 Housing", null, null, user.Id),
+            new Category("🚗 Transport", null, null, user.Id),
+            new Category("🏥 Health", null, null, user.Id),
+            new Category("🎮 Leisure", null, null, user.Id),
+            new Category("💡 Bills", null, null, user.Id),
         };
 
         foreach (var category in defaultCategories)
