@@ -113,7 +113,7 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
                   onClick={handleSaveEdit}
                   disabled={isLoading}
                 >
-                  {t('profile.settings')}
+                  {t('common.save')}
                 </button>
                 <button
                   className="auth-secondary-button"

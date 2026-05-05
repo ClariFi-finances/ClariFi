@@ -1,6 +1,7 @@
+import { useState, useRef, useEffect } from 'react'
 import type { ReactElement } from 'react'
 import { useAuth } from '@/context/useAuth'
-import { BarChart3, Home, Plus, Settings, Target, User } from 'lucide-react'
+import { BarChart3, Home, Plus, Settings, Target, User, ArrowUpCircle, ArrowDownCircle, Camera } from 'lucide-react'
 import { useApp } from '@/context/useApp'
 import { useI18n } from '@/hooks/useI18n'
 import './AppSidebar.css'
@@ -31,8 +32,29 @@ const NAV_ICON_MAP: Record<string, ReactElement> = {
 
 export function AppSidebar() {
   const { user } = useAuth()
-  const { activeScreen, setActiveScreen } = useApp()
+  const { activeScreen, setActiveScreen, setIsNewTransactionModalOpen, setTransactionModalMode } = useApp()
   const { t } = useI18n()
+  const [isQuickMenuOpen, setIsQuickMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsQuickMenuOpen(false)
+      }
+    }
+    if (isQuickMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isQuickMenuOpen])
+
+  const openModal = (mode: 'income' | 'expense') => {
+    setTransactionModalMode(mode)
+    setIsNewTransactionModalOpen(true)
+    setActiveScreen('home')
+    setIsQuickMenuOpen(false)
+  }
 
   return (
     <>
@@ -47,10 +69,34 @@ export function AppSidebar() {
           </div>
         </div>
 
-        <button className="new-transaction-btn" type="button">
-          <Plus size={18} />
-          {t('sidebar.newTransaction', 'New Transaction')}
-        </button>
+        <div className="sidebar-action-container" ref={menuRef}>
+          <button 
+            className={`new-transaction-btn ${isQuickMenuOpen ? 'active' : ''}`}
+            type="button"
+            onClick={() => setIsQuickMenuOpen(!isQuickMenuOpen)}
+          >
+            <Plus size={18} />
+            {t('sidebar.newTransaction', 'New Transaction')}
+          </button>
+
+          {isQuickMenuOpen && (
+            <div className="sidebar-quick-menu">
+              <button className="quick-menu-item" type="button" onClick={() => openModal('income')}>
+                <ArrowUpCircle size={18} className="quick-menu-icon" />
+                <span>{t('home.income')}</span>
+              </button>
+              <button className="quick-menu-item danger" type="button" onClick={() => openModal('expense')}>
+                <ArrowDownCircle size={18} className="quick-menu-icon" />
+                <span>{t('home.expense')}</span>
+              </button>
+              <button className="quick-menu-item" type="button" disabled>
+                <Camera size={18} className="quick-menu-icon" />
+                <span>{t('home.scan')}</span>
+                <span className="quick-menu-hint">{t('home.scanDisabled')}</span>
+              </button>
+            </div>
+          )}
+        </div>
 
         <nav className="sidebar-nav">
           {NAV_ITEMS.map((item) => {
@@ -98,9 +144,40 @@ export function AppSidebar() {
           <BarChart3 size={18} className="mobile-icon" />
           <span>{t('sidebar.nav.reports', 'Reports')}</span>
         </button>
-        <button className="mobile-action-btn" type="button" aria-label={t('sidebar.newTransaction', 'New Transaction')}>
+        <button 
+          className="mobile-action-btn" 
+          type="button" 
+          aria-label={t('sidebar.newTransaction', 'New Transaction')}
+          onClick={() => {
+            // For mobile, maybe just open the expense modal directly or toggle a menu?
+            // User said "faz igual o botao da tela de dashboard", which for mobile is usually a FAB.
+            // Let's keep it simple and just open home + expense modal for mobile for now, 
+            // OR we could also show the menu here. 
+            // Let's make it consistent.
+            setIsQuickMenuOpen(!isQuickMenuOpen)
+          }}
+        >
           <Plus size={22} />
         </button>
+
+        {isQuickMenuOpen && (
+          <div className="mobile-quick-menu-overlay" onClick={() => setIsQuickMenuOpen(false)}>
+            <div className="mobile-quick-menu" onClick={e => e.stopPropagation()}>
+              <button className="quick-menu-item" type="button" onClick={() => openModal('income')}>
+                <ArrowUpCircle size={18} className="quick-menu-icon" />
+                <span>{t('home.income')}</span>
+              </button>
+              <button className="quick-menu-item danger" type="button" onClick={() => openModal('expense')}>
+                <ArrowDownCircle size={18} className="quick-menu-icon" />
+                <span>{t('home.expense')}</span>
+              </button>
+              <button className="quick-menu-item" type="button" disabled>
+                <Camera size={18} className="quick-menu-icon" />
+                <span>{t('home.scan')}</span>
+              </button>
+            </div>
+          </div>
+        )}
         <button className="mobile-nav-item" type="button" disabled>
           <Target size={18} className="mobile-icon" />
           <span>{t('sidebar.nav.goals', 'Goals')}</span>

@@ -37,7 +37,7 @@ interface ApiPaymentMethod {
 }
 
 export function HomeScreen() {
-  const { setActiveScreen } = useApp()
+  const { setActiveScreen, isNewTransactionModalOpen, setIsNewTransactionModalOpen, transactionModalMode, setTransactionModalMode } = useApp()
   const { user, token } = useAuth()
   const { t, language } = useI18n()
   const [showValues, setShowValues] = useState(true)
@@ -63,43 +63,40 @@ export function HomeScreen() {
     if (!user) {
       return
     }
-
-    const controller = new AbortController()
+    let isActive = true
     const loadData = async () => {
       setIsLoading(true)
       setError(null)
       try {
-        const [transactionsResponse, paymentMethodsResponse, categoriesResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/transactions`, { signal: controller.signal, headers }),
-          fetch(`${API_BASE_URL}/paymentmethods`, { signal: controller.signal, headers }),
-          fetch(`${API_BASE_URL}/categories`, { signal: controller.signal, headers }),
+        const [transactionData, paymentMethodData, categoriesData] = await Promise.all([
+          apiRequest<ApiTransaction[]>('/transactions', { headers }),
+          apiRequest<ApiPaymentMethod[]>('/paymentmethods', { headers }),
+          apiRequest<ApiCategory[]>(`/categories?userId=${user.id}`, { headers }),
         ])
 
-        if (!transactionsResponse.ok || !paymentMethodsResponse.ok || !categoriesResponse.ok) {
-          throw new Error(t('home.loadError'))
+        if (!isActive) {
+          return
         }
-
-        const transactionData = await transactionsResponse.json()
-        const paymentMethodData = await paymentMethodsResponse.json()
-        const categoriesData = await categoriesResponse.json()
 
         setTransactions(transactionData)
         setPaymentMethods(paymentMethodData)
         setCategories(categoriesData)
       } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
+        if (!isActive) {
           return
         }
-        setError(err instanceof Error ? err.message : t('home.loadError'))
+        setError(getErrorMessage(err, t('home.loadError')))
       } finally {
-        setIsLoading(false)
+        if (isActive) {
+          setIsLoading(false)
+        }
       }
     }
 
     loadData()
 
     return () => {
-      controller.abort()
+      isActive = false
     }
   }, [headers, t, user])
 
@@ -134,6 +131,14 @@ export function HomeScreen() {
       document.removeEventListener('keydown', handleKey)
     }
   }, [isQuickMenuOpen])
+
+  useEffect(() => {
+    if (isNewTransactionModalOpen) {
+      setIsModalOpen(true)
+      setModalMode(transactionModalMode)
+      setIsNewTransactionModalOpen(false)
+    }
+  }, [isNewTransactionModalOpen, setIsNewTransactionModalOpen, transactionModalMode])
 
   const userTransactions = useMemo(() => {
     if (!user) {
@@ -325,10 +330,10 @@ export function HomeScreen() {
       const parsedCategory = Number.isNaN(Number(payload.category))
         ? payload.category
         : Number(payload.category)
-      const response = await fetch(`${API_BASE_URL}/transactions/log`, {
+      const newTransaction = await apiRequest<ApiTransaction>('/transactions/log', {
         method: 'POST',
         headers,
-        body: JSON.stringify({
+        body: {
           title: payload.title,
           description: payload.description,
           amount: payload.amount,
@@ -338,18 +343,12 @@ export function HomeScreen() {
           userId: user.id,
           paymentMethodId: payload.paymentMethodId,
           installmentInfo: payload.installmentInfo ?? null,
-        }),
+        },
       })
-
-      if (!response.ok) {
-        throw new Error(t('home.saveError'))
-      }
-
-      const newTransaction = await response.json()
       setTransactions(prev => [newTransaction, ...prev])
       setIsModalOpen(false)
     } catch (err) {
-      setModalError(err instanceof Error ? err.message : t('home.saveError'))
+      setModalError(getErrorMessage(err, t('home.saveError')))
     } finally {
       setIsSubmitting(false)
     }

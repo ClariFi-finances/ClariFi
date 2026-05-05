@@ -19,6 +19,7 @@ interface CategorySettingsModalProps {
 
 export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModalProps) {
   const { user, token } = useAuth()
+  const { t } = useI18n()
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [newEmoji, setNewEmoji] = useState('🏷️')
@@ -33,10 +34,24 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
   const headers = useMemo(() => getAuthHeaders(token, user?.cognitoId), [token, user])
 
   useEffect(() => {
-    if (isOpen) {
-      fetchCategories()
+    if (!isOpen) return
+
+    let isActive = true
+    const loadCategories = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const url = user ? `/categories?userId=${user.id}` : '/categories'
+        const data = await apiRequest<Category[]>(url)
+        if (!isActive) return
+        setCategories(data)
+      } catch (err) {
+        if (!isActive) return
+        setError(getErrorMessage(err, t('categoryModal.unknownError', 'Erro desconhecido')))
+      } finally {
+        if (isActive) setIsLoading(false)
+      }
     }
-  }, [isOpen])
 
   const fetchCategories = async () => {
     if (!user) return
@@ -55,11 +70,15 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
       setError(err instanceof Error ? err.message : 'Erro desconhecido')
     } finally {
       setIsLoading(false)
+    loadCategories()
+
+    return () => {
+      isActive = false
     }
-  }
+  }, [isOpen])
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Tem certeza que deseja excluir esta categoria?')) return
+    if (!window.confirm(t('categoryModal.confirmDelete', 'Tem certeza que deseja excluir esta categoria?'))) return
 
     setIsDeleting(id)
     
@@ -75,6 +94,10 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
       setError(err instanceof Error ? err.message : 'Erro ao excluir')
     } finally {
       setIsDeleting(null)
+      await apiRequest<void>(`/categories/${id}/remove`, { method: 'DELETE' })
+      setCategories(prev => prev.filter(c => c.id !== id))
+    } catch (err) {
+      setError(getErrorMessage(err, t('categoryModal.deleteError', 'Erro ao excluir')))
     }
   }
 
@@ -118,6 +141,14 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
         }
         return [...prev, updatedCat]
       })
+      const newCat = await apiRequest<Category>('/categories/add', {
+        method: 'POST',
+        body: {
+          name: finalName,
+          userId: user.id,
+        },
+      })
+      setCategories(prev => [...prev, newCat])
       setNewName('')
       setNewEmoji('🏷️')
       setEditingCategory(null)
@@ -135,8 +166,8 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
       <div className="modal-card category-modal" role="dialog" aria-modal="true">
         <div className="modal-header">
           <div>
-            <p className="modal-tag">FINANÇAS</p>
-            <h2 className="modal-title">Gerenciar Categorias</h2>
+            <p className="modal-tag">{t('categoryModal.tag', 'FINANÇAS')}</p>
+            <h2 className="modal-title">{t('categoryModal.title', 'Gerenciar Categorias')}</h2>
           </div>
           <button className="modal-close" type="button" onClick={onClose}>✕</button>
         </div>
@@ -145,9 +176,9 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
 
         <div className="category-list">
           {isLoading ? (
-            <p className="loading-text">Carregando...</p>
+            <p className="loading-text">{t('common.loading', 'Carregando...')}</p>
           ) : categories.length === 0 ? (
-            <p className="empty-text">Nenhuma categoria encontrada.</p>
+            <p className="empty-text">{t('categoryModal.empty', 'Nenhuma categoria encontrada.')}</p>
           ) : (
             categories.map(cat => (
               <div key={cat.id} className="category-item">
@@ -176,6 +207,14 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
                     {isDeleting === cat.id ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
                   </button>
                 </div>
+                <button 
+                  type="button" 
+                  className="icon-btn delete-btn"
+                  onClick={() => handleDelete(cat.id)}
+                  title={t('categoryModal.deleteTooltip', 'Excluir')}
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             ))
           )}
@@ -229,6 +268,33 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
             </button>
           </form>
         )}
+            
+            {showEmojiPicker && (
+              <div className="emoji-picker-dropdown">
+                <EmojiPicker 
+                  theme={Theme.DARK} 
+                  onEmojiClick={(emojiData: EmojiClickData) => {
+                    setNewEmoji(emojiData.emoji)
+                    setShowEmojiPicker(false)
+                  }} 
+                />
+              </div>
+            )}
+          </div>
+          <input
+            type="text"
+            className="name-input"
+            placeholder={t('categoryModal.newCategoryPlaceholder', 'Nova categoria...')}
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            disabled={isAdding}
+            required
+          />
+          <button type="submit" className="primary-btn add-btn" disabled={isAdding || !newName.trim()}>
+            <Plus size={18} />
+            {t('categoryModal.addBtn', 'Adicionar')}
+          </button>
+        </form>
       </div>
     </div>
   )
