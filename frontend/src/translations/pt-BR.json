@@ -179,5 +179,43 @@
       "settings": "Configurações",
       "profile": "Perfil"
     }
+  },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Gerencie sua conta e preferências",
+    "editProfile": "Editar Perfil",
+    "appearance": "Aparência",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema",
+    "finances": "Finanças",
+    "manageCategoriesTitle": "Gerenciar Categorias",
+    "manageCategoriesDesc": "Personalize suas categorias de gastos",
+    "fixedIncomeTitle": "Receitas Fixas",
+    "fixedIncomeDesc": "Configure receitas recorrentes",
+    "manageReservesTitle": "Gerenciar Reservas",
+    "manageReservesDesc": "Configure suas reservas financeiras",
+    "paymentMethodsTitle": "Métodos de Pagamento",
+    "paymentMethodsDesc": "Cartões e contas bancárias",
+    "preferences": "Preferências",
+    "notificationsTitle": "Notificações",
+    "notificationsDesc": "Alertas e lembretes",
+    "privacySecurityTitle": "Privacidade e Segurança",
+    "privacySecurityDesc": "Proteção de dados e acesso",
+    "helpSupportTitle": "Ajuda e Suporte",
+    "helpSupportDesc": "Dúvidas e tutoriais",
+    "logout": "Sair da conta"
+  },
+  "categoryModal": {
+    "tag": "FINANÇAS",
+    "title": "Gerenciar Categorias",
+    "confirmDelete": "Tem certeza que deseja excluir esta categoria?",
+    "deleteError": "Erro ao excluir",
+    "addError": "Erro ao adicionar",
+    "unknownError": "Erro desconhecido",
+    "empty": "Nenhuma categoria encontrada.",
+    "newCategoryPlaceholder": "Nova categoria...",
+    "addBtn": "Adicionar",
+    "deleteTooltip": "Excluir"
   }
 }

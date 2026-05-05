@@ -179,5 +179,43 @@
       "settings": "Settings",
       "profile": "Profile"
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account and preferences",
+    "editProfile": "Edit Profile",
+    "appearance": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "finances": "Finances",
+    "manageCategoriesTitle": "Manage Categories",
+    "manageCategoriesDesc": "Customize your spending categories",
+    "fixedIncomeTitle": "Fixed Income",
+    "fixedIncomeDesc": "Configure recurring income",
+    "manageReservesTitle": "Manage Reserves",
+    "manageReservesDesc": "Configure your financial reserves",
+    "paymentMethodsTitle": "Payment Methods",
+    "paymentMethodsDesc": "Cards and bank accounts",
+    "preferences": "Preferences",
+    "notificationsTitle": "Notifications",
+    "notificationsDesc": "Alerts and reminders",
+    "privacySecurityTitle": "Privacy and Security",
+    "privacySecurityDesc": "Data protection and access",
+    "helpSupportTitle": "Help and Support",
+    "helpSupportDesc": "FAQs and tutorials",
+    "logout": "Sign out"
+  },
+  "categoryModal": {
+    "tag": "FINANCES",
+    "title": "Manage Categories",
+    "confirmDelete": "Are you sure you want to delete this category?",
+    "deleteError": "Error deleting",
+    "addError": "Error adding",
+    "unknownError": "Unknown error",
+    "empty": "No categories found.",
+    "newCategoryPlaceholder": "New category...",
+    "addBtn": "Add",
+    "deleteTooltip": "Delete"
   }
 }

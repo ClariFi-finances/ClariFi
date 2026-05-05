@@ -4,6 +4,7 @@ import { useAuth } from '@/context/useAuth'
 import { Trash2, Plus } from 'lucide-react'
 import EmojiPicker, { Theme } from 'emoji-picker-react'
 import type { EmojiClickData } from 'emoji-picker-react'
+import { useI18n } from '@/hooks/useI18n'
 import './CategorySettingsModal.css'
 
 export interface Category {
@@ -20,6 +21,7 @@ interface CategorySettingsModalProps {
 
 export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModalProps) {
   const { user } = useAuth()
+  const { t } = useI18n()
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
@@ -42,7 +44,7 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
         setCategories(data)
       } catch (err) {
         if (!isActive) return
-        setError(getErrorMessage(err, 'Erro desconhecido'))
+        setError(getErrorMessage(err, t('categoryModal.unknownError', 'Erro desconhecido')))
       } finally {
         if (isActive) setIsLoading(false)
       }
@@ -56,13 +58,13 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
   }, [isOpen])
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Tem certeza que deseja excluir esta categoria?')) return
+    if (!window.confirm(t('categoryModal.confirmDelete', 'Tem certeza que deseja excluir esta categoria?'))) return
 
     try {
       await apiRequest<void>(`/categories/${id}/remove`, { method: 'DELETE' })
       setCategories(prev => prev.filter(c => c.id !== id))
     } catch (err) {
-      setError(getErrorMessage(err, 'Erro ao excluir'))
+      setError(getErrorMessage(err, t('categoryModal.deleteError', 'Erro ao excluir')))
     }
   }
 
@@ -86,7 +88,7 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
       setCategories(prev => [...prev, newCat])
       setNewName('')
     } catch (err) {
-      setError(getErrorMessage(err, 'Erro ao adicionar'))
+      setError(getErrorMessage(err, t('categoryModal.addError', 'Erro ao adicionar')))
     } finally {
       setIsAdding(false)
     }
@@ -99,8 +101,8 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
       <div className="modal-card category-modal" role="dialog" aria-modal="true">
         <div className="modal-header">
           <div>
-            <p className="modal-tag">FINANÇAS</p>
-            <h2 className="modal-title">Gerenciar Categorias</h2>
+            <p className="modal-tag">{t('categoryModal.tag', 'FINANÇAS')}</p>
+            <h2 className="modal-title">{t('categoryModal.title', 'Gerenciar Categorias')}</h2>
           </div>
           <button className="modal-close" type="button" onClick={onClose}>✕</button>
         </div>
@@ -109,9 +111,9 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
 
         <div className="category-list">
           {isLoading ? (
-            <p className="loading-text">Carregando...</p>
+            <p className="loading-text">{t('common.loading', 'Carregando...')}</p>
           ) : categories.length === 0 ? (
-            <p className="empty-text">Nenhuma categoria encontrada.</p>
+            <p className="empty-text">{t('categoryModal.empty', 'Nenhuma categoria encontrada.')}</p>
           ) : (
             categories.map(cat => (
               <div key={cat.id} className="category-item">
@@ -120,7 +122,7 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
                   type="button" 
                   className="icon-btn delete-btn"
                   onClick={() => handleDelete(cat.id)}
-                  title="Excluir"
+                  title={t('categoryModal.deleteTooltip', 'Excluir')}
                 >
                   <Trash2 size={16} />
                 </button>
@@ -156,7 +158,7 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
           <input
             type="text"
             className="name-input"
-            placeholder="Nova categoria..."
+            placeholder={t('categoryModal.newCategoryPlaceholder', 'Nova categoria...')}
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             disabled={isAdding}
@@ -164,7 +166,7 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
           />
           <button type="submit" className="primary-btn add-btn" disabled={isAdding || !newName.trim()}>
             <Plus size={18} />
-            Adicionar
+            {t('categoryModal.addBtn', 'Adicionar')}
           </button>
         </form>
       </div>
