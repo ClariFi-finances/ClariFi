@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '@/context/useAuth'
 import { useApp } from '@/context/useApp'
+import { CategorySettingsModal } from '@/components/CategorySettingsModal'
 import { showConfirmDialog } from '@/utils/validation'
 import './SettingsScreen.css'
 
@@ -8,6 +9,7 @@ export function SettingsScreen() {
   const { user, logout } = useAuth()
   const { setActiveScreen } = useApp()
   const [theme, setTheme] = useState('escuro')
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
 
   const handleLogout = async () => {
     const confirmed = await showConfirmDialog(
@@ -81,7 +83,7 @@ export function SettingsScreen() {
           <section className="settings-section">
             <h3>Financas</h3>
             <div className="settings-card list-card">
-              <div className="list-item">
+              <div className="list-item" onClick={() => setIsCategoryModalOpen(true)}>
                 <div className="item-icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                 </div>
@@ -170,6 +172,11 @@ export function SettingsScreen() {
           </button>
         </div>
       </div>
+
+      <CategorySettingsModal 
+        isOpen={isCategoryModalOpen} 
+        onClose={() => setIsCategoryModalOpen(false)} 
+      />
     </div>
   )
 }

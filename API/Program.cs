@@ -2,6 +2,7 @@ using API.Infrastructure.Repositories;
 using API.Features.Users;
 using API.Features.PaymentMethods;
 using API.Features.Transactions;
+using API.Features.Categories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +79,10 @@ app.MapGroup("/api/paymentmethods")
 app.MapGroup("/api/transactions")
     .MapTransactionEndpoints()
     .WithTags("Transactions");
+
+app.MapGroup("/api/categories")
+    .MapCategoryEndpoints()
+    .WithTags("Categories");
 
 await DataSeeder.SeedDataAsync(app.Services);
 
