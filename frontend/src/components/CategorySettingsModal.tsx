@@ -87,17 +87,15 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
       const url = isEditing 
         ? `/categories/${editingCategory.id}/update`
         : '/categories/add'
+
+      const fullName = `${newEmoji} ${newName.trim()}`
         
       const payload = isEditing 
         ? {
-            name: newName.trim(),
-            icon: newEmoji.trim(),
-            color: editingCategory.color,
+            name: fullName,
           }
         : {
-            name: newName.trim(),
-            icon: newEmoji.trim(),
-            color: newEmoji.trim(),
+            name: fullName,
             userId: user.id,
           }
 
@@ -110,7 +108,7 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
         setCategories(prev =>
           prev.map(cat =>
             cat.id === editingCategory.id
-              ? { ...cat, name: payload.name, icon: payload.icon ?? undefined, color: payload.color ?? undefined }
+              ? { ...cat, name: payload.name }
               : cat,
           ),
         )
@@ -164,7 +162,11 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
                     className="icon-btn edit-btn"
                     onClick={() => {
                       setEditingCategory(cat)
-                      setNewName(cat.name)
+                      // Strip the emoji prefix from name if it starts with the icon
+                      const nameWithoutEmoji = cat.icon && cat.name.startsWith(cat.icon) 
+                        ? cat.name.slice(cat.icon.length).trim() 
+                        : cat.name
+                      setNewName(nameWithoutEmoji)
                       setNewEmoji(cat.icon || '🏷️')
                       setIsFormOpen(true)
                     }}
