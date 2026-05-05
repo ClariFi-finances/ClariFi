@@ -5,6 +5,7 @@ import { RegisterScreen } from '@/screens/RegisterScreen'
 import { HomeScreen } from '@/screens/HomeScreen'
 import { ProfileScreen } from '@/screens/ProfileScreen'
 import { SettingsScreen } from '@/screens/SettingsScreen'
+import { TransactionsScreen } from '@/screens/TransactionsScreen'
 import { AppShell } from '@/components/AppShell'
 import './App.css'
 
@@ -41,6 +42,8 @@ function App() {
         <ProfileScreen onLogout={() => setActiveScreen('home')} />
       ) : activeScreen === 'settings' ? (
         <SettingsScreen />
+      ) : activeScreen === 'transactions' ? (
+        <TransactionsScreen />
       ) : (
         <HomeScreen />
       )}

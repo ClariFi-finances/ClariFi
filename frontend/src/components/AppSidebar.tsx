@@ -17,7 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'home', label: 'Inicio', icon: 'home', targetScreen: 'home' },
   { id: 'reports', label: 'Relatorios', icon: 'reports', disabled: true },
   { id: 'goals', label: 'Metas', icon: 'goals', disabled: true },
-  { id: 'transactions', label: 'Transacoes', icon: 'transactions', disabled: true },
+  { id: 'transactions', label: 'Transacoes', icon: 'transactions', targetScreen: 'transactions' },
   { id: 'settings', label: 'Configuracoes', icon: 'settings', targetScreen: 'settings' },
 ]
 
