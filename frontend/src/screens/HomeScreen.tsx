@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowDownCircle, ArrowUpCircle, Bell, Camera, Plus } from 'lucide-react'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useApp } from '@/context/useApp'
 import { useAuth } from '@/context/useAuth'
 import { API_BASE_URL } from '@/config/api'
@@ -229,6 +230,38 @@ export function HomeScreen() {
     return userCategories.map(c => ({ value: String(c.id), label: c.name }))
   }, [userCategories])
 
+  const chartData = useMemo(() => {
+    const data = []
+    let runningIncome = 0
+    let runningExpense = 0
+    
+    const transactionsByDay = new Map<number, { income: number, expense: number }>()
+    currentMonthTransactions.forEach(transaction => {
+      const day = new Date(transaction.date).getDate()
+      const existing = transactionsByDay.get(day) || { income: 0, expense: 0 }
+      if (transaction.type === 1 || transaction.type === 'Expense') {
+        existing.expense += transaction.amount
+      } else {
+        existing.income += transaction.amount
+      }
+      transactionsByDay.set(day, existing)
+    })
+
+    const currentDay = now.getDate()
+    for (let i = 1; i <= currentDay; i++) {
+      const dayData = transactionsByDay.get(i) || { income: 0, expense: 0 }
+      runningIncome += dayData.income
+      runningExpense += dayData.expense
+      data.push({ 
+        name: i.toString(), 
+        income: runningIncome, 
+        expense: runningExpense 
+      })
+    }
+
+    return data
+  }, [currentMonthTransactions, now])
+
   const filteredTransactions = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
     if (!query) {
@@ -447,13 +480,37 @@ export function HomeScreen() {
               <div className="card-header">
                 <h3>{t('home.monthSummary')}</h3>
               </div>
-              <div className="chart-placeholder">
-                <div className="chart-line income" />
-                <div className="chart-line expense" />
-              </div>
-              <div className="chart-legend">
-                <span className="legend-item income">{t('home.revenue')}</span>
-                <span className="legend-item expense">{t('home.expenses')}</span>
+              <div className="chart-container" style={{ width: '100%', height: 200, marginTop: 16 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: 'var(--text-secondary)', fontSize: 12 }} 
+                      dy={10} 
+                    />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: 'var(--surface-color)', borderColor: 'var(--border)', borderRadius: 8, color: 'var(--text-primary)' }}
+                      itemStyle={{ color: 'var(--text-primary)' }}
+                      formatter={(value: number) => showValues ? formatter.format(value) : '••••••'}
+                      labelFormatter={(label) => `${label} ${monthFormatter.format(now)}`}
+                    />
+                    <Area type="monotone" dataKey="income" name={t('home.revenue')} stroke="#10B981" fillOpacity={1} fill="url(#colorIncome)" strokeWidth={2} />
+                    <Area type="monotone" dataKey="expense" name={t('home.expenses')} stroke="#EF4444" fillOpacity={1} fill="url(#colorExpense)" strokeWidth={2} />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
