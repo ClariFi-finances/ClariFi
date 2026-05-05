@@ -36,7 +36,8 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
       setIsLoading(true)
       setError(null)
       try {
-        const data = await apiRequest<Category[]>('/categories')
+        const url = user ? `/categories?userId=${user.id}` : '/categories'
+        const data = await apiRequest<Category[]>(url)
         if (!isActive) return
         setCategories(data)
       } catch (err) {

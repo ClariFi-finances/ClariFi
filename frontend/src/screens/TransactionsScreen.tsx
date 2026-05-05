@@ -64,7 +64,7 @@ export function TransactionsScreen() {
       try {
         const [transactionsData, categoriesData, paymentMethodsData] = await Promise.all([
           apiRequest<ApiTransaction[]>('/transactions', { headers }),
-          apiRequest<ApiCategory[]>('/categories', { headers }),
+          apiRequest<ApiCategory[]>(`/categories?userId=${user.id}`, { headers }),
           apiRequest<ApiPaymentMethod[]>('/paymentmethods', { headers }),
         ])
 

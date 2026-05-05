@@ -79,7 +79,7 @@ export function HomeScreen() {
         const [transactionData, paymentMethodData, categoriesData] = await Promise.all([
           apiRequest<ApiTransaction[]>('/transactions', { headers }),
           apiRequest<ApiPaymentMethod[]>('/paymentmethods', { headers }),
-          apiRequest<ApiCategory[]>('/categories', { headers }),
+          apiRequest<ApiCategory[]>(`/categories?userId=${user.id}`, { headers }),
         ])
 
         if (!isActive) {
