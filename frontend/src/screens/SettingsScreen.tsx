@@ -7,8 +7,7 @@ import './SettingsScreen.css'
 
 export function SettingsScreen() {
   const { user, logout } = useAuth()
-  const { setActiveScreen } = useApp()
-  const [theme, setTheme] = useState('escuro')
+  const { setActiveScreen, theme, setTheme } = useApp()
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
 
   const handleLogout = async () => {

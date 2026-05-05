@@ -60,6 +60,24 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+[data-theme="claro"] {
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #F1F5F9;
+  --bg-input: #FFFFFF;
+  
+  --text: #334155;
+  --text-h: #0F172A;
+  --text-muted: #64748B;
+  --text-caption: #94A3B8;
+
+  --border: rgba(0, 0, 0, 0.1);
+  --border-hover: rgba(255, 215, 0, 0.4);
+  --shadow: rgba(0, 0, 0, 0.05) 0 4px 6px -1px;
+
+  color-scheme: light;
+}
+
 body {
   margin: 0;
   padding: 0;

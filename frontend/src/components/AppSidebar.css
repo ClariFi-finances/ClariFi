@@ -1,8 +1,9 @@
 .app-sidebar {
   height: 100%;
   display: flex;
+  display: flex;
   flex-direction: column;
-  background: #090909;
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 24px;
   padding: 20px 16px;
@@ -89,7 +90,7 @@
 
 .nav-item:not(:disabled):hover {
   color: var(--text-h);
-  background: #131313;
+  background: var(--bg-tertiary);
 }
 
 .nav-item:disabled {
@@ -188,7 +189,7 @@
     align-items: center;
     height: 78px;
     border-top: 1px solid var(--border);
-    background: #070707;
+    background: var(--bg-secondary);
     padding: 0 6px;
   }
 
