@@ -2,10 +2,10 @@ namespace API.Models;
 
 public class User : BaseEntity
 {
+    public string CognitoId { get; private set; }
     public string Name { get; private set; }
     public string Email { get; private set; }
     public string Cpf { get; private set; }
-    public string CognitoId { get; private set; }
 
     private readonly List<PaymentMethod> _paymentMethods = new();
     public IReadOnlyCollection<PaymentMethod> PaymentMethods => _paymentMethods.AsReadOnly();

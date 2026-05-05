@@ -1,170 +1,157 @@
 /* 
 AWS Cognito Hosted UI Customization CSS
-Based on ClariFi Design System v1.0 - Dark Theme
-
-Instructions:
-1. Go to AWS Cognito Console -> User Pools -> [Your User Pool] -> App integration -> Hosted UI customization
-2. Upload your logo
-3. Upload this CSS file to match the ClariFi dark theme
+ClariFi Dark Theme
 */
 
-/* Background & Form Container */
+/* Overall Page Background */
 .background-customizable {
-  background-color: #000000;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-  color: #E5E5E5;
+  background-color: #0A0A0A;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
 }
 
 .banner-customizable {
-  padding: 25px 0px 25px 0px;
+  padding: 30px 0px 10px 0px;
   background-color: transparent;
   text-align: center;
 }
 
 .logo-customizable {
   max-width: 60%;
-  max-height: 30%;
+  max-height: 40%;
 }
 
-/* Typography & Labels */
+/* Uppercase Labels (EMAIL, PASSWORD, FULL NAME, etc.) */
 .label-customizable {
-  font-size: 10px;
-  font-weight: 900;
-  color: #A3A3A3;
+  font-weight: 700;
+  font-size: 11px;
+  color: #A1A1AA;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  margin-bottom: 6px;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
   display: block;
 }
 
+/* Subtitles ("Manage your finances with intelligence") */
 .textDescription-customizable {
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: 5px;
+  padding-bottom: 25px;
   display: block;
-  font-size: 12px;
-  color: #A3A3A3;
+  font-size: 14px;
+  color: #A1A1AA;
+  text-align: center;
 }
 
 .idpDescription-customizable {
   padding-top: 10px;
   padding-bottom: 10px;
   display: block;
-  font-size: 16px;
-  color: #E5E5E5;
+  font-size: 14px;
+  color: #A1A1AA;
+  text-align: center;
 }
 
 .legalText-customizable {
-  color: #808080;
-  font-size: 11px;
+  color: #71717A;
+  font-size: 12px;
 }
 
-/* Primary Action Button (Sign in / Register) */
-.submitButton-customizable {
-  font-size: 14px;
-  font-weight: 700;
-  margin: 16px 0px 10px 0px;
-  padding: 12px;
-  height: auto;
+/* Dark Input Fields */
+.inputField-customizable {
   width: 100%;
-  color: #000000;
-  background: linear-gradient(135deg, #FFD700, #ECAC00);
-  border: none;
-  border-radius: 8px;
+  height: 44px;
+  color: #FFFFFF;
+  background-color: #18181B;
+  border: 1px solid #27272A;
+  border-radius: 6px;
+  padding: 0 12px;
+  font-size: 15px;
+  box-sizing: border-box;
+  margin-bottom: 18px;
+}
+
+/* Focus state with ClariFi Yellow border */
+.inputField-customizable:focus {
+  border-color: #EAB308;
+  outline: 0;
+  background-color: #27272A;
+}
+
+/* Primary Action Button ("Sign In" / "Create Account") */
+.submitButton-customizable {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 10px 0px 20px 0px;
+  height: 44px;
+  width: 100%;
+  color: #FFFFFF;
+  background-color: #27272A;
+  border: 1px solid #3F3F46;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .submitButton-customizable:hover {
-  background: linear-gradient(135deg, #FFD700, #ECAC00);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.3);
-  color: #000000;
+  color: #FFFFFF;
+  background-color: #3F3F46;
 }
 
-/* Secondary Action Button (Social Logins / IDP) */
+/* Secondary Buttons */
 .idpButton-customizable {
-  padding: 12px;
-  height: auto;
+  height: 44px;
   width: 100%;
   text-align: center;
   margin-bottom: 15px;
-  background-color: transparent;
-  color: #FFD700;
-  border: 2px solid rgba(255, 215, 0, 0.2);
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 700;
+  color: #FFFFFF;
+  background-color: #27272A;
+  border: 1px solid #3F3F46;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .idpButton-customizable:hover {
-  background-color: rgba(255, 215, 0, 0.05);
-  border-color: #FFD700;
-  color: #FFD700;
+  color: #FFFFFF;
+  background-color: #3F3F46;
 }
 
 .socialButton-customizable {
-  border-radius: 8px;
-  height: 40px;
+  border-radius: 6px;
+  height: 44px;
   margin-bottom: 15px;
   padding: 1px;
   text-align: left;
   width: 100%;
-  background-color: #1A1A1A;
-  color: #FFFFFF;
-  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Input Fields */
-.inputField-customizable {
-  width: 100%;
-  height: auto;
-  padding: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+/* ClariFi Yellow Links ("Create Account" / "Sign In") */
+.redirect-customizable {
+  text-align: center;
+  color: #EAB308; 
   font-size: 14px;
-  background-color: #1E1E1E;
-  color: #FFFFFF;
-  transition: all 0.2s ease;
-  margin-bottom: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  display: block;
+  margin-top: 8px;
 }
 
-.inputField-customizable:focus {
-  outline: none;
-  border-color: #FFD700;
-  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
-  background-color: #1A1A1A;
+/* Validation and Error Messages */
+.errorMessage-customizable {
+  padding: 10px;
+  font-size: 13px;
+  width: 100%;
+  background: #450A0A;
+  border: 1px solid #DC2626;
+  color: #FECACA;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  box-sizing: border-box;
 }
 
-/* Validation and Errors */
 .passwordCheck-notValid-customizable {
-  color: #EF4444; /* ClariFi Danger */
+  color: #EF4444;
   font-size: 12px;
 }
 
 .passwordCheck-valid-customizable {
-  color: #10B981; /* ClariFi Success */
+  color: #22C55E;
   font-size: 12px;
-}
-
-.errorMessage-customizable {
-  padding: 12px;
-  font-size: 14px;
-  width: 100%;
-  border-radius: 8px;
-  background: #1E1E1E;
-  border: 1px solid #EF4444;
-  color: #EF4444; /* ClariFi Danger */
-  margin-bottom: 12px;
-}
-
-/* Links (e.g. Forgot Password, Sign up redirection) */
-.redirect-customizable {
-  text-align: center;
-  color: #ECAC00;
-  margin-top: 10px;
-  font-size: 14px;
-  text-decoration: none;
-  cursor: pointer;
 }

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '@/context/useAuth'
 import { useI18n } from '@/hooks/useI18n'
 import { validateName, validateEmail, showConfirmDialog, showErrorAlert, showSuccessAlert, showLoadingAlert, hideAlert } from '@/utils/validation'
-import './AuthScreens.css'
+import './ProfileScreen.css'
 
 interface ProfileScreenProps {
   onLogout: () => void
