@@ -37,7 +37,7 @@ interface ApiPaymentMethod {
 }
 
 export function HomeScreen() {
-  const { setActiveScreen } = useApp()
+  const { setActiveScreen, isNewTransactionModalOpen, setIsNewTransactionModalOpen, transactionModalMode, setTransactionModalMode } = useApp()
   const { user, token } = useAuth()
   const { t, language } = useI18n()
   const [showValues, setShowValues] = useState(true)
@@ -139,6 +139,14 @@ export function HomeScreen() {
       document.removeEventListener('keydown', handleKey)
     }
   }, [isQuickMenuOpen])
+
+  useEffect(() => {
+    if (isNewTransactionModalOpen) {
+      setIsModalOpen(true)
+      setModalMode(transactionModalMode)
+      setIsNewTransactionModalOpen(false)
+    }
+  }, [isNewTransactionModalOpen, setIsNewTransactionModalOpen, transactionModalMode])
 
   const userTransactions = useMemo(() => {
     if (!user) {

@@ -9,6 +9,10 @@ export interface AppContextType {
   setActiveScreen: (screen: Screen) => void
   theme: Theme
   setTheme: (theme: Theme) => void
+  isNewTransactionModalOpen: boolean
+  setIsNewTransactionModalOpen: (open: boolean) => void
+  transactionModalMode: 'income' | 'expense'
+  setTransactionModalMode: (mode: 'income' | 'expense') => void
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -16,6 +20,8 @@ const AppContext = createContext<AppContextType | undefined>(undefined)
 export function AppProvider({ children }: { children: ReactNode }) {
   const [activeScreen, setActiveScreen] = useState<Screen>('login')
   const [theme, setThemeState] = useState<Theme>('escuro')
+  const [isNewTransactionModalOpen, setIsNewTransactionModalOpen] = useState(false)
+  const [transactionModalMode, setTransactionModalMode] = useState<'income' | 'expense'>('expense')
 
   const applyThemeToDOM = (t: Theme) => {
     if (t === 'sistema') {
@@ -55,7 +61,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AppContext.Provider value={{ activeScreen, setActiveScreen, theme, setTheme }}>
+    <AppContext.Provider value={{ activeScreen, setActiveScreen, theme, setTheme, isNewTransactionModalOpen, setIsNewTransactionModalOpen, transactionModalMode, setTransactionModalMode }}>
       {children}
     </AppContext.Provider>
   )

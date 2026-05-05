@@ -243,4 +243,114 @@
   .mobile-action-btn:hover {
     filter: brightness(1.03);
   }
+
+  .mobile-quick-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 30;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 90px;
+  }
+
+  .mobile-quick-menu {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 12px;
+    width: calc(100% - 32px);
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
 }
+
+/* Sidebar Quick Menu Styles */
+.sidebar-action-container {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.new-transaction-btn.active {
+  background: var(--accent-gold);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.sidebar-quick-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: var(--shadow);
+  z-index: 50;
+  animation: fadeInDown 0.25s ease;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.quick-menu-item {
+  border: none;
+  background: transparent;
+  color: var(--text-h);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.quick-menu-item:hover:not(:disabled) {
+  background: var(--bg-tertiary);
+}
+
+.quick-menu-item.danger {
+  color: var(--danger);
+}
+
+.quick-menu-item:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.quick-menu-icon {
+  font-size: 18px;
+}
+
+.quick-menu-hint {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+  background: var(--bg-tertiary);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
