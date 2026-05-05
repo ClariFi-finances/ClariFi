@@ -5,7 +5,7 @@ using MediatR;
 namespace API.Features.Categories;
 
 public record AddCategoryCommand(string Name, string? Icon, string? Color, int UserId) : IRequest<Category>;
-public record GetCategoriesQuery() : IRequest<IEnumerable<Category>>;
+public record GetCategoriesQuery(int? UserId = null) : IRequest<IEnumerable<Category>>;
 public record UpdateCategoryCommand(int Id, string Name, string? Icon, string? Color) : IRequest<bool>;
 public record RemoveCategoryCommand(int Id) : IRequest<bool>;
 
@@ -25,7 +25,14 @@ public class CategoryHandlers(IRepository<Category> repository) :
     }
 
     public async Task<IEnumerable<Category>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
-        => await repository.GetAllAsync(cancellationToken);
+    {
+        var categories = await repository.GetAllAsync(cancellationToken);
+        if (request.UserId.HasValue)
+        {
+            categories = categories.Where(c => c.UserId == request.UserId.Value);
+        }
+        return categories;
+    }
 
     public async Task<bool> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
     {

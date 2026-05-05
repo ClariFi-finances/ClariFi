@@ -15,8 +15,8 @@ public static class CategoryEndpoints
             return Results.Created($"/api/categories/{category.Id}", category);
         });
 
-        group.MapGet("/", async ([FromServices] IMediator mediator) =>
-            Results.Ok(await mediator.Send(new GetCategoriesQuery())));
+        group.MapGet("/", async ([FromQuery] int? userId, [FromServices] IMediator mediator) =>
+            Results.Ok(await mediator.Send(new GetCategoriesQuery(userId))));
 
         group.MapPut("/{id:int}/update", async (int id, [FromBody] UpdateCategoryDto dto, [FromServices] IMediator mediator) =>
             await mediator.Send(new UpdateCategoryCommand(id, dto.Name, dto.Icon, dto.Color)) 

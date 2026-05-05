@@ -3,7 +3,7 @@ import { ArrowDownCircle, ArrowUpCircle, Bell, Camera, Plus } from 'lucide-react
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useApp } from '@/context/useApp'
 import { useAuth } from '@/context/useAuth'
-import { API_BASE_URL } from '@/config/api'
+import { apiRequest, getErrorMessage } from '@/utils/apiClient'
 import { useI18n } from '@/hooks/useI18n'
 import { TransactionModal } from '@/components/TransactionModal'
 import './HomeScreen.css'
@@ -71,43 +71,40 @@ export function HomeScreen() {
     if (!user) {
       return
     }
-
-    const controller = new AbortController()
+    let isActive = true
     const loadData = async () => {
       setIsLoading(true)
       setError(null)
       try {
-        const [transactionsResponse, paymentMethodsResponse, categoriesResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/transactions`, { signal: controller.signal, headers }),
-          fetch(`${API_BASE_URL}/paymentmethods`, { signal: controller.signal, headers }),
-          fetch(`${API_BASE_URL}/categories`, { signal: controller.signal, headers }),
+        const [transactionData, paymentMethodData, categoriesData] = await Promise.all([
+          apiRequest<ApiTransaction[]>('/transactions', { headers }),
+          apiRequest<ApiPaymentMethod[]>('/paymentmethods', { headers }),
+          apiRequest<ApiCategory[]>(`/categories?userId=${user.id}`, { headers }),
         ])
 
-        if (!transactionsResponse.ok || !paymentMethodsResponse.ok || !categoriesResponse.ok) {
-          throw new Error(t('home.loadError'))
+        if (!isActive) {
+          return
         }
-
-        const transactionData = await transactionsResponse.json()
-        const paymentMethodData = await paymentMethodsResponse.json()
-        const categoriesData = await categoriesResponse.json()
 
         setTransactions(transactionData)
         setPaymentMethods(paymentMethodData)
         setCategories(categoriesData)
       } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
+        if (!isActive) {
           return
         }
-        setError(err instanceof Error ? err.message : t('home.loadError'))
+        setError(getErrorMessage(err, t('home.loadError')))
       } finally {
-        setIsLoading(false)
+        if (isActive) {
+          setIsLoading(false)
+        }
       }
     }
 
     loadData()
 
     return () => {
-      controller.abort()
+      isActive = false
     }
   }, [headers, t, user])
 
@@ -333,10 +330,10 @@ export function HomeScreen() {
       const parsedCategory = Number.isNaN(Number(payload.category))
         ? payload.category
         : Number(payload.category)
-      const response = await fetch(`${API_BASE_URL}/transactions/log`, {
+      const newTransaction = await apiRequest<ApiTransaction>('/transactions/log', {
         method: 'POST',
         headers,
-        body: JSON.stringify({
+        body: {
           title: payload.title,
           description: payload.description,
           amount: payload.amount,
@@ -346,18 +343,12 @@ export function HomeScreen() {
           userId: user.id,
           paymentMethodId: payload.paymentMethodId,
           installmentInfo: payload.installmentInfo ?? null,
-        }),
+        },
       })
-
-      if (!response.ok) {
-        throw new Error(t('home.saveError'))
-      }
-
-      const newTransaction = await response.json()
       setTransactions(prev => [newTransaction, ...prev])
       setIsModalOpen(false)
     } catch (err) {
-      setModalError(err instanceof Error ? err.message : t('home.saveError'))
+      setModalError(getErrorMessage(err, t('home.saveError')))
     } finally {
       setIsSubmitting(false)
     }
@@ -504,7 +495,11 @@ export function HomeScreen() {
                     <Tooltip 
                       contentStyle={{ backgroundColor: 'var(--surface-color)', borderColor: 'var(--border)', borderRadius: 8, color: 'var(--text-primary)' }}
                       itemStyle={{ color: 'var(--text-primary)' }}
-                      formatter={(value: number) => showValues ? formatter.format(value) : '••••••'}
+                      formatter={(value) => {
+                        if (!showValues) return '••••••'
+                        const numericValue = typeof value === 'number' ? value : Number(value ?? 0)
+                        return formatter.format(numericValue)
+                      }}
                       labelFormatter={(label) => `${label} ${monthFormatter.format(now)}`}
                     />
                     <Area type="monotone" dataKey="income" name={t('home.revenue')} stroke="#10B981" fillOpacity={1} fill="url(#colorIncome)" strokeWidth={2} />
