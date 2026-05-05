@@ -1,12 +1,11 @@
-
 namespace API.Models;
 
 public class User : BaseEntity
 {
-    public  string Name { get; private set; }
+    public string Name { get; private set; }
     public string Email { get; private set; }
-    public string Password { get; private set; }
     public string Cpf { get; private set; }
+    public string CognitoId { get; private set; }
 
     private readonly List<PaymentMethod> _paymentMethods = new();
     public IReadOnlyCollection<PaymentMethod> PaymentMethods => _paymentMethods.AsReadOnly();
@@ -19,16 +18,16 @@ public class User : BaseEntity
     {
         Name = null!;
         Email = null!;
-        Password = null!;
         Cpf = null!;
+        CognitoId = null!;
     } 
 
-    public User(string name, string email, string password, string cpf)
+    public User(string name, string email, string cpf, string cognitoId)
     {
         Name = name;
         Email = email;
-        Password = password;
         Cpf = cpf;
+        CognitoId = cognitoId;
     }
 
     public void UpdateProfile(string name, string email, string cpf)

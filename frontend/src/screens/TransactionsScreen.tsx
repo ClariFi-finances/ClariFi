@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowDownCircle, ArrowUpCircle, Filter, Search, Trash2, Calendar, ChevronRight } from 'lucide-react'
+import { ArrowDownCircle, ArrowUpCircle, Search, Trash2 } from 'lucide-react'
 import { useAuth } from '@/context/useAuth'
 import { API_BASE_URL } from '@/config/api'
 import { useI18n } from '@/hooks/useI18n'
@@ -42,7 +42,7 @@ export function TransactionsScreen() {
   const [categories, setCategories] = useState<ApiCategory[]>([])
   const [paymentMethods, setPaymentMethods] = useState<ApiPaymentMethod[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [, setError] = useState<string | null>(null)
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('')

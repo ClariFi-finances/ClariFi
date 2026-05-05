@@ -1,8 +1,8 @@
-import { createContext, useState, useEffect, type ReactNode } from 'react'
-import { API_BASE_URL } from '@/config/api'
+import { createContext, type ReactNode } from 'react'
+import { useAuth as useCognitoAuth } from 'react-oidc-context'
 
 export interface User {
-  id: number
+  id: number | string
   name: string
   email: string
   cpf: string
@@ -13,189 +13,68 @@ export interface AuthContextType {
   token: string | null
   isLoading: boolean
   error: string | null
-  login: (email: string, password: string) => Promise<void>
-  register: (name: string, email: string, password: string, cpf: string) => Promise<void>
+  login: () => Promise<void>
+  register: () => Promise<void>
   logout: () => void
   clearError: () => void
-  updateProfile: (id: number, name: string, email: string, cpf: string) => Promise<void>
+  updateProfile: (id: number | string, name: string, email: string, cpf: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const cognitoAuth = useCognitoAuth()
 
-  // Load user from localStorage on mount
-  useEffect(() => {
-    const savedToken = localStorage.getItem('auth_token')
-    const savedUser = localStorage.getItem('auth_user')
-    if (savedToken && savedUser) {
-      setToken(savedToken)
-      setUser(JSON.parse(savedUser))
-    }
-  }, [])
-
-  const login = async (email: string, password: string) => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      })
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error('Invalid credentials')
-        }
-        throw new Error('Failed to login')
-      }
-
-      const userData = await response.json()
-      const token = `token_${userData.id}_${Date.now()}`
-
-      setToken(token)
-      setUser({
-        id: userData.id,
-        name: userData.name,
-        email: userData.email,
-        cpf: userData.cpf,
-      })
-      localStorage.setItem('auth_token', token)
-      localStorage.setItem('auth_user', JSON.stringify({
-        id: userData.id,
-        name: userData.name,
-        email: userData.email,
-        cpf: userData.cpf,
-      }))
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Login failed'
-      setError(errorMessage)
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
+  const login = async () => {
+    await cognitoAuth.signinRedirect()
   }
 
-  const register = async (
-    name: string,
-    email: string,
-    password: string,
-    cpf: string
-  ) => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          cpf,
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to register')
-      }
-
-      const newUser = await response.json()
-      const token = `token_${newUser.id}_${Date.now()}`
-
-      setToken(token)
-      setUser({
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        cpf: newUser.cpf,
-      })
-      localStorage.setItem('auth_token', token)
-      localStorage.setItem('auth_user', JSON.stringify({
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        cpf: newUser.cpf,
-      }))
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Registration failed'
-      setError(errorMessage)
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
+  const register = async () => {
+    // You can customize the redirect for signup, or let the user click sign up on the hosted UI
+    await cognitoAuth.signinRedirect()
   }
 
-  const updateProfile = async (id: number, name: string, email: string, cpf: string) => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const response = await fetch(`${API_BASE_URL}/users/${id}/update-profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          cpf,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to update profile')
-      }
-
-      const updatedUser = {
-        id,
-        name,
-        email,
-        cpf,
-      }
-
-      setUser(updatedUser)
-      localStorage.setItem('auth_user', JSON.stringify(updatedUser))
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Profile update failed'
-      setError(errorMessage)
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
+  const updateProfile = async (id: number | string, name: string, email: string, cpf: string) => {
+    // Stub: Profile updates should be done via Cognito API or your backend
+    console.log('Update profile not natively supported strictly through OIDC SDK alone:', { id, name, email, cpf })
   }
 
   const logout = () => {
-    setUser(null)
-    setToken(null)
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('auth_user')
+    if (cognitoAuth.isAuthenticated) {
+      const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+      const logoutUri = import.meta.env.VITE_HTTP_COGNITO_REDIRECT_URI;
+      const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
+      
+      cognitoAuth.removeUser();
+      window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+    }
   }
 
   const clearError = () => {
-    setError(null)
+    // Clear error not directly supported by useAuth in this context without internal reset, but we can clear local state if any.
+    cognitoAuth.removeUser();
   }
+
+  const activeUser: User | null = cognitoAuth.isAuthenticated 
+    ? {
+        id: cognitoAuth.user?.profile.sub || '',
+        name: cognitoAuth.user?.profile.name || cognitoAuth.user?.profile.email?.split('@')[0] || 'User',
+        email: cognitoAuth.user?.profile.email || '',
+        cpf: '00000000000', // Default dummy cpf as it's not provided by Cognito
+      }
+    : null
+
+  const activeToken = cognitoAuth.isAuthenticated ? cognitoAuth.user?.access_token || null : null
+  const activeIsLoading = cognitoAuth.isLoading || cognitoAuth.activeNavigator === "signinRedirect"
+  const activeError = cognitoAuth.error ? cognitoAuth.error.message : null
 
   return (
     <AuthContext.Provider
       value={{
-        user,
-        token,
-        isLoading,
-        error,
+        user: activeUser,
+        token: activeToken,
+        isLoading: activeIsLoading,
+        error: activeError,
         login,
         register,
         logout,

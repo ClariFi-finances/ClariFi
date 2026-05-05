@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowDownCircle, ArrowUpCircle, Bell, Camera, Plus } from 'lucide-react'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useApp } from '@/context/useApp'
 import { useAuth } from '@/context/useAuth'
 import { API_BASE_URL } from '@/config/api'
@@ -504,7 +504,7 @@ export function HomeScreen() {
                     <Tooltip 
                       contentStyle={{ backgroundColor: 'var(--surface-color)', borderColor: 'var(--border)', borderRadius: 8, color: 'var(--text-primary)' }}
                       itemStyle={{ color: 'var(--text-primary)' }}
-                      formatter={(value: number) => showValues ? formatter.format(value) : '••••••'}
+                      formatter={(value: any) => showValues ? formatter.format(value as number) : '••••••'}
                       labelFormatter={(label) => `${label} ${monthFormatter.format(now)}`}
                     />
                     <Area type="monotone" dataKey="income" name={t('home.revenue')} stroke="#10B981" fillOpacity={1} fill="url(#colorIncome)" strokeWidth={2} />

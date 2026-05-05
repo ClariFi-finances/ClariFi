@@ -17,9 +17,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
             entity.Property(e => e.Email).IsRequired().HasMaxLength(255);
-            entity.Property(e => e.Password).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.CognitoId).IsRequired().HasMaxLength(255);
             entity.Property(e => e.Cpf).IsRequired().HasMaxLength(11);
             entity.HasIndex(e => e.Cpf).IsUnique();
+            entity.HasIndex(e => e.CognitoId).IsUnique();
         });
 
         modelBuilder.Entity<API.Models.PaymentMethod>(entity =>

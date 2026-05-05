@@ -23,8 +23,8 @@ public static class DataSeeder
                 .CustomInstantiator(f => new User(
                     f.Person.FullName,
                     f.Person.Email,
-                    f.Internet.Password(8, false, "", "Pass123!"),
-                    f.Random.Replace("###########") // Fake 11 digit CPF
+                    f.Random.Replace("###########"), // Fake 11 digit CPF
+                    f.Random.Guid().ToString() // Fake CognitoId
                 ));
 
             var fakeUsers = userFaker.Generate(5);
@@ -99,4 +99,3 @@ public static class DataSeeder
         }
     }
 }
-
