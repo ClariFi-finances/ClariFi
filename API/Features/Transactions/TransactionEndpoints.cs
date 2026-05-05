@@ -2,7 +2,7 @@ using MediatR;
 
 namespace API.Features.Transactions;
 
-public record UpdateTransactionDto(string Title, string Description, decimal Amount, TransactionCategory Category, DateTime Date);
+public record UpdateTransactionDto(string Title, string Description, decimal Amount, int CategoryId, DateTime Date);
 
 public static class TransactionEndpoints
 {
@@ -18,7 +18,7 @@ public static class TransactionEndpoints
             Results.Ok(await mediator.Send(new GetTransactionsQuery())));
 
         group.MapPut("/{id:int}/adjust", async (int id, [FromBody] UpdateTransactionDto dto, [FromServices] IMediator mediator) =>
-             await mediator.Send(new UpdateTransactionCommand(id, dto.Title, dto.Description, dto.Amount, dto.Category, dto.Date))
+             await mediator.Send(new UpdateTransactionCommand(id, dto.Title, dto.Description, dto.Amount, dto.CategoryId, dto.Date))
                  ? Results.NoContent() 
                  : Results.NotFound());
         

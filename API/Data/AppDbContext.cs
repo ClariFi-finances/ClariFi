@@ -36,7 +36,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.Amount).IsRequired();
             entity.Property(e => e.Date).IsRequired();
             entity.Property(e => e.Type).IsRequired();
-            entity.Property(e => e.Category).IsRequired();
+            entity.Property(e => e.CategoryId).IsRequired();
             entity.Property(e => e.InstallmentInfo).HasMaxLength(255);
             entity.Property(e => e.UserId).IsRequired();
             entity.Property(e => e.PaymentMethodId).IsRequired();

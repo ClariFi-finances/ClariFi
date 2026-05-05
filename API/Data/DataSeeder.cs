@@ -51,12 +51,32 @@ public static class DataSeeder
             context.Set<PaymentMethod>().AddRange(paymentMethods);
             await context.SaveChangesAsync();
 
-            // 3. Generate Fake Transactions matching Users to their own PaymentMethods
+            // 3. Generate Fake Categories for each User
+            var categories = new List<Category>();
+            var categoryNames = new[] { "Health", "Tasks", "Taxes", "Leisure", "Food", "Reserve", "Fixed", "Bills" };
+            
+            foreach (var user in fakeUsers)
+            {
+                var categoryFaker = new Faker<Category>()
+                    .CustomInstantiator(f => new Category(
+                        f.PickRandom(categoryNames),
+                        f.Random.Word(), // icon
+                        f.Internet.Color(), // color
+                        user.Id
+                    ));
+                
+                categories.AddRange(categoryFaker.Generate(faker.Random.Int(3, 8)));
+            }
+            context.Set<Category>().AddRange(categories);
+            await context.SaveChangesAsync();
+
+            // 4. Generate Fake Transactions matching Users to their own PaymentMethods and Categories
             var transactions = new List<Transaction>();
             
             foreach (var user in fakeUsers)
             {
                 var userPaymentMethods = paymentMethods.Where(pm => pm.UserId == user.Id).ToList();
+                var userCategories = categories.Where(c => c.UserId == user.Id).ToList();
                 
                 var transactionFaker = new Faker<Transaction>()
                     .CustomInstantiator(f => new Transaction(
@@ -65,7 +85,7 @@ public static class DataSeeder
                         Math.Round(f.Random.Decimal(10, 1000), 2),
                         f.Date.Past(1).ToUniversalTime(), // Transactions over the last year
                         f.PickRandom<TransactionType>(),
-                        f.PickRandom<TransactionCategory>(),
+                        f.PickRandom(userCategories).Id,
                         user.Id,
                         f.PickRandom(userPaymentMethods).Id,
                         f.Random.Bool(0.2f) ? $"{f.Random.Int(2,12)}x" : null

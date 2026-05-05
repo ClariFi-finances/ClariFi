@@ -14,10 +14,18 @@ interface ApiTransaction {
   amount: number
   date: string
   type: number | string
-  category: number | string
+  categoryId: number
   userId: number
   paymentMethodId: number
   installmentInfo?: string | null
+}
+
+interface ApiCategory {
+  id: number
+  name: string
+  icon?: string | null
+  color?: string | null
+  userId: number
 }
 
 interface ApiPaymentMethod {
@@ -36,6 +44,7 @@ export function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('')
   const [transactions, setTransactions] = useState<ApiTransaction[]>([])
   const [paymentMethods, setPaymentMethods] = useState<ApiPaymentMethod[]>([])
+  const [categories, setCategories] = useState<ApiCategory[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -67,20 +76,23 @@ export function HomeScreen() {
       setIsLoading(true)
       setError(null)
       try {
-        const [transactionsResponse, paymentMethodsResponse] = await Promise.all([
+        const [transactionsResponse, paymentMethodsResponse, categoriesResponse] = await Promise.all([
           fetch(`${API_BASE_URL}/transactions`, { signal: controller.signal, headers }),
           fetch(`${API_BASE_URL}/paymentmethods`, { signal: controller.signal, headers }),
+          fetch(`${API_BASE_URL}/categories`, { signal: controller.signal, headers }),
         ])
 
-        if (!transactionsResponse.ok || !paymentMethodsResponse.ok) {
+        if (!transactionsResponse.ok || !paymentMethodsResponse.ok || !categoriesResponse.ok) {
           throw new Error(t('home.loadError'))
         }
 
         const transactionData = await transactionsResponse.json()
         const paymentMethodData = await paymentMethodsResponse.json()
+        const categoriesData = await categoriesResponse.json()
 
         setTransactions(transactionData)
         setPaymentMethods(paymentMethodData)
+        setCategories(categoriesData)
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {
           return
@@ -144,6 +156,13 @@ export function HomeScreen() {
     return paymentMethods.filter(method => method.userId === user.id)
   }, [paymentMethods, user])
 
+  const userCategories = useMemo(() => {
+    if (!user) {
+      return []
+    }
+    return categories.filter(category => category.userId === user.id)
+  }, [categories, user])
+
   const sortedTransactions = useMemo(() => {
     return [...userTransactions].sort((a, b) =>
       new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -195,8 +214,8 @@ export function HomeScreen() {
     const grouped = currentMonthTransactions
       .filter(transaction => transaction.type === 1 || transaction.type === 'Expense')
       .reduce<Record<string, number>>((acc, transaction) => {
-        const key = String(transaction.category)
-        acc[key] = (acc[key] ?? 0) + transaction.amount
+        const categoryName = userCategories.find(c => c.id === transaction.categoryId)?.name ?? String(transaction.categoryId)
+        acc[categoryName] = (acc[categoryName] ?? 0) + transaction.amount
         return acc
       }, {})
 
@@ -207,16 +226,8 @@ export function HomeScreen() {
   }, [currentMonthTransactions])
 
   const availableCategories = useMemo(() => {
-    const unique = new Map<string, string>()
-    userTransactions.forEach(transaction => {
-      const categoryValue = String(transaction.category)
-      if (!unique.has(categoryValue)) {
-        unique.set(categoryValue, categoryValue)
-      }
-    })
-
-    return Array.from(unique.entries()).map(([value, label]) => ({ value, label }))
-  }, [userTransactions])
+    return userCategories.map(c => ({ value: String(c.id), label: c.name }))
+  }, [userCategories])
 
   const filteredTransactions = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
@@ -224,10 +235,11 @@ export function HomeScreen() {
       return sortedTransactions
     }
 
-    return sortedTransactions.filter(transaction =>
-      transaction.title.toLowerCase().includes(query) ||
-      String(transaction.category).toLowerCase().includes(query),
-    )
+    return sortedTransactions.filter(transaction => {
+      const categoryName = userCategories.find(c => c.id === transaction.categoryId)?.name ?? String(transaction.categoryId)
+      return transaction.title.toLowerCase().includes(query) ||
+      categoryName.toLowerCase().includes(query)
+    })
   }, [sortedTransactions, searchQuery])
 
   const formatter = useMemo(() => {
@@ -297,7 +309,7 @@ export function HomeScreen() {
           amount: payload.amount,
           date: new Date(payload.date).toISOString(),
           type: modalMode === 'income' ? 0 : 1,
-          category: parsedCategory,
+          categoryId: parsedCategory,
           userId: user.id,
           paymentMethodId: payload.paymentMethodId,
           installmentInfo: payload.installmentInfo ?? null,
@@ -506,7 +518,7 @@ export function HomeScreen() {
                     <div key={transaction.id} className="transaction-row">
                       <div className="transaction-meta">
                         <p className="transaction-title">{transaction.title}</p>
-                        <p className="transaction-category">{transaction.category}</p>
+                        <p className="transaction-category">{userCategories.find(c => c.id === transaction.categoryId)?.name ?? transaction.categoryId}</p>
                       </div>
                       <p className={`transaction-amount ${transaction.type === 1 || transaction.type === 'Expense' ? 'expense' : 'income'}`}>
                         {transaction.type === 1 || transaction.type === 'Expense' ? '-' : '+'}
@@ -548,7 +560,7 @@ export function HomeScreen() {
                   <div key={transaction.id} className="transaction-row">
                     <div className="transaction-meta">
                       <p className="transaction-title">{transaction.title}</p>
-                      <p className="transaction-category">{transaction.category}</p>
+                      <p className="transaction-category">{userCategories.find(c => c.id === transaction.categoryId)?.name ?? transaction.categoryId}</p>
                     </div>
                     <p className={`transaction-amount ${transaction.type === 1 || transaction.type === 'Expense' ? 'expense' : 'income'}`}>
                       {transaction.type === 1 || transaction.type === 'Expense' ? '-' : '+'}
