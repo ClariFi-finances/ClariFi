@@ -3,9 +3,9 @@ using MediatR;
 
 namespace API.Features.Users;
 
-public record RegisterUserCommand(string Name, string Email, string Password, string Cpf) : IRequest<User>;
-public record LoginUserCommand(string Email, string Password) : IRequest<User?>;
-public record UpdateUserProfileCommand(int Id, string Name, string Email, string Cpf) : IRequest<bool>;
+public record RegisterUserCommand(string CognitoId) : IRequest<User>;
+public record LoginUserCommand(string CognitoId) : IRequest<User?>;
+public record UpdateUserProfileCommand(int Id, string CognitoId) : IRequest<bool>;
 public record GetAllUsersQuery() : IRequest<IEnumerable<User>>;
 
 public class UserHandlers(
@@ -23,7 +23,7 @@ public class UserHandlers(
 
     public async Task<User> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
-        var user = new User(request.Name, request.Email, request.Password, request.Cpf);
+        var user = new User(request.CognitoId);
         await repository.AddAsync(user, cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
 
@@ -63,15 +63,14 @@ public class UserHandlers(
         var users = await repository.GetAllAsync(cancellationToken);
 
         return users.FirstOrDefault(user =>
-            user.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase) &&
-            user.Password == request.Password);
+            user.CognitoId == request.CognitoId);
     }
-
+    
     public async Task<bool> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)
     {
         if (await repository.GetByIdAsync(request.Id, cancellationToken) is not { } user) return false;
 
-        user.UpdateProfile(request.Name, request.Email, request.Cpf);
+        user.UpdateCognitoId(request.CognitoId);
         await repository.UpdateAsync(user);
         await repository.SaveChangesAsync(cancellationToken);
         return true;

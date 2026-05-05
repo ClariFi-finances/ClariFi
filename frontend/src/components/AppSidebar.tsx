@@ -10,7 +10,7 @@ type NavItem = {
   id: string
   label: string
   icon: string
-  targetScreen?: 'home' | 'profile' | 'settings'
+  targetScreen?: 'home' | 'profile' | 'settings' | 'transactions'
   disabled?: boolean
 }
 

@@ -1,8 +1,11 @@
 import { createContext, useState, useEffect, type ReactNode } from 'react'
+import { useAuth as useCognitoAuth } from 'react-oidc-context'
+import { API_BASE_URL } from '@/config/api'
 import { apiRequest, ApiError, getErrorMessage } from '@/utils/apiClient'
 
 export interface User {
-  id: number
+  id: number | string
+  cognitoId?: string
   name: string
   email: string
   cpf: string
@@ -13,165 +16,116 @@ export interface AuthContextType {
   token: string | null
   isLoading: boolean
   error: string | null
-  login: (email: string, password: string) => Promise<void>
-  register: (name: string, email: string, password: string, cpf: string) => Promise<void>
+  login: () => Promise<void>
+  register: () => Promise<void>
   logout: () => void
   clearError: () => void
-  updateProfile: (id: number, name: string, email: string, cpf: string) => Promise<void>
+  updateProfile: (id: number | string, name: string, email: string, cpf: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const cognitoAuth = useCognitoAuth()
+  const [internalUser, setInternalUser] = useState<User | null>(null)
+  const [internalLoading, setInternalLoading] = useState(true)
 
-  // Load user from localStorage on mount
   useEffect(() => {
-    const savedToken = localStorage.getItem('auth_token')
-    const savedUser = localStorage.getItem('auth_user')
-    if (savedToken && savedUser) {
-      setToken(savedToken)
-      setUser(JSON.parse(savedUser))
-    }
-  }, [])
+    async function syncBackendUser() {
+      if (cognitoAuth.isAuthenticated && cognitoAuth.user?.profile.sub) {
+        try {
+          const cognitoId = cognitoAuth.user.profile.sub
+          const email = cognitoAuth.user.profile.email || ''
+          const name = cognitoAuth.user.profile.name || email.split('@')[0] || 'User'
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const userData = await apiRequest<User>('/users/login', {
-        method: 'POST',
-        body: {
-          email,
-          password,
-        },
-      })
-      const token = `token_${userData.id}_${Date.now()}`
+          // Try to login to get internal user ID
+          let userRes = await fetch(`${API_BASE_URL}/users/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${cognitoAuth.user.access_token}`
+            },
+            body: JSON.stringify({ cognitoId })
+          })
 
-      setToken(token)
-      setUser({
-        id: userData.id,
-        name: userData.name,
-        email: userData.email,
-        cpf: userData.cpf,
-      })
-      localStorage.setItem('auth_token', token)
-      localStorage.setItem('auth_user', JSON.stringify({
-        id: userData.id,
-        name: userData.name,
-        email: userData.email,
-        cpf: userData.cpf,
-      }))
-    } catch (err) {
-      const errorMessage =
-        err instanceof ApiError && err.status === 401
-          ? 'Invalid credentials'
-          : getErrorMessage(err, 'Login failed')
-      setError(errorMessage)
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
-  }
+          if (userRes.status === 401 || userRes.status === 404) {
+            // User doesn't exist, register them
+            userRes = await fetch(`${API_BASE_URL}/users/register`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${cognitoAuth.user.access_token}`
+              },
+              body: JSON.stringify({ cognitoId })
+            })
+          }
 
-  const register = async (
-    name: string,
-    email: string,
-    password: string,
-    cpf: string
-  ) => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const newUser = await apiRequest<User>('/users/register', {
-        method: 'POST',
-        body: {
-          name,
-          email,
-          password,
-          cpf,
-        },
-      })
-      const token = `token_${newUser.id}_${Date.now()}`
-
-      setToken(token)
-      setUser({
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        cpf: newUser.cpf,
-      })
-      localStorage.setItem('auth_token', token)
-      localStorage.setItem('auth_user', JSON.stringify({
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        cpf: newUser.cpf,
-      }))
-    } catch (err) {
-      const errorMessage = getErrorMessage(err, 'Registration failed')
-      setError(errorMessage)
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const updateProfile = async (id: number, name: string, email: string, cpf: string) => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      await apiRequest<void>(`/users/${id}/update-profile`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: {
-          name,
-          email,
-          cpf,
-        },
-      })
-
-      const updatedUser = {
-        id,
-        name,
-        email,
-        cpf,
+          if (userRes.ok) {
+            const data = await userRes.json()
+            setInternalUser({
+              id: data.id,
+              cognitoId: data.cognitoId,
+              name,
+              email,
+              cpf: '00000000000'
+            })
+          }
+        } catch (e) {
+          console.error('Failed to sync backend user', e)
+        }
+      } else {
+        setInternalUser(null)
       }
-
-      setUser(updatedUser)
-      localStorage.setItem('auth_user', JSON.stringify(updatedUser))
-    } catch (err) {
-      const errorMessage = getErrorMessage(err, 'Profile update failed')
-      setError(errorMessage)
-      throw err
-    } finally {
-      setIsLoading(false)
+      setInternalLoading(false)
     }
+
+    if (!cognitoAuth.isLoading) {
+      syncBackendUser()
+    }
+  }, [cognitoAuth.isAuthenticated, cognitoAuth.isLoading, cognitoAuth.user])
+
+  const login = async () => {
+    await cognitoAuth.signinRedirect()
+  }
+
+  const register = async () => {
+    // You can customize the redirect for signup, or let the user click sign up on the hosted UI
+    await cognitoAuth.signinRedirect()
+  }
+
+  const updateProfile = async (id: number | string, name: string, email: string, cpf: string) => {
+    // Stub: Profile updates should be done via Cognito API or your backend
+    console.log('Update profile not natively supported strictly through OIDC SDK alone:', { id, name, email, cpf })
   }
 
   const logout = () => {
-    setUser(null)
-    setToken(null)
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('auth_user')
+    if (cognitoAuth.isAuthenticated) {
+      const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+      const logoutUri = import.meta.env.VITE_HTTP_COGNITO_REDIRECT_URI;
+      const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
+      
+      cognitoAuth.removeUser();
+      window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+    }
   }
 
   const clearError = () => {
-    setError(null)
+    // Clear error not directly supported by useAuth in this context without internal reset, but we can clear local state if any.
+    cognitoAuth.removeUser();
   }
+
+  const activeUser: User | null = internalUser
+  const activeToken = cognitoAuth.isAuthenticated ? cognitoAuth.user?.access_token || null : null
+  const activeIsLoading = cognitoAuth.isLoading || cognitoAuth.activeNavigator === "signinRedirect" || internalLoading
+  const activeError = cognitoAuth.error ? cognitoAuth.error.message : null
 
   return (
     <AuthContext.Provider
       value={{
-        user,
-        token,
-        isLoading,
-        error,
+        user: activeUser,
+        token: activeToken,
+        isLoading: activeIsLoading,
+        error: activeError,
         login,
         register,
         logout,

@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowDownCircle, ArrowUpCircle, Bell, Camera, Plus } from 'lucide-react'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useApp } from '@/context/useApp'
 import { useAuth } from '@/context/useAuth'
-import { apiRequest, getErrorMessage } from '@/utils/apiClient'
+import { API_BASE_URL, getAuthHeaders } from '@/config/api'
 import { useI18n } from '@/hooks/useI18n'
 import { TransactionModal } from '@/components/TransactionModal'
 import './HomeScreen.css'
@@ -57,15 +57,7 @@ export function HomeScreen() {
   const quickMenuButtonRef = useRef<HTMLButtonElement | null>(null)
   const quickMenuFabRef = useRef<HTMLButtonElement | null>(null)
 
-  const headers = useMemo(() => {
-    const baseHeaders: Record<string, string> = {
-      'Content-Type': 'application/json',
-    }
-    if (token) {
-      baseHeaders['Authorization'] = `Bearer ${token}`
-    }
-    return baseHeaders
-  }, [token])
+  const headers = useMemo(() => getAuthHeaders(token, user?.cognitoId), [token, user])
 
   useEffect(() => {
     if (!user) {
@@ -503,11 +495,7 @@ export function HomeScreen() {
                     <Tooltip 
                       contentStyle={{ backgroundColor: 'var(--surface-color)', borderColor: 'var(--border)', borderRadius: 8, color: 'var(--text-primary)' }}
                       itemStyle={{ color: 'var(--text-primary)' }}
-                      formatter={(value) => {
-                        if (!showValues) return '••••••'
-                        const numericValue = typeof value === 'number' ? value : Number(value ?? 0)
-                        return formatter.format(numericValue)
-                      }}
+                      formatter={(value: any) => showValues ? formatter.format(value as number) : '••••••'}
                       labelFormatter={(label) => `${label} ${monthFormatter.format(now)}`}
                     />
                     <Area type="monotone" dataKey="income" name={t('home.revenue')} stroke="#10B981" fillOpacity={1} fill="url(#colorIncome)" strokeWidth={2} />
