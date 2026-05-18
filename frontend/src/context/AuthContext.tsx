@@ -30,20 +30,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [internalUser, setInternalUser] = useState<User | null>(null)
   const [internalLoading, setInternalLoading] = useState(true)
 
+  const isAuthenticated = cognitoAuth.isAuthenticated
+  const isAuthLoading = cognitoAuth.isLoading
+  const cognitoId = cognitoAuth.user?.profile.sub as string | undefined
+  const email = (cognitoAuth.user?.profile.email as string | undefined) || ''
+  const name = (cognitoAuth.user?.profile.name as string | undefined) || email.split('@')[0] || 'User'
+  const accessToken = cognitoAuth.user?.access_token as string | undefined
+
   useEffect(() => {
     async function syncBackendUser() {
-      if (cognitoAuth.isAuthenticated && cognitoAuth.user?.profile.sub) {
+      if (isAuthenticated && cognitoId) {
         try {
-          const cognitoId = cognitoAuth.user.profile.sub
-          const email = cognitoAuth.user.profile.email || ''
-          const name = cognitoAuth.user.profile.name || email.split('@')[0] || 'User'
-
           // Try to login to get internal user ID
           let userRes = await fetch(`${API_BASE_URL}/users/login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${cognitoAuth.user.access_token}`
+              'Authorization': `Bearer ${accessToken}`
             },
             body: JSON.stringify({ cognitoId })
           })
@@ -54,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${cognitoAuth.user.access_token}`
+                'Authorization': `Bearer ${accessToken}`
               },
               body: JSON.stringify({ cognitoId })
             })
@@ -79,10 +82,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setInternalLoading(false)
     }
 
-    if (!cognitoAuth.isLoading) {
+    if (!isAuthLoading) {
       syncBackendUser()
     }
-  }, [cognitoAuth.isAuthenticated, cognitoAuth.isLoading, cognitoAuth.user])
+  }, [isAuthenticated, isAuthLoading, cognitoId, email, name, accessToken])
 
   const login = async () => {
     await cognitoAuth.signinRedirect()
