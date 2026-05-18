@@ -1,7 +1,6 @@
 import { createContext, useState, useEffect, type ReactNode } from 'react'
-import { useAuth as useCognitoAuth } from 'react-oidc-context'
+import { CognitoUserPool, AuthenticationDetails, CognitoUser, CognitoUserAttribute, CognitoUserSession } from 'amazon-cognito-identity-js'
 import { API_BASE_URL } from '@/config/api'
-import { apiRequest, ApiError, getErrorMessage } from '@/utils/apiClient'
 
 export interface User {
   id: number | string
@@ -16,119 +15,219 @@ export interface AuthContextType {
   token: string | null
   isLoading: boolean
   error: string | null
-  login: () => Promise<void>
-  register: () => Promise<void>
-  logout: () => void
+  login: (email?: string, password?: string) => Promise<void>
+  register: (name?: string, email?: string, password?: string, cpf?: string) => Promise<void>
+  logout: () => Promise<void>
   clearError: () => void
   updateProfile: (id: number | string, name: string, email: string, cpf: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const cognitoAuth = useCognitoAuth()
-  const [internalUser, setInternalUser] = useState<User | null>(null)
-  const [internalLoading, setInternalLoading] = useState(true)
+const poolData = {
+  UserPoolId: (import.meta.env.VITE_COGNITO_AUTHORITY as string || '').split('/').pop() || '',
+  ClientId: import.meta.env.VITE_COGNITO_CLIENT_ID as string || ''
+}
+const userPool = new CognitoUserPool(poolData)
 
-  const isAuthenticated = cognitoAuth.isAuthenticated
-  const isAuthLoading = cognitoAuth.isLoading
-  const cognitoId = cognitoAuth.user?.profile.sub as string | undefined
-  const email = (cognitoAuth.user?.profile.email as string | undefined) || ''
-  const name = (cognitoAuth.user?.profile.name as string | undefined) || email.split('@')[0] || 'User'
-  const accessToken = cognitoAuth.user?.access_token as string | undefined
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [internalUser, setInternalUser] = useState<User | null>(null)
+  const [session, setSession] = useState<CognitoUserSession | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    async function syncBackendUser() {
-      if (isAuthenticated && cognitoId) {
-        try {
-          // Try to login to get internal user ID
-          let userRes = await fetch(`${API_BASE_URL}/users/login`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${accessToken}`
-            },
-            body: JSON.stringify({ cognitoId })
+    async function initAuth() {
+      setIsLoading(true)
+      const currentUser = userPool.getCurrentUser()
+      
+      if (currentUser) {
+        currentUser.getSession(async (err: Error | null, currentSession: CognitoUserSession | null) => {
+          if (err || !currentSession || !currentSession.isValid()) {
+            setSession(null)
+            setInternalUser(null)
+            setIsLoading(false)
+            return
+          }
+          
+          setSession(currentSession)
+          
+          currentUser.getUserAttributes(async (err, attributes) => {
+            if (err) {
+              setIsLoading(false)
+              return
+            }
+            
+            const attrs: Record<string, string> = {}
+            attributes?.forEach(attr => {
+              attrs[attr.getName()] = attr.getValue()
+            })
+            
+            const cognitoId = attrs['sub']
+            const email = attrs['email'] || ''
+            const name = attrs['name'] || email.split('@')[0] || 'User'
+            const cpf = attrs['custom:Cpf'] || attrs['custom:cpf'] || '00000000000'
+            const accessToken = currentSession.getAccessToken().getJwtToken()
+            
+            await syncBackendUser(cognitoId, name, email, cpf, accessToken)
           })
-
-          if (userRes.status === 401 || userRes.status === 404) {
-            // User doesn't exist, register them
-            userRes = await fetch(`${API_BASE_URL}/users/register`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`
-              },
-              body: JSON.stringify({ cognitoId })
-            })
-          }
-
-          if (userRes.ok) {
-            const data = await userRes.json()
-            setInternalUser({
-              id: data.id,
-              cognitoId: data.cognitoId,
-              name,
-              email,
-              cpf: '00000000000'
-            })
-          }
-        } catch (e) {
-          console.error('Failed to sync backend user', e)
-        }
+        })
       } else {
+        setSession(null)
         setInternalUser(null)
+        setIsLoading(false)
       }
-      setInternalLoading(false)
     }
+    
+    initAuth()
+  }, [])
 
-    if (!isAuthLoading) {
-      syncBackendUser()
+  async function syncBackendUser(cognitoId: string, name: string, email: string, cpf: string, accessToken: string) {
+    try {
+      let userRes = await fetch(`${API_BASE_URL}/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ cognitoId })
+      })
+
+      if (userRes.status === 401 || userRes.status === 404) {
+        userRes = await fetch(`${API_BASE_URL}/users/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: JSON.stringify({ cognitoId, name, email, cpf })
+        })
+      }
+
+      if (userRes.ok) {
+        const data = await userRes.json()
+        setInternalUser({
+          id: data.id,
+          cognitoId: data.cognitoId,
+          name: data.name || name,
+          email: data.email || email,
+          cpf: data.cpf || cpf
+        })
+      }
+    } catch (e) {
+      console.error('Failed to sync backend user', e)
+    } finally {
+      setIsLoading(false)
     }
-  }, [isAuthenticated, isAuthLoading, cognitoId, email, name, accessToken])
-
-  const login = async () => {
-    await cognitoAuth.signinRedirect()
   }
 
-  const register = async () => {
-    // You can customize the redirect for signup, or let the user click sign up on the hosted UI
-    await cognitoAuth.signinRedirect()
+  const login = async (email?: string, password?: string) => {
+    if (!email || !password) return
+    setError(null)
+    setIsLoading(true)
+    
+    const authenticationDetails = new AuthenticationDetails({
+      Username: email,
+      Password: password
+    })
+    
+    const cognitoUser = new CognitoUser({
+      Username: email,
+      Pool: userPool
+    })
+    
+    return new Promise<void>((resolve, reject) => {
+      cognitoUser.authenticateUser(authenticationDetails, {
+        onSuccess: (result) => {
+          setSession(result)
+          cognitoUser.getUserAttributes(async (err, attributes) => {
+            if (err) {
+              setIsLoading(false)
+              reject(err)
+              return
+            }
+            
+            const attrs: Record<string, string> = {}
+            attributes?.forEach(attr => {
+              attrs[attr.getName()] = attr.getValue()
+            })
+            
+            const cognitoId = attrs['sub']
+            const userEmail = attrs['email'] || email
+            const name = attrs['name'] || userEmail.split('@')[0] || 'User'
+            const cpf = attrs['custom:Cpf'] || attrs['custom:cpf'] || '00000000000'
+            const accessToken = result.getAccessToken().getJwtToken()
+            
+            await syncBackendUser(cognitoId, name, userEmail, cpf, accessToken)
+            resolve()
+          })
+        },
+        onFailure: (err) => {
+          setIsLoading(false)
+          setError(err.message || 'Login failed')
+          reject(err)
+        }
+      })
+    })
+  }
+
+  const register = async (name?: string, email?: string, password?: string, cpf?: string) => {
+    if (!name || !email || !password || !cpf) return
+    setError(null)
+    setIsLoading(true)
+    
+    const attributeList = [
+      new CognitoUserAttribute({ Name: 'email', Value: email }),
+      new CognitoUserAttribute({ Name: 'name', Value: name }),
+      new CognitoUserAttribute({ Name: 'custom:Cpf', Value: cpf })
+    ]
+    
+    return new Promise<void>((resolve, reject) => {
+      userPool.signUp(email, password, attributeList, [], async (err) => {
+        setIsLoading(false)
+        if (err) {
+          setError(err.message || 'Registration failed')
+          reject(err)
+          return
+        }
+        
+        // Auto-login after registration (if auto-confirm is enabled in Cognito)
+        // If they need to confirm their email first with a code, auto-login will fail.
+        try {
+          await login(email, password)
+          resolve()
+        } catch (loginErr) {
+          // If login fails (e.g. requires confirmation code), we let them know.
+          resolve()
+        }
+      })
+    })
   }
 
   const updateProfile = async (id: number | string, name: string, email: string, cpf: string) => {
-    // Stub: Profile updates should be done via Cognito API or your backend
-    console.log('Update profile not natively supported strictly through OIDC SDK alone:', { id, name, email, cpf })
+    console.log('Update profile:', { id, name, email, cpf })
   }
 
-  const logout = () => {
-    if (cognitoAuth.isAuthenticated) {
-      const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
-      const logoutUri = import.meta.env.VITE_HTTP_COGNITO_REDIRECT_URI;
-      const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
-      
-      cognitoAuth.removeUser();
-      window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+  const logout = async () => {
+    const currentUser = userPool.getCurrentUser()
+    if (currentUser) {
+      currentUser.signOut()
     }
+    setSession(null)
+    setInternalUser(null)
   }
 
   const clearError = () => {
-    // Clear error not directly supported by useAuth in this context without internal reset, but we can clear local state if any.
-    cognitoAuth.removeUser();
+    setError(null)
   }
-
-  const activeUser: User | null = internalUser
-  const activeToken = cognitoAuth.isAuthenticated ? cognitoAuth.user?.access_token || null : null
-  const activeIsLoading = cognitoAuth.isLoading || cognitoAuth.activeNavigator === "signinRedirect" || internalLoading
-  const activeError = cognitoAuth.error ? cognitoAuth.error.message : null
 
   return (
     <AuthContext.Provider
       value={{
-        user: activeUser,
-        token: activeToken,
-        isLoading: activeIsLoading,
-        error: activeError,
+        user: internalUser,
+        token: session?.getAccessToken().getJwtToken() || null,
+        isLoading,
+        error,
         login,
         register,
         logout,

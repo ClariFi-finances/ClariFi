@@ -38,9 +38,10 @@ interface ApiPaymentMethod {
 }
 
 export function HomeScreen() {
-  const { setActiveScreen, isNewTransactionModalOpen, setIsNewTransactionModalOpen, transactionModalMode, setTransactionModalMode } = useApp()
   const { user, token } = useAuth()
   const { t, language } = useI18n()
+  const { setActiveScreen, isNewTransactionModalOpen, setIsNewTransactionModalOpen, transactionModalMode } = useApp()
+
   const [showValues, setShowValues] = useState(true)
   const [activeView, setActiveView] = useState<'dashboard' | 'transactions'>('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
@@ -642,4 +643,3 @@ export function HomeScreen() {
     </div>
   )
 }
-

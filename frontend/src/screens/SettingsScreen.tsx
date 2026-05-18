@@ -18,8 +18,8 @@ export function SettingsScreen() {
       t('profile.confirmLogoutMessage', 'Tem certeza que deseja sair?')
     )
     if (confirmed) {
+      // Intentionally don't await this so we don't block the UI while browser redirects
       logout()
-      setActiveScreen('home')
     }
   }
 

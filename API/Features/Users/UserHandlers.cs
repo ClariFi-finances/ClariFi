@@ -3,9 +3,9 @@ using MediatR;
 
 namespace API.Features.Users;
 
-public record RegisterUserCommand(string CognitoId) : IRequest<User>;
+public record RegisterUserCommand(string CognitoId, string Name, string Email, string Cpf) : IRequest<User>;
 public record LoginUserCommand(string CognitoId) : IRequest<User?>;
-public record UpdateUserProfileCommand(int Id, string CognitoId) : IRequest<bool>;
+public record UpdateUserProfileCommand(int Id, string CognitoId, string Name, string Email, string Cpf) : IRequest<bool>;
 public record GetAllUsersQuery() : IRequest<IEnumerable<User>>;
 
 public class UserHandlers(
@@ -23,7 +23,7 @@ public class UserHandlers(
 
     public async Task<User> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
-        var user = new User(request.CognitoId);
+        var user = new User(request.CognitoId, request.Name, request.Email, request.Cpf);
         await repository.AddAsync(user, cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
 
@@ -71,6 +71,7 @@ public class UserHandlers(
         if (await repository.GetByIdAsync(request.Id, cancellationToken) is not { } user) return false;
 
         user.UpdateCognitoId(request.CognitoId);
+        user.UpdateProfile(request.Name, request.Email, request.Cpf);
         await repository.UpdateAsync(user);
         await repository.SaveChangesAsync(cancellationToken);
         return true;

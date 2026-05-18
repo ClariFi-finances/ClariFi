@@ -3,6 +3,9 @@ namespace API.Models;
 public class User : BaseEntity
 {
     public string CognitoId { get; private set; }
+    public string Name { get; private set; }
+    public string Email { get; private set; }
+    public string Cpf { get; private set; }
 
     private readonly List<PaymentMethod> _paymentMethods = new();
     public IReadOnlyCollection<PaymentMethod> PaymentMethods => _paymentMethods.AsReadOnly();
@@ -14,13 +17,26 @@ public class User : BaseEntity
     protected User() 
     {
         CognitoId = null!;
+        Name = null!;
+        Email = null!;
+        Cpf = null!;
     } 
 
-    public User(string cognitoId)
+    public User(string cognitoId, string name, string email, string cpf)
     {
         CognitoId = cognitoId;
+        Name = name;
+        Email = email;
+        Cpf = cpf;
     }
 
+    public void UpdateProfile(string name, string email, string cpf)
+    {
+        Name = name;
+        Email = email;
+        Cpf = cpf;
+    }
+    
     public void UpdateCognitoId(string cognitoId)
     {
         CognitoId = cognitoId;

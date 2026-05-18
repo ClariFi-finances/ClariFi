@@ -21,7 +21,7 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
       t('profile.confirmLogoutMessage')
     )
     if (confirmed) {
-      logout()
+      await logout()
       onLogout()
     }
   }

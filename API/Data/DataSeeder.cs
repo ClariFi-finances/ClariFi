@@ -13,15 +13,22 @@ public static class DataSeeder
 
         await context.Database.MigrateAsync();
 
-        if (!await context.Set<User>().AnyAsync())
+        if (!context.Users.Any())
         {
+            var testUser = new User("admin@clarifi.com", "Admin User", "admin@clarifi.com", "00000000000"); // Standard Cognito sub
+            context.Users.Add(testUser);
+            await context.SaveChangesAsync();
+
             // Set a random seed to consistently generate the same dummy data
             Randomizer.Seed = new Random(8675309);
 
             // 1. Generate Fake Users
             var userFaker = new Faker<User>()
                 .CustomInstantiator(f => new User(
-                    f.Random.Guid().ToString() // Fake CognitoId
+                    f.Random.Guid().ToString(), // Fake CognitoId
+                    f.Name.FullName(),
+                    f.Internet.Email(),
+                    "00000000000"
                 ));
 
             var fakeUsers = userFaker.Generate(5);

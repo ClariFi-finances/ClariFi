@@ -4,22 +4,19 @@ import { HomeScreen } from '@/screens/HomeScreen'
 import { ProfileScreen } from '@/screens/ProfileScreen'
 import { SettingsScreen } from '@/screens/SettingsScreen'
 import { TransactionsScreen } from '@/screens/TransactionsScreen'
+import { LoginScreen } from '@/screens/Auth/LoginScreen'
+import { RegisterScreen } from '@/screens/Auth/RegisterScreen'
 import { AppShell } from '@/components/AppShell'
-import { useEffect } from 'react'
+import { useState } from 'react'
 import './App.css'
 
 function App() {
-  const { user, isLoading, login } = useAuth()
+  const { user, isLoading } = useAuth()
   const { activeScreen, setActiveScreen } = useApp()
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      login()
-    }
-  }, [isLoading, user, login])
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
 
   // Show loading state
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <p>Carregando...</p>
@@ -27,11 +24,23 @@ function App() {
     )
   }
 
+  // Unauthenticated - show custom auth screens
+  if (!user) {
+    if (authMode === 'register') {
+      return <RegisterScreen onSwitchToLogin={() => setAuthMode('login')} />
+    }
+    return <LoginScreen onSwitchToRegister={() => setAuthMode('register')} />
+  }
+
+  const handleLogout = () => {
+    setActiveScreen('home')
+  }
+
   // Authenticated - show app screens
   return (
     <AppShell>
       {activeScreen === 'profile' ? (
-        <ProfileScreen onLogout={() => setActiveScreen('home')} />
+        <ProfileScreen onLogout={handleLogout} />
       ) : activeScreen === 'settings' ? (
         <SettingsScreen />
       ) : activeScreen === 'transactions' ? (
