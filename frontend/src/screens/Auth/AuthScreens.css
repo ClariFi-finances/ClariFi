@@ -164,6 +164,38 @@
   display: block;
 }
 
+.auth-link-inline {
+  display: inline;
+  padding: 0;
+}
+
+.auth-link-disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Confirmation Code Input */
+.code-input-group {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.form-group:has(.code-input-group) .form-label {
+  text-align: center;
+}
+
+.code-input {
+  width: 3rem;
+  height: 3.5rem;
+  text-align: center;
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  padding: 0.5rem;
+  letter-spacing: 0;
+}
+
 /* Profile Screen */
 .profile-container {
   min-height: 100%;

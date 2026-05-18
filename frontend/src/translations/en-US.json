@@ -63,6 +63,29 @@
       "errorMessage": "Failed to create account",
       "loadingTitle": "Creating Account...",
       "loadingMessage": "Please wait."
+    },
+    "confirm": {
+      "title": "Verify Your Email",
+      "subtitle": "We sent a 6-digit code to",
+      "codeLabel": "Verification Code",
+      "submitButton": "Verify Account",
+      "submitting": "Verifying...",
+      "invalidCode": "Invalid Code",
+      "invalidCodeMessage": "Please enter the 6-digit code sent to your email.",
+      "successTitle": "Email Verified!",
+      "successMessage": "Your account has been confirmed. Welcome to ClariFi!",
+      "errorTitle": "Verification Error",
+      "errorMessage": "Failed to verify your account.",
+      "loadingTitle": "Verifying...",
+      "loadingMessage": "Please wait.",
+      "noCode": "Didn't receive the code?",
+      "resendCode": "Resend Code",
+      "resendIn": "Resend in",
+      "resendSuccessTitle": "Code Sent!",
+      "resendSuccessMessage": "A new verification code has been sent to your email.",
+      "resendErrorTitle": "Resend Error",
+      "resendErrorMessage": "Failed to resend verification code.",
+      "backToLogin": "← Back to Sign In"
     }
   },
   "validation": {

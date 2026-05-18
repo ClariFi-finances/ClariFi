@@ -63,6 +63,29 @@
       "errorMessage": "Falha ao criar conta",
       "loadingTitle": "Criando Conta...",
       "loadingMessage": "Por favor, aguarde."
+    },
+    "confirm": {
+      "title": "Verifique seu Email",
+      "subtitle": "Enviamos um código de 6 dígitos para",
+      "codeLabel": "Código de Verificação",
+      "submitButton": "Verificar Conta",
+      "submitting": "Verificando...",
+      "invalidCode": "Código Inválido",
+      "invalidCodeMessage": "Por favor, insira o código de 6 dígitos enviado para seu email.",
+      "successTitle": "Email Verificado!",
+      "successMessage": "Sua conta foi confirmada. Bem-vindo ao ClariFi!",
+      "errorTitle": "Erro na Verificação",
+      "errorMessage": "Falha ao verificar sua conta.",
+      "loadingTitle": "Verificando...",
+      "loadingMessage": "Por favor, aguarde.",
+      "noCode": "Não recebeu o código?",
+      "resendCode": "Reenviar Código",
+      "resendIn": "Reenviar em",
+      "resendSuccessTitle": "Código Enviado!",
+      "resendSuccessMessage": "Um novo código de verificação foi enviado para seu email.",
+      "resendErrorTitle": "Erro ao Reenviar",
+      "resendErrorMessage": "Falha ao reenviar o código de verificação.",
+      "backToLogin": "← Voltar para Entrar"
     }
   },
   "validation": {

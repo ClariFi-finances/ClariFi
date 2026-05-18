@@ -15,10 +15,15 @@ export interface AuthContextType {
   token: string | null
   isLoading: boolean
   error: string | null
+  needsConfirmation: boolean
+  pendingEmail: string | null
   login: (email?: string, password?: string) => Promise<void>
   register: (name?: string, email?: string, password?: string, cpf?: string) => Promise<void>
+  confirmAccount: (email: string, code: string) => Promise<void>
+  resendConfirmationCode: (email: string) => Promise<void>
   logout: () => Promise<void>
   clearError: () => void
+  clearConfirmation: () => void
   updateProfile: (id: number | string, name: string, email: string, cpf: string) => Promise<void>
 }
 
@@ -35,6 +40,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<CognitoUserSession | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [needsConfirmation, setNeedsConfirmation] = useState(false)
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null)
+  const [pendingPassword, setPendingPassword] = useState<string | null>(null)
 
   useEffect(() => {
     async function initAuth() {
@@ -191,17 +199,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return
         }
         
-        // Auto-login after registration (if auto-confirm is enabled in Cognito)
-        // If they need to confirm their email first with a code, auto-login will fail.
+        // Account created - user needs to confirm email with verification code
+        setPendingEmail(email)
+        setPendingPassword(password)
+        setNeedsConfirmation(true)
+        resolve()
+      })
+    })
+  }
+
+  const confirmAccount = async (email: string, code: string) => {
+    setError(null)
+    setIsLoading(true)
+
+    const cognitoUser = new CognitoUser({
+      Username: email,
+      Pool: userPool
+    })
+
+    return new Promise<void>((resolve, reject) => {
+      cognitoUser.confirmRegistration(code, true, async (err) => {
+        if (err) {
+          setIsLoading(false)
+          setError(err.message || 'Confirmation failed')
+          reject(err)
+          return
+        }
+
+        // Auto-login after successful confirmation
         try {
-          await login(email, password)
+          if (pendingPassword) {
+            await login(email, pendingPassword)
+          }
+          setNeedsConfirmation(false)
+          setPendingEmail(null)
+          setPendingPassword(null)
           resolve()
         } catch (loginErr) {
-          // If login fails (e.g. requires confirmation code), we let them know.
+          setIsLoading(false)
+          setNeedsConfirmation(false)
+          setPendingEmail(null)
+          setPendingPassword(null)
           resolve()
         }
       })
     })
+  }
+
+  const resendConfirmationCode = async (email: string) => {
+    setError(null)
+
+    const cognitoUser = new CognitoUser({
+      Username: email,
+      Pool: userPool
+    })
+
+    return new Promise<void>((resolve, reject) => {
+      cognitoUser.resendConfirmationCode((err) => {
+        if (err) {
+          setError(err.message || 'Failed to resend code')
+          reject(err)
+          return
+        }
+        resolve()
+      })
+    })
+  }
+
+  const clearConfirmation = () => {
+    setNeedsConfirmation(false)
+    setPendingEmail(null)
+    setPendingPassword(null)
   }
 
   const updateProfile = async (id: number | string, name: string, email: string, cpf: string) => {
@@ -228,10 +296,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token: session?.getAccessToken().getJwtToken() || null,
         isLoading,
         error,
+        needsConfirmation,
+        pendingEmail,
         login,
         register,
+        confirmAccount,
+        resendConfirmationCode,
         logout,
         clearError,
+        clearConfirmation,
         updateProfile,
       }}
     >

@@ -6,12 +6,13 @@ import { SettingsScreen } from '@/screens/SettingsScreen'
 import { TransactionsScreen } from '@/screens/TransactionsScreen'
 import { LoginScreen } from '@/screens/Auth/LoginScreen'
 import { RegisterScreen } from '@/screens/Auth/RegisterScreen'
+import { ConfirmAccountScreen } from '@/screens/Auth/ConfirmAccountScreen'
 import { AppShell } from '@/components/AppShell'
 import { useState } from 'react'
 import './App.css'
 
 function App() {
-  const { user, isLoading } = useAuth()
+  const { user, isLoading, needsConfirmation, pendingEmail } = useAuth()
   const { activeScreen, setActiveScreen } = useApp()
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
 
@@ -26,6 +27,9 @@ function App() {
 
   // Unauthenticated - show custom auth screens
   if (!user) {
+    if (needsConfirmation && pendingEmail) {
+      return <ConfirmAccountScreen email={pendingEmail} onBackToLogin={() => setAuthMode('login')} />
+    }
     if (authMode === 'register') {
       return <RegisterScreen onSwitchToLogin={() => setAuthMode('login')} />
     }
