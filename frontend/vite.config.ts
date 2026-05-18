@@ -46,9 +46,12 @@ export default defineConfig(async () => {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
-    define: Object.keys(ssmParams).reduce((acc, key) => {
-      acc[`import.meta.env.${key}`] = JSON.stringify(ssmParams[key])
-      return acc
-    }, {} as Record<string, string>)
+    define: {
+      global: 'window',
+      ...Object.keys(ssmParams).reduce((acc, key) => {
+        acc[`import.meta.env.${key}`] = JSON.stringify(ssmParams[key])
+        return acc
+      }, {} as Record<string, string>)
+    }
   }
 })
