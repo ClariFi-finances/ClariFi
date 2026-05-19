@@ -164,7 +164,12 @@
     "fieldInstallmentPlaceholder": "Ex: 3x",
     "noCategories": "Sem categorias",
     "noPaymentMethods": "Sem metodos",
-    "saving": "Salvando..."
+    "fieldGoal": "Direcionar para meta (opcional)",
+    "noGoal": "Nenhuma meta",
+    "saving": "Salvando...",
+    "filterAll": "Tudo",
+    "filterRegular": "Sem metas",
+    "filterGoals": "Só metas"
   },
   "profile": {
     "title": "Perfil",

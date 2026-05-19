@@ -11,11 +11,18 @@ export interface TransactionModalPaymentMethod {
   name: string
 }
 
+export interface TransactionModalGoalOption {
+  id: number
+  name: string
+  icon: string | null
+}
+
 interface TransactionModalProps {
   isOpen: boolean
   mode: 'income' | 'expense'
   categories: TransactionModalCategoryOption[]
   paymentMethods: TransactionModalPaymentMethod[]
+  goals?: TransactionModalGoalOption[]
   isSubmitting: boolean
   error: string | null
   onClose: () => void
@@ -27,6 +34,7 @@ interface TransactionModalProps {
     category: string
     paymentMethodId: number
     installmentInfo?: string
+    goalId?: number
   }) => Promise<void>
   t: (key: string, defaultValue?: string) => string
 }
@@ -36,6 +44,7 @@ export function TransactionModal({
   mode,
   categories,
   paymentMethods,
+  goals = [],
   isSubmitting,
   error,
   onClose,
@@ -54,6 +63,7 @@ export function TransactionModal({
   const [category, setCategory] = useState(categories[0]?.value ?? '')
   const [paymentMethodId, setPaymentMethodId] = useState(paymentMethods[0]?.id.toString() ?? '')
   const [installmentInfo, setInstallmentInfo] = useState('')
+  const [goalId, setGoalId] = useState('')
 
   const primaryLabel = mode === 'income' ? t('home.income') : t('home.expense')
 
@@ -83,6 +93,7 @@ export function TransactionModal({
       category,
       paymentMethodId: Number(paymentMethodId),
       installmentInfo: installmentInfo.trim() || undefined,
+      goalId: goalId ? Number(goalId) : undefined,
     })
   }
 
@@ -195,6 +206,23 @@ export function TransactionModal({
               placeholder={t('home.fieldInstallmentPlaceholder')}
             />
           </label>
+
+          {mode === 'income' && goals.length > 0 && (
+            <label className="modal-field goal-field">
+              <span>{t('home.fieldGoal')}</span>
+              <select
+                value={goalId}
+                onChange={event => setGoalId(event.target.value)}
+              >
+                <option value="">{t('home.noGoal')}</option>
+                {goals.map(goal => (
+                  <option key={goal.id} value={goal.id}>
+                    {goal.icon || '🎯'} {goal.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
 
           {error ? <p className="modal-error">{error}</p> : null}
 

@@ -164,7 +164,12 @@
     "fieldInstallmentPlaceholder": "e.g. 3x",
     "noCategories": "No categories",
     "noPaymentMethods": "No methods",
-    "saving": "Saving..."
+    "fieldGoal": "Assign to goal (optional)",
+    "noGoal": "No goal",
+    "saving": "Saving...",
+    "filterAll": "All",
+    "filterRegular": "No goals",
+    "filterGoals": "Goals only"
   },
   "profile": {
     "title": "Profile",

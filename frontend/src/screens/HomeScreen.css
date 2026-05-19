@@ -99,6 +99,44 @@
   flex-direction: column;
 }
 
+/* Goal Transaction Filter */
+.goal-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.goal-filter-icon {
+  color: var(--text-muted);
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.goal-filter-chip {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.goal-filter-chip:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-h);
+}
+
+.goal-filter-chip.active {
+  background: rgba(255, 215, 0, 0.12);
+  border-color: rgba(255, 215, 0, 0.3);
+  color: var(--accent-gold);
+}
+
 .fade-in {
   animation: fadeIn 0.35s ease;
 }

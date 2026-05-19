@@ -94,6 +94,14 @@
   font-size: var(--text-sm);
 }
 
+.goal-field {
+  background: rgba(255, 215, 0, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  border-left: 3px solid var(--accent-gold);
+  border-radius: 14px;
+  padding: 12px;
+}
+
 @media (max-width: 600px) {
   .modal-card {
     border-radius: 18px;

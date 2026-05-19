@@ -27,6 +27,10 @@ public class Transaction : BaseEntity
     public PaymentMethod? PaymentMethod { get; private set; }
     public int PaymentMethodId { get; private set; }
 
+    [System.Text.Json.Serialization.JsonIgnore]
+    public Goal? Goal { get; private set; }
+    public int? GoalId { get; private set; }
+
     // EF Constructor
     protected Transaction()
     {
@@ -35,7 +39,7 @@ public class Transaction : BaseEntity
     } 
 
     public Transaction(string title, string description, decimal amount, DateTime date, 
-        TransactionType type, int categoryId, int userId, int paymentMethodId, string? installmentInfo = null)
+        TransactionType type, int categoryId, int userId, int paymentMethodId, string? installmentInfo = null, int? goalId = null)
     {
         Title = title;
         Description = description;
@@ -46,6 +50,7 @@ public class Transaction : BaseEntity
         UserId = userId;
         PaymentMethodId = paymentMethodId;
         InstallmentInfo = installmentInfo;
+        GoalId = goalId;
     }
 
     public void UpdateDetails(string title, string description, decimal amount, int categoryId, DateTime date)

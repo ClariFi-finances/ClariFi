@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowDownCircle, ArrowUpCircle, Bell, Camera, Plus } from 'lucide-react'
+import { ArrowDownCircle, ArrowUpCircle, Bell, Camera, Plus, Target } from 'lucide-react'
 import { AreaChart, Area, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useApp } from '@/context/useApp'
 import { useAuth } from '@/context/useAuth'
@@ -20,6 +20,7 @@ interface ApiTransaction {
   userId: number
   paymentMethodId: number
   installmentInfo?: string | null
+  goalId?: number | null
 }
 
 interface ApiCategory {
@@ -37,6 +38,16 @@ interface ApiPaymentMethod {
   userId: number
 }
 
+interface ApiGoal {
+  id: number
+  name: string
+  icon: string | null
+  color: string | null
+  targetAmount: number
+  currentAmount: number
+  userId: number
+}
+
 export function HomeScreen() {
   const { user, token } = useAuth()
   const { t, language } = useI18n()
@@ -45,9 +56,11 @@ export function HomeScreen() {
   const [showValues, setShowValues] = useState(true)
   const [activeView, setActiveView] = useState<'dashboard' | 'transactions'>('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
+  const [transactionFilter, setTransactionFilter] = useState<'all' | 'regular' | 'goals'>('all')
   const [transactions, setTransactions] = useState<ApiTransaction[]>([])
   const [paymentMethods, setPaymentMethods] = useState<ApiPaymentMethod[]>([])
   const [categories, setCategories] = useState<ApiCategory[]>([])
+  const [goals, setGoals] = useState<ApiGoal[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -70,10 +83,11 @@ export function HomeScreen() {
       setIsLoading(true)
       setError(null)
       try {
-        const [transactionData, paymentMethodData, categoriesData] = await Promise.all([
+        const [transactionData, paymentMethodData, categoriesData, goalsData] = await Promise.all([
           apiRequest<ApiTransaction[]>(`/transactions?userId=${user.id}`, { headers }),
           apiRequest<ApiPaymentMethod[]>(`/paymentmethods?userId=${user.id}`, { headers }),
           apiRequest<ApiCategory[]>(`/categories?userId=${user.id}`, { headers }),
+          apiRequest<ApiGoal[]>(`/goals?userId=${user.id}`, { headers }),
         ])
 
         if (!isActive) {
@@ -83,6 +97,7 @@ export function HomeScreen() {
         setTransactions(transactionData)
         setPaymentMethods(paymentMethodData)
         setCategories(categoriesData)
+        setGoals(goalsData)
       } catch (err) {
         if (!isActive) {
           return
@@ -180,11 +195,17 @@ export function HomeScreen() {
     }),
   [monthEnd, monthStart, sortedTransactions])
 
+  const filteredMonthTransactions = useMemo(() => {
+    if (transactionFilter === 'all') return currentMonthTransactions
+    if (transactionFilter === 'goals') return currentMonthTransactions.filter(t => t.goalId != null)
+    return currentMonthTransactions.filter(t => !t.goalId)
+  }, [currentMonthTransactions, transactionFilter])
+
   const totals = useMemo(() => {
-    const income = currentMonthTransactions
+    const income = filteredMonthTransactions
       .filter(transaction => transaction.type === 0 || transaction.type === 'Income')
       .reduce((sum, transaction) => sum + transaction.amount, 0)
-    const expense = currentMonthTransactions
+    const expense = filteredMonthTransactions
       .filter(transaction => transaction.type === 1 || transaction.type === 'Expense')
       .reduce((sum, transaction) => sum + transaction.amount, 0)
 
@@ -193,7 +214,7 @@ export function HomeScreen() {
       expense,
       balance: income - expense,
     }
-  }, [currentMonthTransactions, userCategories])
+  }, [filteredMonthTransactions])
 
   const previousMonthTotals = useMemo(() => {
     const previousStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
@@ -211,7 +232,7 @@ export function HomeScreen() {
   }, [monthStart, now, sortedTransactions])
 
   const categoryTotals = useMemo(() => {
-    const grouped = currentMonthTransactions
+    const grouped = filteredMonthTransactions
       .filter(transaction => transaction.type === 1 || transaction.type === 'Expense')
       .reduce<Record<string, number>>((acc, transaction) => {
         const categoryName = userCategories.find(c => c.id === transaction.categoryId)?.name ?? String(transaction.categoryId)
@@ -223,7 +244,7 @@ export function HomeScreen() {
       .map(([category, amount]) => ({ category, amount }))
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 4)
-  }, [currentMonthTransactions])
+  }, [filteredMonthTransactions])
 
   const availableCategories = useMemo(() => {
     return userCategories.map(c => ({ value: String(c.id), label: c.name }))
@@ -235,7 +256,7 @@ export function HomeScreen() {
     let runningExpense = 0
     
     const transactionsByDay = new Map<number, { income: number, expense: number }>()
-    currentMonthTransactions.forEach(transaction => {
+    filteredMonthTransactions.forEach(transaction => {
       const day = new Date(transaction.date).getDate()
       const existing = transactionsByDay.get(day) || { income: 0, expense: 0 }
       if (transaction.type === 1 || transaction.type === 'Expense') {
@@ -259,7 +280,7 @@ export function HomeScreen() {
     }
 
     return data
-  }, [currentMonthTransactions, now])
+  }, [filteredMonthTransactions, now])
 
   const filteredTransactions = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
@@ -321,6 +342,7 @@ export function HomeScreen() {
     category: string
     paymentMethodId: number
     installmentInfo?: string
+    goalId?: number
   }) => {
     if (!user) {
       return
@@ -345,6 +367,7 @@ export function HomeScreen() {
           userId: user.id,
           paymentMethodId: payload.paymentMethodId,
           installmentInfo: payload.installmentInfo ?? null,
+          goalId: payload.goalId ?? null,
         },
       })
       setTransactions(prev => [newTransaction, ...prev])
@@ -438,6 +461,21 @@ export function HomeScreen() {
 
       {activeView === 'dashboard' ? (
         <section className="view-panel fade-in" role="tabpanel">
+          {/* Goal Transaction Filter */}
+          <div className="goal-filter-bar">
+            <Target size={14} className="goal-filter-icon" />
+            {(['all', 'regular', 'goals'] as const).map(mode => (
+              <button
+                key={mode}
+                type="button"
+                className={`goal-filter-chip ${transactionFilter === mode ? 'active' : ''}`}
+                onClick={() => setTransactionFilter(mode)}
+              >
+                {t(`home.filter${mode.charAt(0).toUpperCase() + mode.slice(1)}`)}
+              </button>
+            ))}
+          </div>
+
           <div className="dashboard-grid">
             <div className="card stat-card span-3">
               <p className="card-label">{t('home.availableBalance')}</p>
@@ -634,6 +672,7 @@ export function HomeScreen() {
         mode={modalMode}
         categories={availableCategories}
         paymentMethods={userPaymentMethods.map(method => ({ id: method.id, name: method.name }))}
+        goals={goals.filter(g => g.userId === user?.id).map(g => ({ id: g.id, name: g.name, icon: g.icon }))}
         isSubmitting={isSubmitting}
         error={modalError}
         onClose={() => setIsModalOpen(false)}
