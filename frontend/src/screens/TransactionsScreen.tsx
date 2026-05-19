@@ -60,9 +60,9 @@ export function TransactionsScreen() {
       setIsLoading(true)
       try {
         const [transactionsData, categoriesData, paymentMethodsData] = await Promise.all([
-          apiRequest<ApiTransaction[]>('/transactions', { headers }),
+          apiRequest<ApiTransaction[]>(`/transactions?userId=${user.id}`, { headers }),
           apiRequest<ApiCategory[]>(`/categories?userId=${user.id}`, { headers }),
-          apiRequest<ApiPaymentMethod[]>('/paymentmethods', { headers }),
+          apiRequest<ApiPaymentMethod[]>(`/paymentmethods?userId=${user.id}`, { headers }),
         ])
 
         if (!isActive) return

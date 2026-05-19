@@ -8,7 +8,7 @@ namespace API.Features.PaymentMethods;
  * constructors, immutable properties, and it adds a boolean equality check
  */
 public record AddPaymentMethodCommand(string Name, PaymentMethodType Type, int UserId) : IRequest<PaymentMethod>;
-public record GetPaymentMethodsQuery() : IRequest<IEnumerable<PaymentMethod>>;
+public record GetPaymentMethodsQuery(int UserId) : IRequest<IEnumerable<PaymentMethod>>;
 public record UpdatePaymentMethodDetailsCommand(int Id, string Name, PaymentMethodType Type) : IRequest<bool>;
 public record RemovePaymentMethodCommand(int Id) : IRequest<bool>;
 
@@ -40,7 +40,10 @@ public class PaymentMethodHandlers(IRepository<PaymentMethod> repository) :
     }
 
     public async Task<IEnumerable<PaymentMethod>> Handle(GetPaymentMethodsQuery request, CancellationToken cancellationToken)
-        => await repository.GetAllAsync(cancellationToken);
+    {
+        var paymentMethods = await repository.GetAllAsync(cancellationToken);
+        return paymentMethods.Where(p => p.UserId == request.UserId);
+    }
     
 
     public async Task<bool> Handle(UpdatePaymentMethodDetailsCommand request, CancellationToken cancellationToken)

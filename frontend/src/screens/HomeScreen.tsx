@@ -71,8 +71,8 @@ export function HomeScreen() {
       setError(null)
       try {
         const [transactionData, paymentMethodData, categoriesData] = await Promise.all([
-          apiRequest<ApiTransaction[]>('/transactions', { headers }),
-          apiRequest<ApiPaymentMethod[]>('/paymentmethods', { headers }),
+          apiRequest<ApiTransaction[]>(`/transactions?userId=${user.id}`, { headers }),
+          apiRequest<ApiPaymentMethod[]>(`/paymentmethods?userId=${user.id}`, { headers }),
           apiRequest<ApiCategory[]>(`/categories?userId=${user.id}`, { headers }),
         ])
 

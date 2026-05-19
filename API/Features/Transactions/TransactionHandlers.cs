@@ -5,7 +5,7 @@ namespace API.Features.Transactions;
 
 public record CreateTransactionCommand(string Title, string Description, decimal Amount, DateTime Date, 
     TransactionType Type, int CategoryId, int UserId, int PaymentMethodId, string? InstallmentInfo = null) : IRequest<Transaction>;
-public record GetTransactionsQuery() : IRequest<IEnumerable<Transaction>>;
+public record GetTransactionsQuery(int UserId) : IRequest<IEnumerable<Transaction>>;
 public record UpdateTransactionCommand(int Id, string Title, string Description, decimal Amount, int CategoryId, DateTime Date) : IRequest<bool>;
 public record DeleteTransactionCommand(int Id) : IRequest<bool>;
 
@@ -28,7 +28,10 @@ public class PaymentMethodHandlers(IRepository<Transaction> repository) :
     }
 
     public async Task<IEnumerable<Transaction>> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
-        => await repository.GetAllAsync(cancellationToken);
+    {
+        var transactions = await repository.GetAllAsync(cancellationToken);
+        return transactions.Where(t => t.UserId == request.UserId);
+    }
 
     public async Task<bool> Handle(UpdateTransactionCommand request, CancellationToken cancellationToken)
     {

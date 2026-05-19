@@ -14,8 +14,8 @@ public static class PaymentMethodEndpoints
             return Results.Created($"/api/paymentmethods/{paymentMethod.Id}", paymentMethod);
         });
 
-        group.MapGet("/", async ([FromServices] IMediator mediator) =>
-            Results.Ok(await mediator.Send(new GetPaymentMethodsQuery())));
+        group.MapGet("/", async ([FromQuery] int userId, [FromServices] IMediator mediator) =>
+            Results.Ok(await mediator.Send(new GetPaymentMethodsQuery(userId))));
 
         group.MapPut("/{id:int}/update-details", async (int id, [FromBody] UpdatePaymentDetailsDto dto, [FromServices] IMediator mediator) =>
             await mediator.Send(new UpdatePaymentMethodDetailsCommand(id, dto.Name, dto.Type)) 
