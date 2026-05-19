@@ -100,6 +100,34 @@ public static class DataSeeder
             
             context.Set<Transaction>().AddRange(transactions);
             await context.SaveChangesAsync();
+
+            // 5. Generate Fake Goals for each User
+            var goalNames = new[] { "Vacation", "Emergency Fund", "New Car", "iPhone", "Investment", "Retirement", "Education", "Home Down Payment" };
+            var goalIcons = new[] { "✈️", "🛡️", "🚗", "📱", "📈", "🏖️", "📚", "🏠" };
+            var goalColors = new[] { "#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899", "#14B8A6", "#F43F5E", "#6366F1" };
+            var goals = new List<Goal>();
+
+            foreach (var user in fakeUsers)
+            {
+                int numberOfGoals = faker.Random.Int(2, 5);
+                var usedIndexes = new HashSet<int>();
+                
+                for (int i = 0; i < numberOfGoals; i++)
+                {
+                    int idx;
+                    do { idx = faker.Random.Int(0, goalNames.Length - 1); } while (usedIndexes.Contains(idx));
+                    usedIndexes.Add(idx);
+
+                    var target = Math.Round(faker.Random.Decimal(500, 15000), 2);
+                    var current = Math.Round(faker.Random.Decimal(0, target), 2);
+                    var deadline = faker.Random.Bool(0.7f) ? faker.Date.Future(2).ToUniversalTime() : (DateTime?)null;
+
+                    goals.Add(new Goal(goalNames[idx], goalIcons[idx], goalColors[idx], target, current, deadline, user.Id));
+                }
+            }
+
+            context.Set<Goal>().AddRange(goals);
+            await context.SaveChangesAsync();
         }
     }
 }

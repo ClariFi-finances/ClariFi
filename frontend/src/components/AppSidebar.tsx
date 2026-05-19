@@ -10,14 +10,14 @@ type NavItem = {
   id: string
   label: string
   icon: string
-  targetScreen?: 'home' | 'profile' | 'settings' | 'transactions'
+  targetScreen?: 'home' | 'profile' | 'settings' | 'transactions' | 'reports' | 'goals'
   disabled?: boolean
 }
 
 const NAV_ITEMS: NavItem[] = [
   { id: 'home', label: 'Inicio', icon: 'home', targetScreen: 'home' },
   { id: 'reports', label: 'Relatorios', icon: 'reports', targetScreen: 'reports' },
-  { id: 'goals', label: 'Metas', icon: 'goals', disabled: true },
+  { id: 'goals', label: 'Metas', icon: 'goals', targetScreen: 'goals' },
   { id: 'transactions', label: 'Transacoes', icon: 'transactions', targetScreen: 'transactions' },
   { id: 'settings', label: 'Configuracoes', icon: 'settings', targetScreen: 'settings' },
 ]
@@ -182,7 +182,11 @@ export function AppSidebar() {
             </div>
           </div>
         )}
-        <button className="mobile-nav-item" type="button" disabled>
+        <button
+          className={`mobile-nav-item ${activeScreen === 'goals' ? 'active' : ''}`}
+          type="button"
+          onClick={() => setActiveScreen('goals')}
+        >
           <Target size={18} className="mobile-icon" />
           <span>{t('sidebar.nav.goals', 'Goals')}</span>
         </button>

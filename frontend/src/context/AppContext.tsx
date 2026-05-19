@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, type ReactNode } from 'react'
 
-export type Screen = 'login' | 'register' | 'home' | 'profile' | 'settings' | 'transactions' | 'reports'
+export type Screen = 'login' | 'register' | 'home' | 'profile' | 'settings' | 'transactions' | 'reports' | 'goals'
 
 export type Theme = 'claro' | 'escuro' | 'sistema'
 

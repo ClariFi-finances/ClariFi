@@ -261,5 +261,50 @@
     "newCategoryPlaceholder": "Nova categoria...",
     "addBtn": "Adicionar",
     "deleteTooltip": "Excluir"
+  },
+  "goals": {
+    "title": "Metas",
+    "subtitle": "Organize seus objetivos financeiros",
+    "newGoal": "Nova Meta",
+    "empty": "Você ainda não tem metas. Crie uma para começar a poupar!",
+    "loading": "Carregando metas...",
+    "saved": "Guardado",
+    "remaining": "Faltam",
+    "target": "Objetivo",
+    "deadline": "Prazo",
+    "noDeadline": "Sem prazo",
+    "progress": "Progresso",
+    "deposit": "Depositar",
+    "withdraw": "Resgatar",
+    "delete": "Excluir meta",
+    "completed": "Meta atingida! 🎉",
+    "create": {
+      "title": "Criar Nova Meta",
+      "name": "Nome da meta",
+      "namePlaceholder": "Ex: Viagem para Europa",
+      "icon": "Ícone",
+      "iconPlaceholder": "Ex: ✈️",
+      "color": "Cor",
+      "targetAmount": "Valor objetivo",
+      "targetAmountPlaceholder": "0,00",
+      "initialAmount": "Valor inicial",
+      "initialAmountPlaceholder": "0,00",
+      "deadline": "Data limite (opcional)",
+      "submit": "Criar Meta",
+      "submitting": "Criando..."
+    },
+    "transaction": {
+      "depositTitle": "Depositar na meta",
+      "withdrawTitle": "Resgatar da meta",
+      "amount": "Valor",
+      "amountPlaceholder": "0,00",
+      "submit": "Confirmar",
+      "submitting": "Processando..."
+    },
+    "confirmDelete": "Tem certeza que deseja excluir esta meta?",
+    "deleteError": "Erro ao excluir a meta.",
+    "createError": "Erro ao criar a meta.",
+    "transactionError": "Erro na operação.",
+    "transactionSuccess": "Operação realizada com sucesso!"
   }
 }

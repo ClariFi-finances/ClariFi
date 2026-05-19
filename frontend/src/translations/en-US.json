@@ -261,5 +261,50 @@
     "newCategoryPlaceholder": "New category...",
     "addBtn": "Add",
     "deleteTooltip": "Delete"
+  },
+  "goals": {
+    "title": "Goals",
+    "subtitle": "Organize your financial objectives",
+    "newGoal": "New Goal",
+    "empty": "You don't have any goals yet. Create one to start saving!",
+    "loading": "Loading goals...",
+    "saved": "Saved",
+    "remaining": "Remaining",
+    "target": "Target",
+    "deadline": "Deadline",
+    "noDeadline": "No deadline",
+    "progress": "Progress",
+    "deposit": "Deposit",
+    "withdraw": "Withdraw",
+    "delete": "Delete goal",
+    "completed": "Goal achieved! 🎉",
+    "create": {
+      "title": "Create New Goal",
+      "name": "Goal name",
+      "namePlaceholder": "e.g. Trip to Europe",
+      "icon": "Icon",
+      "iconPlaceholder": "e.g. ✈️",
+      "color": "Color",
+      "targetAmount": "Target amount",
+      "targetAmountPlaceholder": "0.00",
+      "initialAmount": "Initial amount",
+      "initialAmountPlaceholder": "0.00",
+      "deadline": "Deadline (optional)",
+      "submit": "Create Goal",
+      "submitting": "Creating..."
+    },
+    "transaction": {
+      "depositTitle": "Deposit to goal",
+      "withdrawTitle": "Withdraw from goal",
+      "amount": "Amount",
+      "amountPlaceholder": "0.00",
+      "submit": "Confirm",
+      "submitting": "Processing..."
+    },
+    "confirmDelete": "Are you sure you want to delete this goal?",
+    "deleteError": "Error deleting goal.",
+    "createError": "Error creating goal.",
+    "transactionError": "Transaction error.",
+    "transactionSuccess": "Transaction completed successfully!"
   }
 }
