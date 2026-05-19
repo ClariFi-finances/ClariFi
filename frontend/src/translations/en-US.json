@@ -229,6 +229,27 @@
     "helpSupportDesc": "FAQs and tutorials",
     "logout": "Sign out"
   },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Detailed analysis of your finances",
+    "filters": {
+      "thisMonth": "This month",
+      "lastMonth": "Last month",
+      "last3Months": "Last 3 months",
+      "thisYear": "This year"
+    },
+    "cards": {
+      "income": "Income",
+      "expense": "Expenses",
+      "balance": "Balance"
+    },
+    "charts": {
+      "incomeVsExpense": "Income vs Expenses",
+      "expenseDistribution": "Expense Distribution",
+      "expenseByCategory": "Expenses by Category",
+      "monthlyComparison": "Monthly Comparison"
+    }
+  },
   "categoryModal": {
     "tag": "FINANCES",
     "title": "Manage Categories",

@@ -16,7 +16,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { id: 'home', label: 'Inicio', icon: 'home', targetScreen: 'home' },
-  { id: 'reports', label: 'Relatorios', icon: 'reports', disabled: true },
+  { id: 'reports', label: 'Relatorios', icon: 'reports', targetScreen: 'reports' },
   { id: 'goals', label: 'Metas', icon: 'goals', disabled: true },
   { id: 'transactions', label: 'Transacoes', icon: 'transactions', targetScreen: 'transactions' },
   { id: 'settings', label: 'Configuracoes', icon: 'settings', targetScreen: 'settings' },
@@ -140,7 +140,11 @@ export function AppSidebar() {
           <Home size={18} className="mobile-icon" />
           <span>{t('sidebar.nav.home', 'Home')}</span>
         </button>
-        <button className="mobile-nav-item" type="button" disabled>
+        <button
+          className={`mobile-nav-item ${activeScreen === 'reports' ? 'active' : ''}`}
+          type="button"
+          onClick={() => setActiveScreen('reports')}
+        >
           <BarChart3 size={18} className="mobile-icon" />
           <span>{t('sidebar.nav.reports', 'Reports')}</span>
         </button>

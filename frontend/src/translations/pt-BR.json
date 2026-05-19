@@ -229,6 +229,27 @@
     "helpSupportDesc": "Dúvidas e tutoriais",
     "logout": "Sair da conta"
   },
+  "reports": {
+    "title": "Relatórios",
+    "subtitle": "Análise detalhada das suas finanças",
+    "filters": {
+      "thisMonth": "Este mês",
+      "lastMonth": "Último mês",
+      "last3Months": "Últimos 3 meses",
+      "thisYear": "Este ano"
+    },
+    "cards": {
+      "income": "Receitas",
+      "expense": "Despesas",
+      "balance": "Saldo"
+    },
+    "charts": {
+      "incomeVsExpense": "Receitas vs Despesas",
+      "expenseDistribution": "Distribuição de Gastos",
+      "expenseByCategory": "Gastos por Categoria",
+      "monthlyComparison": "Comparativo Mensal"
+    }
+  },
   "categoryModal": {
     "tag": "FINANÇAS",
     "title": "Gerenciar Categorias",

@@ -4,6 +4,7 @@ import { HomeScreen } from '@/screens/HomeScreen'
 import { ProfileScreen } from '@/screens/ProfileScreen'
 import { SettingsScreen } from '@/screens/SettingsScreen'
 import { TransactionsScreen } from '@/screens/TransactionsScreen'
+import { ReportsScreen } from '@/screens/ReportsScreen'
 import { LoginScreen } from '@/screens/Auth/LoginScreen'
 import { RegisterScreen } from '@/screens/Auth/RegisterScreen'
 import { ConfirmAccountScreen } from '@/screens/Auth/ConfirmAccountScreen'
@@ -49,6 +50,8 @@ function App() {
         <SettingsScreen />
       ) : activeScreen === 'transactions' ? (
         <TransactionsScreen />
+      ) : activeScreen === 'reports' ? (
+        <ReportsScreen />
       ) : (
         <HomeScreen />
       )}
