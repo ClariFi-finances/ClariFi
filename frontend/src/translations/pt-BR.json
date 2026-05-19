@@ -247,7 +247,16 @@
       "incomeVsExpense": "Receitas vs Despesas",
       "expenseDistribution": "Distribuição de Gastos",
       "expenseByCategory": "Gastos por Categoria",
-      "monthlyComparison": "Comparativo Mensal"
+      "monthlyComparison": "Comparativo Mensal",
+      "goalsOverview": "Visão Geral das Metas"
+    },
+    "goals": {
+      "totalSaved": "Total Guardado",
+      "totalTarget": "Objetivo Total",
+      "completed": "Concluídas",
+      "inProgress": "Em Andamento",
+      "progress": "Progresso Geral",
+      "empty": "Nenhuma meta criada ainda."
     }
   },
   "categoryModal": {

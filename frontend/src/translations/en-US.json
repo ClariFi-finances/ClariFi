@@ -247,7 +247,16 @@
       "incomeVsExpense": "Income vs Expenses",
       "expenseDistribution": "Expense Distribution",
       "expenseByCategory": "Expenses by Category",
-      "monthlyComparison": "Monthly Comparison"
+      "monthlyComparison": "Monthly Comparison",
+      "goalsOverview": "Goals Overview"
+    },
+    "goals": {
+      "totalSaved": "Total Saved",
+      "totalTarget": "Total Target",
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "progress": "Overall Progress",
+      "empty": "No goals created yet."
     }
   },
   "categoryModal": {

@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts'
-import { ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Target } from 'lucide-react'
 import { useAuth } from '@/context/useAuth'
 import { getAuthHeaders } from '@/config/api'
 import { apiRequest, getErrorMessage } from '@/utils/apiClient'
@@ -26,6 +26,17 @@ interface ApiCategory {
   userId: number
 }
 
+interface ApiGoal {
+  id: number
+  name: string
+  icon: string | null
+  color: string | null
+  targetAmount: number
+  currentAmount: number
+  deadline: string | null
+  userId: number
+}
+
 type FilterPeriod = 'thisMonth' | 'lastMonth' | 'last3Months' | 'thisYear'
 
 const PIE_COLORS = ['#F59E0B', '#6366F1', '#8B5CF6', '#EC4899', '#14B8A6', '#F43F5E', '#10B981', '#3B82F6']
@@ -36,6 +47,7 @@ export function ReportsScreen() {
   const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>('thisMonth')
   const [transactions, setTransactions] = useState<ApiTransaction[]>([])
   const [categories, setCategories] = useState<ApiCategory[]>([])
+  const [goals, setGoals] = useState<ApiGoal[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -47,13 +59,15 @@ export function ReportsScreen() {
     const loadData = async () => {
       setIsLoading(true)
       try {
-        const [transactionData, categoriesData] = await Promise.all([
+        const [transactionData, categoriesData, goalsData] = await Promise.all([
           apiRequest<ApiTransaction[]>(`/transactions?userId=${user.id}`, { headers }),
           apiRequest<ApiCategory[]>(`/categories?userId=${user.id}`, { headers }),
+          apiRequest<ApiGoal[]>(`/goals?userId=${user.id}`, { headers }),
         ])
         if (isActive) {
           setTransactions(transactionData)
           setCategories(categoriesData)
+          setGoals(goalsData)
         }
       } catch (err) {
         if (isActive) setError(getErrorMessage(err, t('common.error')))
@@ -74,6 +88,20 @@ export function ReportsScreen() {
     if (!user) return []
     return categories.filter(c => c.userId === user.id)
   }, [categories, user])
+
+  const userGoals = useMemo(() => {
+    if (!user) return []
+    return goals.filter(g => g.userId === user.id)
+  }, [goals, user])
+
+  // Goals summary
+  const goalsSummary = useMemo(() => {
+    const totalSaved = userGoals.reduce((sum, g) => sum + g.currentAmount, 0)
+    const totalTarget = userGoals.reduce((sum, g) => sum + g.targetAmount, 0)
+    const completedCount = userGoals.filter(g => g.currentAmount >= g.targetAmount).length
+    const overallProgress = totalTarget > 0 ? (totalSaved / totalTarget) * 100 : 0
+    return { totalSaved, totalTarget, completedCount, inProgress: userGoals.length - completedCount, overallProgress, total: userGoals.length }
+  }, [userGoals])
 
   // Filtering Logic
   const now = useMemo(() => new Date(), [])
@@ -306,6 +334,79 @@ export function ReportsScreen() {
                </div>
                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>-2.3% vs mes anterior</div>
             </div>
+          </div>
+
+          {/* Goals Overview */}
+          <div className="chart-card span-12">
+            <h3 className="chart-header">
+              <Target size={18} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 8 }} />
+              {t('reports.charts.goalsOverview')}
+            </h3>
+            {userGoals.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{t('reports.goals.empty')}</p>
+            ) : (
+              <div className="goals-report-section">
+                <div className="goals-report-stats">
+                  <div className="goals-report-stat">
+                    <span className="goals-report-stat-label">{t('reports.goals.totalSaved')}</span>
+                    <span className="goals-report-stat-value accent">{formatCurrency(goalsSummary.totalSaved)}</span>
+                  </div>
+                  <div className="goals-report-stat">
+                    <span className="goals-report-stat-label">{t('reports.goals.totalTarget')}</span>
+                    <span className="goals-report-stat-value">{formatCurrency(goalsSummary.totalTarget)}</span>
+                  </div>
+                  <div className="goals-report-stat">
+                    <span className="goals-report-stat-label">{t('reports.goals.completed')}</span>
+                    <span className="goals-report-stat-value" style={{ color: '#10B981' }}>{goalsSummary.completedCount}</span>
+                  </div>
+                  <div className="goals-report-stat">
+                    <span className="goals-report-stat-label">{t('reports.goals.inProgress')}</span>
+                    <span className="goals-report-stat-value" style={{ color: '#F59E0B' }}>{goalsSummary.inProgress}</span>
+                  </div>
+                </div>
+
+                <div className="goals-report-progress">
+                  <div className="goals-report-progress-header">
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('reports.goals.progress')}</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-h)' }}>{goalsSummary.overallProgress.toFixed(0)}%</span>
+                  </div>
+                  <div className="goals-report-progress-bar">
+                    <div className="goals-report-progress-fill" style={{ width: `${Math.min(100, goalsSummary.overallProgress)}%` }} />
+                  </div>
+                </div>
+
+                <div className="goals-report-list">
+                  {userGoals.map(goal => {
+                    const progress = goal.targetAmount > 0 ? Math.min(100, (goal.currentAmount / goal.targetAmount) * 100) : 100
+                    const done = goal.currentAmount >= goal.targetAmount
+                    return (
+                      <div key={goal.id} className="goals-report-item">
+                        <div className="goals-report-item-top">
+                          <div className="goals-report-item-icon" style={{ background: `${goal.color || '#F59E0B'}20` }}>
+                            {goal.icon || '🎯'}
+                          </div>
+                          <div className="goals-report-item-info">
+                            <span className="goals-report-item-name">{goal.name}</span>
+                            <span className="goals-report-item-amounts">
+                              {formatCurrency(goal.currentAmount)} / {formatCurrency(goal.targetAmount)}
+                            </span>
+                          </div>
+                          <span className={`goals-report-item-badge ${done ? 'done' : ''}`}>
+                            {done ? '✓' : `${progress.toFixed(0)}%`}
+                          </span>
+                        </div>
+                        <div className="goals-report-item-bar">
+                          <div
+                            className="goals-report-item-fill"
+                            style={{ width: `${progress}%`, background: done ? '#10B981' : (goal.color || '#F59E0B') }}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
         </div>
