@@ -460,6 +460,41 @@
   border-radius: 10px;
 }
 
+/* Emoji Picker */
+.goals-emoji-picker-container {
+  position: relative;
+}
+
+.goals-emoji-btn {
+  width: 100%;
+  height: 48px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.goals-emoji-btn:hover {
+  border-color: var(--accent-gold);
+  background: var(--bg-tertiary);
+}
+
+.goals-emoji-picker-dropdown {
+  position: absolute;
+  top: 56px;
+  left: 0;
+  z-index: 200;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  animation: goalsSlideUp 0.2s ease;
+}
+
 /* Color picker row */
 .color-options {
   display: flex;

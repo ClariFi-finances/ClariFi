@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Plus, ArrowUpCircle, ArrowDownCircle, Trash2, X, Target, Calendar } from 'lucide-react'
+import EmojiPicker, { Theme, type EmojiClickData } from 'emoji-picker-react'
 import { useAuth } from '@/context/useAuth'
 import { getAuthHeaders } from '@/config/api'
 import { apiRequest, getErrorMessage } from '@/utils/apiClient'
@@ -46,6 +47,9 @@ export function GoalsScreen() {
   const [formTarget, setFormTarget] = useState('')
   const [formInitial, setFormInitial] = useState('')
   const [formDeadline, setFormDeadline] = useState('')
+
+  // Emoji picker state
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
 
   // Transaction form state
   const [transactionAmount, setTransactionAmount] = useState('')
@@ -369,13 +373,28 @@ export function GoalsScreen() {
             <div className="goals-form-row">
               <div className="goals-form-group">
                 <label className="goals-form-label">{t('goals.create.icon')}</label>
-                <input
-                  className="goals-form-input"
-                  placeholder={t('goals.create.iconPlaceholder')}
-                  value={formIcon}
-                  onChange={e => setFormIcon(e.target.value)}
-                  style={{ textAlign: 'center', fontSize: 20 }}
-                />
+                <div className="goals-emoji-picker-container">
+                  <button
+                    type="button"
+                    className="goals-emoji-btn"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  >
+                    {formIcon}
+                  </button>
+                  {showEmojiPicker && (
+                    <div className="goals-emoji-picker-dropdown">
+                      <EmojiPicker
+                        theme={Theme.DARK}
+                        onEmojiClick={(emojiData: EmojiClickData) => {
+                          setFormIcon(emojiData.emoji)
+                          setShowEmojiPicker(false)
+                        }}
+                        width={300}
+                        height={350}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="goals-form-group">
                 <label className="goals-form-label">{t('goals.create.color')}</label>
