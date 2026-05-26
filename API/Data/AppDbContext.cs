@@ -9,6 +9,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Goal> Goals { get; set; }
+    public DbSet<FixedIncome> FixedIncomes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,6 +56,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.Color).HasMaxLength(7);
             entity.Property(e => e.TargetAmount).IsRequired();
             entity.Property(e => e.CurrentAmount).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UserId).IsRequired();
+        });
+
+        modelBuilder.Entity<API.Models.FixedIncome>(entity =>
+        {
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Amount).IsRequired();
+            entity.Property(e => e.DayOfMonth).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.Property(e => e.UserId).IsRequired();
         });

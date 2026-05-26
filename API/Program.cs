@@ -4,6 +4,7 @@ using API.Features.PaymentMethods;
 using API.Features.Transactions;
 using API.Features.Categories;
 using API.Features.Goals;
+using API.Features.FixedIncomes;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,7 @@ builder.Services.AddMapsterConfiguration();
 // ---- BUSINESS LOGIC
 builder.Services.AddAuthorization(); 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddHostedService<FixedIncomeBackgroundService>();
 
 // ---- MEDIATR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
@@ -88,6 +90,10 @@ app.MapGroup("/api/categories")
 app.MapGroup("/api/goals")
     .MapGoalEndpoints()
     .WithTags("Goals");
+
+app.MapGroup("/api/fixedincomes")
+    .MapFixedIncomeEndpoints()
+    .WithTags("FixedIncomes");
 
 await DataSeeder.SeedDataAsync(app.Services);
 
