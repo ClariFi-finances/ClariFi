@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import type { ReactElement } from 'react'
 import { useAuth } from '@/context/useAuth'
-import { BarChart3, Home, Plus, Settings, Target, User, ArrowUpCircle, ArrowDownCircle, Camera } from 'lucide-react'
+import { BarChart3, Home, Plus, Settings, Target, User, ArrowUpCircle, ArrowDownCircle, Camera, Loader2 } from 'lucide-react'
 import { useApp } from '@/context/useApp'
 import { useI18n } from '@/hooks/useI18n'
+import Tesseract from 'tesseract.js'
 import './AppSidebar.css'
 
 type NavItem = {
@@ -32,10 +33,75 @@ const NAV_ICON_MAP: Record<string, ReactElement> = {
 
 export function AppSidebar() {
   const { user } = useAuth()
-  const { activeScreen, setActiveScreen, setIsNewTransactionModalOpen, setTransactionModalMode } = useApp()
+  const { activeScreen, setActiveScreen, setIsNewTransactionModalOpen, setTransactionModalMode, setInitialTransactionAmount } = useApp()
   const { t } = useI18n()
   const [isQuickMenuOpen, setIsQuickMenuOpen] = useState(false)
+  const [isScanning, setIsScanning] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleScan = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setIsScanning(true)
+    try {
+      // Run OCR using Tesseract
+      const result = await Tesseract.recognize(file, 'por+eng')
+      const text = result.data.text
+      
+      // Remove any numbers followed by a % sign (e.g. 10,00%, 22.00%)
+      const cleanText = text.replace(/\d+[.,]\d{2}\s*%/g, '')
+      
+      const lines = cleanText.split('\n')
+      let extractedAmount = 0
+      
+      // Pass 1: Look for keywords like "TOTAL", "VALOR", "COMPLESSIVO"
+      for (let i = 0; i < lines.length; i++) {
+        const lowerLine = lines[i].toLowerCase()
+        if (lowerLine.includes('total') || lowerLine.includes('valor') || lowerLine.includes('complessivo')) {
+          // Check this line and the next line for numbers
+          const searchArea = lines[i] + ' ' + (lines[i + 1] || '')
+          const matches = searchArea.match(/\d+[.,]\d{2}/g)
+          if (matches) {
+            matches.forEach(m => {
+              const parsed = parseFloat(m.replace(',', '.'))
+              if (!isNaN(parsed) && parsed > extractedAmount) {
+                extractedAmount = parsed
+              }
+            })
+          }
+        }
+      }
+
+      // Pass 2: If we didn't find anything near "TOTAL", fallback to the maximum amount found in the entire clean text
+      if (extractedAmount === 0) {
+        const fallbackMatches = cleanText.match(/\d+[.,]\d{2}/g) || []
+        fallbackMatches.forEach(m => {
+          const parsed = parseFloat(m.replace(',', '.'))
+          if (!isNaN(parsed) && parsed > extractedAmount) {
+            extractedAmount = parsed
+          }
+        })
+      }
+
+      if (extractedAmount > 0) {
+        setInitialTransactionAmount(extractedAmount.toString())
+      } else {
+        setInitialTransactionAmount('')
+      }
+      
+      openModal('expense')
+    } catch (error) {
+      console.error('Error during OCR:', error)
+      alert(t('home.scanError', 'Failed to read the receipt.'))
+    } finally {
+      setIsScanning(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -89,11 +155,27 @@ export function AppSidebar() {
                 <ArrowDownCircle size={18} className="quick-menu-icon" />
                 <span>{t('home.expense')}</span>
               </button>
-              <button className="quick-menu-item" type="button" disabled>
-                <Camera size={18} className="quick-menu-icon" />
-                <span>{t('home.scan')}</span>
-                <span className="quick-menu-hint">{t('home.scanDisabled')}</span>
+              <button 
+                className="quick-menu-item" 
+                type="button" 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isScanning}
+              >
+                {isScanning ? (
+                  <Loader2 size={18} className="quick-menu-icon spin" />
+                ) : (
+                  <Camera size={18} className="quick-menu-icon" />
+                )}
+                <span>{isScanning ? t('home.scanning', 'Scanning...') : t('home.scan', 'Scan Receipt')}</span>
               </button>
+              <input 
+                type="file" 
+                accept="image/*" 
+                capture="environment" 
+                ref={fileInputRef} 
+                style={{ display: 'none' }} 
+                onChange={handleScan}
+              />
             </div>
           )}
         </div>
@@ -175,9 +257,21 @@ export function AppSidebar() {
                 <ArrowDownCircle size={18} className="quick-menu-icon" />
                 <span>{t('home.expense')}</span>
               </button>
-              <button className="quick-menu-item" type="button" disabled>
-                <Camera size={18} className="quick-menu-icon" />
-                <span>{t('home.scan')}</span>
+              <button 
+                className="quick-menu-item" 
+                type="button" 
+                onClick={(e) => {
+                  e.stopPropagation()
+                  fileInputRef.current?.click()
+                }}
+                disabled={isScanning}
+              >
+                {isScanning ? (
+                  <Loader2 size={18} className="quick-menu-icon spin" />
+                ) : (
+                  <Camera size={18} className="quick-menu-icon" />
+                )}
+                <span>{isScanning ? t('home.scanning', 'Scanning...') : t('home.scan', 'Scan Receipt')}</span>
               </button>
             </div>
           </div>

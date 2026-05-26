@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import './TransactionModal.css'
 
 export interface TransactionModalCategoryOption {
@@ -23,6 +23,7 @@ interface TransactionModalProps {
   categories: TransactionModalCategoryOption[]
   paymentMethods: TransactionModalPaymentMethod[]
   goals?: TransactionModalGoalOption[]
+  initialAmount?: string
   isSubmitting: boolean
   error: string | null
   onClose: () => void
@@ -45,6 +46,7 @@ export function TransactionModal({
   categories,
   paymentMethods,
   goals = [],
+  initialAmount = '',
   isSubmitting,
   error,
   onClose,
@@ -58,12 +60,18 @@ export function TransactionModal({
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [amount, setAmount] = useState('')
+  const [amount, setAmount] = useState(initialAmount)
   const [date, setDate] = useState(initialDate)
   const [category, setCategory] = useState(categories[0]?.value ?? '')
   const [paymentMethodId, setPaymentMethodId] = useState(paymentMethods[0]?.id.toString() ?? '')
   const [installmentInfo, setInstallmentInfo] = useState('')
   const [goalId, setGoalId] = useState('')
+
+  useEffect(() => {
+    if (isOpen && initialAmount) {
+      setAmount(initialAmount)
+    }
+  }, [isOpen, initialAmount])
 
   const primaryLabel = mode === 'income' ? t('home.income') : t('home.expense')
 

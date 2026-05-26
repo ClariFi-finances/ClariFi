@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowDownCircle, ArrowUpCircle, Bell, Camera, Plus, Target } from 'lucide-react'
+import { ArrowDownCircle, ArrowUpCircle, Bell, Camera, Plus, Target, Loader2 } from 'lucide-react'
 import { AreaChart, Area, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useApp } from '@/context/useApp'
 import { useAuth } from '@/context/useAuth'
@@ -7,6 +7,7 @@ import { getAuthHeaders } from '@/config/api'
 import { apiRequest, getErrorMessage } from '@/utils/apiClient'
 import { useI18n } from '@/hooks/useI18n'
 import { TransactionModal } from '@/components/TransactionModal'
+import Tesseract from 'tesseract.js'
 import './HomeScreen.css'
 
 interface ApiTransaction {
@@ -51,7 +52,7 @@ interface ApiGoal {
 export function HomeScreen() {
   const { user, token } = useAuth()
   const { t, language } = useI18n()
-  const { setActiveScreen, isNewTransactionModalOpen, setIsNewTransactionModalOpen, transactionModalMode } = useApp()
+  const { setActiveScreen, isNewTransactionModalOpen, setIsNewTransactionModalOpen, transactionModalMode, initialTransactionAmount, setInitialTransactionAmount } = useApp()
 
   const [showValues, setShowValues] = useState(true)
   const [activeView, setActiveView] = useState<'dashboard' | 'transactions'>('dashboard')
@@ -71,6 +72,65 @@ export function HomeScreen() {
   const quickMenuRef = useRef<HTMLDivElement | null>(null)
   const quickMenuButtonRef = useRef<HTMLButtonElement | null>(null)
   const quickMenuFabRef = useRef<HTMLButtonElement | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isScanning, setIsScanning] = useState(false)
+
+  const handleScan = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setIsScanning(true)
+    try {
+      const result = await Tesseract.recognize(file, 'por+eng')
+      const text = result.data.text
+      
+      const cleanText = text.replace(/\d+[.,]\d{2}\s*%/g, '')
+      const lines = cleanText.split('\n')
+      let extractedAmount = 0
+      
+      for (let i = 0; i < lines.length; i++) {
+        const lowerLine = lines[i].toLowerCase()
+        if (lowerLine.includes('total') || lowerLine.includes('valor') || lowerLine.includes('complessivo')) {
+          const searchArea = lines[i] + ' ' + (lines[i + 1] || '')
+          const matches = searchArea.match(/\d+[.,]\d{2}/g)
+          if (matches) {
+            matches.forEach(m => {
+              const parsed = parseFloat(m.replace(',', '.'))
+              if (!isNaN(parsed) && parsed > extractedAmount) {
+                extractedAmount = parsed
+              }
+            })
+          }
+        }
+      }
+
+      if (extractedAmount === 0) {
+        const fallbackMatches = cleanText.match(/\d+[.,]\d{2}/g) || []
+        fallbackMatches.forEach(m => {
+          const parsed = parseFloat(m.replace(',', '.'))
+          if (!isNaN(parsed) && parsed > extractedAmount) {
+            extractedAmount = parsed
+          }
+        })
+      }
+
+      if (extractedAmount > 0) {
+        setInitialTransactionAmount(extractedAmount.toString())
+      } else {
+        setInitialTransactionAmount('')
+      }
+      
+      openModal('expense')
+    } catch (err) {
+      console.error('Error during OCR:', err)
+      alert(t('home.scanError', 'Failed to read the receipt.'))
+    } finally {
+      setIsScanning(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
 
   const headers = useMemo(() => getAuthHeaders(token, user?.cognitoId), [token, user])
 
@@ -441,11 +501,27 @@ export function HomeScreen() {
             <ArrowDownCircle size={18} className="quick-menu-icon" />
             <span>{t('home.expense')}</span>
           </button>
-          <button className="quick-menu-item" type="button" disabled>
-            <Camera size={18} className="quick-menu-icon" />
-            <span>{t('home.scan')}</span>
-            <span className="quick-menu-hint">{t('home.scanDisabled')}</span>
+          <button 
+            className="quick-menu-item" 
+            type="button" 
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isScanning}
+          >
+            {isScanning ? (
+              <Loader2 size={18} className="quick-menu-icon spin" />
+            ) : (
+              <Camera size={18} className="quick-menu-icon" />
+            )}
+            <span>{isScanning ? t('home.scanning', 'Scanning...') : t('home.scan', 'Scan Receipt')}</span>
           </button>
+          <input 
+            type="file" 
+            accept="image/*" 
+            capture="environment" 
+            ref={fileInputRef} 
+            style={{ display: 'none' }} 
+            onChange={handleScan}
+          />
         </div>
       ) : null}
 
@@ -675,6 +751,7 @@ export function HomeScreen() {
         goals={goals.filter(g => g.userId === user?.id).map(g => ({ id: g.id, name: g.name, icon: g.icon }))}
         isSubmitting={isSubmitting}
         error={modalError}
+        initialAmount={initialTransactionAmount}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleCreateTransaction}
         t={t}
