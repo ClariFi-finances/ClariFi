@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, ArrowUpCircle, ArrowDownCircle, Trash2, X, Target, Calendar } from 'lucide-react'
+import { Plus, ArrowUpCircle, ArrowDownCircle, Trash2, X, Calendar } from 'lucide-react'
 import EmojiPicker, { Theme, type EmojiClickData } from 'emoji-picker-react'
 import { useAuth } from '@/context/useAuth'
 import { getAuthHeaders } from '@/config/api'

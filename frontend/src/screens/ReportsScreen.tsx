@@ -234,7 +234,7 @@ export function ReportsScreen() {
                   <RechartsTooltip 
                     cursor={{ fill: 'var(--surface-hover)' }}
                     contentStyle={{ backgroundColor: 'var(--surface-color)', borderColor: 'var(--border)', borderRadius: 8, color: 'var(--text-primary)' }}
-                    formatter={(value: number) => formatCurrency(value)}
+                    formatter={(value: any) => formatCurrency(Number(value))}
                   />
                   <Bar dataKey="income" name={t('reports.cards.income')} fill="#10B981" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="expense" name={t('reports.cards.expense')} fill="#EF4444" radius={[4, 4, 0, 0]} />
@@ -268,7 +268,7 @@ export function ReportsScreen() {
                     </Pie>
                     <RechartsTooltip 
                       contentStyle={{ backgroundColor: 'var(--surface-color)', borderColor: 'var(--border)', borderRadius: 8, color: 'var(--text-primary)' }}
-                      formatter={(value: number) => formatCurrency(value)}
+                      formatter={(value: any) => formatCurrency(Number(value))}
                     />
                   </PieChart>
                 </ResponsiveContainer>

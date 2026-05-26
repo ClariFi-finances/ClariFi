@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'node:url'
 import { SSMClient, GetParametersCommand } from "@aws-sdk/client-ssm"
 
+import { VitePWA } from 'vite-plugin-pwa'
+
 // Fetch from AWS SSM dynamically before Vite starts
 async function fetchSSMParams() {
   const ssmClient = new SSMClient({ region: process.env.AWS_REGION || "sa-east-1" })
@@ -40,7 +42,45 @@ export default defineConfig(async () => {
   const ssmParams = await fetchSSMParams()
 
   return {
-    plugins: [react()],
+    server: {
+      allowedHosts: true
+    },
+    plugins: [
+      react(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        devOptions: {
+          enabled: true
+        },
+        includeAssets: ['favicon.svg', 'favicon_aws.svg', 'icons.svg'],
+        manifest: {
+          name: 'ClariFi',
+          short_name: 'ClariFi',
+          description: 'ClariFi Finances App',
+          theme_color: '#ffffff',
+          background_color: '#ffffff',
+          display: 'standalone',
+          icons: [
+            {
+              src: 'favicon.svg',
+              sizes: 'any',
+              type: 'image/svg+xml'
+            },
+            {
+              src: 'favicon.svg',
+              sizes: '192x192',
+              type: 'image/svg+xml'
+            },
+            {
+              src: 'favicon.svg',
+              sizes: '512x512',
+              type: 'image/svg+xml',
+              purpose: 'any maskable'
+            }
+          ]
+        }
+      })
+    ],
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
