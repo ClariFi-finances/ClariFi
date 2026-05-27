@@ -9,7 +9,9 @@
 }
 
 .app-shell-sidebar-panel {
-  min-height: calc(100vh - 32px);
+  position: sticky;
+  top: 16px;
+  height: calc(100vh - 32px);
 }
 
 .app-shell-main-panel {
