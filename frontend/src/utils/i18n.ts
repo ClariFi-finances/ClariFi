@@ -27,7 +27,7 @@ export class I18n {
     }
   }
 
-  static t(key: string, defaultValue?: string): string {
+  static t(key: string, options?: Record<string, string | number>, defaultValue?: string): string {
     const keys = key.split('.')
     let value: unknown = translations[this.currentLanguage] as Record<string, unknown>
 
@@ -39,7 +39,15 @@ export class I18n {
       }
     }
 
-    return typeof value === 'string' ? value : defaultValue || key
+    let text = typeof value === 'string' ? value : defaultValue || key
+
+    if (options && typeof text === 'string') {
+      for (const [k, v] of Object.entries(options)) {
+        text = text.replace(new RegExp(`{{${k}}}`, 'g'), String(v))
+      }
+    }
+
+    return text
   }
 
   static getTranslations() {

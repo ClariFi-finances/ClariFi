@@ -320,5 +320,16 @@
     "createError": "Error creating goal.",
     "transactionError": "Transaction error.",
     "transactionSuccess": "Transaction completed successfully!"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No new notifications.",
+    "markRead": "Mark as read",
+    "budgetAlertTitle": "Budget Alert",
+    "budgetAlertMessage": "Attention: You've spent more than you earned this month!",
+    "goalProgressTitle": "Goal Progress!",
+    "goalProgressMessage": "Congratulations! You reached 50% of your '{{goalName}}' goal!",
+    "goalCompletedTitle": "Goal Completed! 🎉",
+    "goalCompletedMessage": "Amazing! You reached 100% of your '{{goalName}}' goal!"
   }
 }

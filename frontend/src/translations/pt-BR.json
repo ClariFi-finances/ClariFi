@@ -320,5 +320,16 @@
     "createError": "Erro ao criar a meta.",
     "transactionError": "Erro na operação.",
     "transactionSuccess": "Operação realizada com sucesso!"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "empty": "Nenhuma notificação nova.",
+    "markRead": "Marcar como lido",
+    "budgetAlertTitle": "Alerta de Orçamento",
+    "budgetAlertMessage": "Atenção: Você gastou mais do que ganhou este mês!",
+    "goalProgressTitle": "Progresso de Meta!",
+    "goalProgressMessage": "Parabéns! Você alcançou 50% da sua meta '{{goalName}}'!",
+    "goalCompletedTitle": "Meta Concluída! 🎉",
+    "goalCompletedMessage": "Incrível! Você alcançou 100% da sua meta '{{goalName}}'!"
   }
 }

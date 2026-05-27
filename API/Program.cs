@@ -5,6 +5,7 @@ using API.Features.Transactions;
 using API.Features.Categories;
 using API.Features.Goals;
 using API.Features.FixedIncomes;
+using API.Features.Notifications;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,6 +91,10 @@ app.MapGroup("/api/categories")
 app.MapGroup("/api/goals")
     .MapGoalEndpoints()
     .WithTags("Goals");
+
+app.MapGroup("/api/notifications")
+    .MapNotificationEndpoints()
+    .WithTags("Notifications");
 
 app.MapGroup("/api/fixedincomes")
     .MapFixedIncomeEndpoints()

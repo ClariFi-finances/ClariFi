@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Category> Categories { get; set; }
     public DbSet<Goal> Goals { get; set; }
     public DbSet<FixedIncome> FixedIncomes { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -65,6 +66,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
             entity.Property(e => e.Amount).IsRequired();
             entity.Property(e => e.DayOfMonth).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UserId).IsRequired();
+        });
+
+        modelBuilder.Entity<API.Models.Notification>(entity =>
+        {
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Message).IsRequired();
+            entity.Property(e => e.IsRead).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.Property(e => e.UserId).IsRequired();
         });

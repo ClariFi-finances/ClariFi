@@ -1,4 +1,6 @@
 using API.Infrastructure.Repositories;
+using API.Models;
+using Microsoft.EntityFrameworkCore;
 using MediatR;
 
 namespace API.Features.Transactions;
@@ -9,7 +11,7 @@ public record GetTransactionsQuery(int UserId) : IRequest<IEnumerable<Transactio
 public record UpdateTransactionCommand(int Id, string Title, string Description, decimal Amount, int CategoryId, DateTime Date) : IRequest<bool>;
 public record DeleteTransactionCommand(int Id) : IRequest<bool>;
 
-public class PaymentMethodHandlers(IRepository<Transaction> repository, IRepository<Goal> goalRepository) :
+public class PaymentMethodHandlers(IRepository<Transaction> repository, IRepository<Goal> goalRepository, API.Data.AppDbContext dbContext) :
     IRequestHandler<CreateTransactionCommand, Transaction>,
     IRequestHandler<GetTransactionsQuery, IEnumerable<Transaction>>,
     IRequestHandler<UpdateTransactionCommand, bool>,
@@ -26,14 +28,60 @@ public class PaymentMethodHandlers(IRepository<Transaction> repository, IReposit
         await repository.SaveChangesAsync(cancellationToken);
 
         // Auto-deposit to goal if linked
-        if (request.GoalId.HasValue && request.Type == TransactionType.Income)
+        if (request.GoalId.HasValue)
         {
             var goal = await goalRepository.GetByIdAsync(request.GoalId.Value, cancellationToken);
             if (goal != null)
             {
+                var beforePercent = goal.TargetAmount > 0 ? (goal.CurrentAmount / goal.TargetAmount) * 100 : 0;
+                
                 goal.Deposit(request.Amount);
+                
+                var afterPercent = goal.TargetAmount > 0 ? (goal.CurrentAmount / goal.TargetAmount) * 100 : 0;
+
                 await goalRepository.UpdateAsync(goal);
                 await goalRepository.SaveChangesAsync(cancellationToken);
+
+                if (beforePercent < 50 && afterPercent >= 50 && afterPercent < 100)
+                {
+                    var notification = new Notification("notifications.goalProgressTitle", $"notifications.goalProgressMessage||{goal.Name}", request.UserId);
+                    dbContext.Notifications.Add(notification);
+                    await dbContext.SaveChangesAsync(cancellationToken);
+                }
+                else if (beforePercent < 100 && afterPercent >= 100)
+                {
+                    var notification = new Notification("notifications.goalCompletedTitle", $"notifications.goalCompletedMessage||{goal.Name}", request.UserId);
+                    dbContext.Notifications.Add(notification);
+                    await dbContext.SaveChangesAsync(cancellationToken);
+                }
+            }
+        }
+
+        // Check Budget Overrun for Expenses
+        if (request.Type == TransactionType.Expense)
+        {
+            var now = DateTime.UtcNow;
+            var startOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+            var endOfMonth = startOfMonth.AddMonths(1);
+
+            var monthTransactions = await repository.GetAllAsync(cancellationToken);
+            var userMonthTransactions = monthTransactions.Where(t => t.UserId == request.UserId && t.Date >= startOfMonth && t.Date < endOfMonth).ToList();
+
+            var totalIncome = userMonthTransactions.Where(t => t.Type == TransactionType.Income).Sum(t => t.Amount);
+            var totalExpense = userMonthTransactions.Where(t => t.Type == TransactionType.Expense).Sum(t => t.Amount);
+
+            if (totalExpense > totalIncome)
+            {
+                // Verify if there is already an unread budget alert this month
+                var hasUnreadAlert = await dbContext.Notifications
+                    .AnyAsync(n => n.UserId == request.UserId && !n.IsRead && n.Title == "notifications.budgetAlertTitle" && n.CreatedAt >= startOfMonth, cancellationToken);
+                
+                if (!hasUnreadAlert)
+                {
+                    var notification = new Notification("notifications.budgetAlertTitle", "notifications.budgetAlertMessage", request.UserId);
+                    dbContext.Notifications.Add(notification);
+                    await dbContext.SaveChangesAsync(cancellationToken);
+                }
             }
         }
 

@@ -49,6 +49,15 @@ interface ApiGoal {
   userId: number
 }
 
+interface ApiNotification {
+  id: number
+  title: string
+  message: string
+  isRead: boolean
+  createdAt: string
+  userId: number
+}
+
 export function HomeScreen() {
   const { user, token } = useAuth()
   const { t, language } = useI18n()
@@ -62,6 +71,7 @@ export function HomeScreen() {
   const [paymentMethods, setPaymentMethods] = useState<ApiPaymentMethod[]>([])
   const [categories, setCategories] = useState<ApiCategory[]>([])
   const [goals, setGoals] = useState<ApiGoal[]>([])
+  const [notifications, setNotifications] = useState<ApiNotification[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -69,9 +79,12 @@ export function HomeScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [modalError, setModalError] = useState<string | null>(null)
   const [isQuickMenuOpen, setIsQuickMenuOpen] = useState(false)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const quickMenuRef = useRef<HTMLDivElement | null>(null)
   const quickMenuButtonRef = useRef<HTMLButtonElement | null>(null)
   const quickMenuFabRef = useRef<HTMLButtonElement | null>(null)
+  const notificationsMenuRef = useRef<HTMLDivElement | null>(null)
+  const notificationsButtonRef = useRef<HTMLButtonElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isScanning, setIsScanning] = useState(false)
 
@@ -143,11 +156,12 @@ export function HomeScreen() {
       setIsLoading(true)
       setError(null)
       try {
-        const [transactionData, paymentMethodData, categoriesData, goalsData] = await Promise.all([
+        const [transactionData, paymentMethodData, categoriesData, goalsData, notificationData] = await Promise.all([
           apiRequest<ApiTransaction[]>(`/transactions?userId=${user.id}`, { headers }),
           apiRequest<ApiPaymentMethod[]>(`/paymentmethods?userId=${user.id}`, { headers }),
           apiRequest<ApiCategory[]>(`/categories?userId=${user.id}`, { headers }),
           apiRequest<ApiGoal[]>(`/goals?userId=${user.id}`, { headers }),
+          apiRequest<ApiNotification[]>(`/notifications?userId=${user.id}`, { headers }),
         ])
 
         if (!isActive) {
@@ -158,6 +172,7 @@ export function HomeScreen() {
         setPaymentMethods(paymentMethodData)
         setCategories(categoriesData)
         setGoals(goalsData)
+        setNotifications(notificationData)
       } catch (err) {
         if (!isActive) {
           return
@@ -184,19 +199,26 @@ export function HomeScreen() {
 
     const handleClick = (event: MouseEvent) => {
       const target = event.target as Node
-      const isTriggerClick =
+      const isQuickMenuTrigger =
         (quickMenuButtonRef.current?.contains(target) ?? false) ||
         (quickMenuFabRef.current?.contains(target) ?? false)
-      const isMenuClick = quickMenuRef.current?.contains(target) ?? false
+      const isQuickMenu = quickMenuRef.current?.contains(target) ?? false
 
-      if (!isTriggerClick && !isMenuClick) {
+      const isNotifTrigger = notificationsButtonRef.current?.contains(target) ?? false
+      const isNotifMenu = notificationsMenuRef.current?.contains(target) ?? false
+
+      if (!isQuickMenuTrigger && !isQuickMenu) {
         setIsQuickMenuOpen(false)
+      }
+      if (!isNotifTrigger && !isNotifMenu) {
+        setIsNotificationsOpen(false)
       }
     }
 
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsQuickMenuOpen(false)
+        setIsNotificationsOpen(false)
       }
     }
 
@@ -371,7 +393,6 @@ export function HomeScreen() {
   const formatPercent = (value: number) => (showValues ? `${value.toFixed(0)}%` : '••')
 
   const budgetRatio = totals.income > 0 ? Math.min(100, (totals.expense / totals.income) * 100) : 0
-  const isOverBudget = totals.expense > totals.income
 
   const expenseDelta = previousMonthTotals.expense > 0
     ? ((totals.expense - previousMonthTotals.expense) / previousMonthTotals.expense) * 100
@@ -432,10 +453,29 @@ export function HomeScreen() {
       })
       setTransactions(prev => [newTransaction, ...prev])
       setIsModalOpen(false)
+
+      try {
+        const notifs = await apiRequest<ApiNotification[]>(`/notifications?userId=${user.id}`, { headers })
+        if (notifs) setNotifications(notifs)
+      } catch (err) {
+        console.error('Failed to refetch notifications:', err)
+      }
     } catch (err) {
       setModalError(getErrorMessage(err, t('home.saveError')))
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleMarkNotificationRead = async (id: number) => {
+    try {
+      await apiRequest(`/notifications/${id}/read`, {
+        method: 'PUT',
+        headers
+      })
+      setNotifications(prev => prev.filter(n => n.id !== id))
+    } catch (err) {
+      console.error('Failed to mark notification as read:', err)
     }
   }
 
@@ -464,9 +504,47 @@ export function HomeScreen() {
             <Plus size={18} />
             {t('home.newTransaction')}
           </button>
-          <button className="notification-btn" type="button" aria-label={t('home.notification')}>
-            <Bell size={18} />
-          </button>
+          <div style={{ position: 'relative' }}>
+            <button 
+              className="notification-btn" 
+              type="button" 
+              aria-label={t('home.notification')}
+              ref={notificationsButtonRef}
+              onClick={() => setIsNotificationsOpen(v => !v)}
+            >
+              <Bell size={18} />
+              {notifications && notifications.length > 0 && <span className="notification-dot" />}
+            </button>
+            {isNotificationsOpen && (
+              <div className="quick-menu" ref={notificationsMenuRef} role="menu" style={{ right: 0, left: 'auto', minWidth: '280px' }}>
+                <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>
+                  {t('notifications.title')}
+                </div>
+                {!notifications || notifications.length === 0 ? (
+                  <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    {t('notifications.empty')}
+                  </div>
+                ) : (
+                  notifications.map(notification => (
+                    <div key={notification.id} style={{ padding: '12px', borderBottom: '1px solid var(--border)' }}>
+                      <p style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--accent-gold)' }}>{t(notification.title)}</p>
+                      <p style={{ fontSize: 'var(--text-sm)', margin: '4px 0', color: 'var(--text-secondary)' }}>
+                        {notification.message.includes('||') 
+                          ? t(notification.message.split('||')[0], { goalName: notification.message.split('||')[1] })
+                          : t(notification.message)}
+                      </p>
+                      <button 
+                        onClick={() => handleMarkNotificationRead(notification.id)}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--text-h)', fontSize: '12px', padding: 0, marginTop: '4px', textDecoration: 'underline', cursor: 'pointer' }}
+                      >
+                        {t('notifications.markRead')}
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -572,16 +650,6 @@ export function HomeScreen() {
               </div>
               <span className="progress-value">{formatPercent(budgetRatio)}</span>
             </div>
-
-            {isOverBudget ? (
-              <div className="budget-alert span-12" role="status" aria-live="polite">
-                <span className="budget-alert-dot" />
-                <div>
-                  <p className="budget-alert-title">{t('home.budgetAlert')}</p>
-                  <p className="budget-alert-text">{t('home.budgetAlertText')}</p>
-                </div>
-              </div>
-            ) : null}
 
             <div className="card span-8">
               <div className="card-header">

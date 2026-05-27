@@ -14,7 +14,7 @@ public record WithdrawGoalCommand(int Id, decimal Amount) : IRequest<Goal?>;
 public record DeleteGoalCommand(int Id) : IRequest<bool>;
 
 // ---- Handlers ----
-public class GoalHandlers(IRepository<Goal> repository) :
+public class GoalHandlers(IRepository<Goal> repository, API.Data.AppDbContext dbContext) :
     IRequestHandler<CreateGoalCommand, Goal>,
     IRequestHandler<GetGoalsQuery, IEnumerable<Goal>>,
     IRequestHandler<GetGoalByIdQuery, Goal?>,
@@ -58,9 +58,27 @@ public class GoalHandlers(IRepository<Goal> repository) :
     public async Task<Goal?> Handle(DepositGoalCommand request, CancellationToken cancellationToken)
     {
         if (await repository.GetByIdAsync(request.Id, cancellationToken) is not { } goal) return null;
+        
+        var beforePercent = goal.TargetAmount > 0 ? (goal.CurrentAmount / goal.TargetAmount) * 100 : 0;
+        
         goal.Deposit(request.Amount);
+        
+        var afterPercent = goal.TargetAmount > 0 ? (goal.CurrentAmount / goal.TargetAmount) * 100 : 0;
+        
         await repository.UpdateAsync(goal);
         await repository.SaveChangesAsync(cancellationToken);
+                if (beforePercent < 50 && afterPercent >= 50 && afterPercent < 100)
+            {
+                var notification = new Notification("notifications.goalProgressTitle", $"notifications.goalProgressMessage||{goal.Name}", goal.UserId);
+                dbContext.Notifications.Add(notification);
+            }
+            else if (beforePercent < 100 && afterPercent >= 100)
+            {
+                var notification = new Notification("notifications.goalCompletedTitle", $"notifications.goalCompletedMessage||{goal.Name}", goal.UserId);
+                dbContext.Notifications.Add(notification);
+            }
+            await dbContext.SaveChangesAsync(cancellationToken);
+        
         return goal;
     }
 
