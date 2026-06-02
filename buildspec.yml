@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      dotnet: 9.0
+  pre_build:
+    commands:
+      - echo Restore started on `date`
+      - dotnet restore ClariFi.sln
+  build:
+    commands:
+      - echo Build started on `date`
+      - dotnet build ClariFi.sln --configuration Release --no-restore
+      - echo Testing started on `date`
+      - dotnet test ClariFi.sln --configuration Release --no-build --logger trx
+  post_build:
+    commands:
+      - echo Publish started on `date`
+      - dotnet publish API/API.csproj --configuration Release --output ./publish
+artifacts:
+  files:
+    - '**/*'
+  base-directory: ./publish
