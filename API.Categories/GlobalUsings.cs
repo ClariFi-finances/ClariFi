@@ -5,3 +5,4 @@ global using Microsoft.EntityFrameworkCore;
 global using API.Models;
 global using API.Data;
 global using API.Data.Configs.Mapster;
+global using Microsoft.Extensions.DependencyInjection;

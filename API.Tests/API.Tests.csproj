@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -23,7 +23,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\API\API.csproj" />
+    <ProjectReference Include="..\API.Core\API.Core.csproj" />
+    <ProjectReference Include="..\API.Users\API.Users.csproj" />
+    <ProjectReference Include="..\API.PaymentMethods\API.PaymentMethods.csproj" />
+    <ProjectReference Include="..\API.Transactions\API.Transactions.csproj" />
+    <ProjectReference Include="..\API.Categories\API.Categories.csproj" />
+    <ProjectReference Include="..\API.Goals\API.Goals.csproj" />
+    <ProjectReference Include="..\API.Notifications\API.Notifications.csproj" />
+    <ProjectReference Include="..\API.FixedIncomes\API.FixedIncomes.csproj" />
   </ItemGroup>
 
 </Project>
