@@ -61,7 +61,18 @@ interface ApiNotification {
 export function HomeScreen() {
   const { user, token } = useAuth()
   const { t, language } = useI18n()
-  const { setActiveScreen, isNewTransactionModalOpen, setIsNewTransactionModalOpen, transactionModalMode, initialTransactionAmount, setInitialTransactionAmount } = useApp()
+  const { 
+    setActiveScreen, 
+    isNewTransactionModalOpen, 
+    setIsNewTransactionModalOpen, 
+    transactionModalMode, 
+    initialTransactionAmount, 
+    setInitialTransactionAmount,
+    initialTransactionTitle,
+    setInitialTransactionTitle,
+    initialTransactionDate,
+    setInitialTransactionDate
+  } = useApp()
 
   const [showValues, setShowValues] = useState(true)
   const [activeView, setActiveView] = useState<'dashboard' | 'transactions'>('dashboard')
@@ -127,11 +138,53 @@ export function HomeScreen() {
         })
       }
 
+      // Extract Date
+      let extractedDate = ''
+      const dateRegex = /\b(\d{2})\/(\d{2})\/(\d{2,4})\b/
+      const dateMatch = cleanText.match(dateRegex)
+      if (dateMatch) {
+        const day = dateMatch[1]
+        const month = dateMatch[2]
+        let year = dateMatch[3]
+        if (year.length === 2) {
+          year = '20' + year
+        }
+        const testDate = new Date(`${year}-${month}-${day}`)
+        if (!isNaN(testDate.getTime())) {
+          extractedDate = `${year}-${month}-${day}`
+        }
+      }
+
+      // Extract Title (store name)
+      let extractedTitle = ''
+      for (let i = 0; i < Math.min(lines.length, 5); i++) {
+        const line = lines[i].trim()
+        const lowerLine = line.toLowerCase()
+        if (line.length < 3 || line.length > 50) continue
+        if (
+          lowerLine.includes('cnpj') || 
+          lowerLine.includes('tel') || 
+          lowerLine.includes('fone') || 
+          lowerLine.includes('data') || 
+          lowerLine.includes('hora') || 
+          lowerLine.includes('avenida') || 
+          lowerLine.includes('rua') || 
+          lowerLine.includes('www.') ||
+          lowerLine.includes('http')
+        ) continue
+        if (line.replace(/[^0-9]/g, '').length > line.length * 0.4) continue
+        
+        extractedTitle = line
+        break
+      }
+
       if (extractedAmount > 0) {
         setInitialTransactionAmount(extractedAmount.toString())
       } else {
         setInitialTransactionAmount('')
       }
+      setInitialTransactionTitle(extractedTitle)
+      setInitialTransactionDate(extractedDate)
       
       openModal('expense')
     } catch (err) {
@@ -820,7 +873,14 @@ export function HomeScreen() {
         isSubmitting={isSubmitting}
         error={modalError}
         initialAmount={initialTransactionAmount}
-        onClose={() => setIsModalOpen(false)}
+        initialTitle={initialTransactionTitle}
+        initialDate={initialTransactionDate}
+        onClose={() => {
+          setIsModalOpen(false)
+          setInitialTransactionAmount('')
+          setInitialTransactionTitle('')
+          setInitialTransactionDate('')
+        }}
         onSubmit={handleCreateTransaction}
         t={t}
       />

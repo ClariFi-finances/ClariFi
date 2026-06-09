@@ -24,6 +24,8 @@ interface TransactionModalProps {
   paymentMethods: TransactionModalPaymentMethod[]
   goals?: TransactionModalGoalOption[]
   initialAmount?: string
+  initialTitle?: string
+  initialDate?: string
   isSubmitting: boolean
   error: string | null
   onClose: () => void
@@ -47,13 +49,15 @@ export function TransactionModal({
   paymentMethods,
   goals = [],
   initialAmount = '',
+  initialTitle = '',
+  initialDate = '',
   isSubmitting,
   error,
   onClose,
   onSubmit,
   t,
 }: TransactionModalProps) {
-  const initialDate = useMemo(() => {
+  const defaultDate = useMemo(() => {
     const today = new Date()
     return today.toISOString().split('T')[0] ?? ''
   }, [])
@@ -61,7 +65,7 @@ export function TransactionModal({
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState(initialAmount)
-  const [date, setDate] = useState(initialDate)
+  const [date, setDate] = useState(defaultDate)
   const [category, setCategory] = useState(categories[0]?.value ?? '')
   const [paymentMethodId, setPaymentMethodId] = useState(paymentMethods[0]?.id.toString() ?? '')
   const [installmentInfo, setInstallmentInfo] = useState('')
@@ -74,10 +78,16 @@ export function TransactionModal({
   const [paymentMethodIdTouched, setPaymentMethodIdTouched] = useState(false)
 
   useEffect(() => {
-    if (isOpen && initialAmount) {
-      setAmount(initialAmount)
+    if (isOpen) {
+      if (initialAmount) setAmount(initialAmount)
+      if (initialTitle) setTitle(initialTitle)
+      if (initialDate) {
+        setDate(initialDate)
+      } else {
+        setDate(defaultDate)
+      }
     }
-  }, [isOpen, initialAmount])
+  }, [isOpen, initialAmount, initialTitle, initialDate, defaultDate])
 
   const primaryLabel = mode === 'income' ? t('home.income') : t('home.expense')
 

@@ -15,6 +15,10 @@ export interface AppContextType {
   setTransactionModalMode: (mode: 'income' | 'expense') => void
   initialTransactionAmount: string
   setInitialTransactionAmount: (amount: string) => void
+  initialTransactionTitle: string
+  setInitialTransactionTitle: (title: string) => void
+  initialTransactionDate: string
+  setInitialTransactionDate: (date: string) => void
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -25,6 +29,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isNewTransactionModalOpen, setIsNewTransactionModalOpen] = useState(false)
   const [transactionModalMode, setTransactionModalMode] = useState<'income' | 'expense'>('expense')
   const [initialTransactionAmount, setInitialTransactionAmount] = useState('')
+  const [initialTransactionTitle, setInitialTransactionTitle] = useState('')
+  const [initialTransactionDate, setInitialTransactionDate] = useState('')
 
   const applyThemeToDOM = (t: Theme) => {
     if (t === 'sistema') {
@@ -69,7 +75,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       theme, setTheme, 
       isNewTransactionModalOpen, setIsNewTransactionModalOpen, 
       transactionModalMode, setTransactionModalMode,
-      initialTransactionAmount, setInitialTransactionAmount
+      initialTransactionAmount, setInitialTransactionAmount,
+      initialTransactionTitle, setInitialTransactionTitle,
+      initialTransactionDate, setInitialTransactionDate
     }}>
       {children}
     </AppContext.Provider>
