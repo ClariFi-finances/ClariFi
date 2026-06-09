@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useAuth } from '@/context/useAuth'
 import { useI18n } from '@/hooks/useI18n'
 import { validateName, validateEmail, showConfirmDialog, showErrorAlert, showSuccessAlert, showLoadingAlert, hideAlert } from '@/utils/validation'
@@ -14,6 +14,26 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editedName, setEditedName] = useState(user?.name || '')
   const [editedEmail, setEditedEmail] = useState(user?.email || '')
+  const [nameTouched, setNameTouched] = useState(false)
+  const [emailTouched, setEmailTouched] = useState(false)
+
+  const nameError = useMemo(() => {
+    if (!nameTouched) return null
+    const res = validateName(editedName)
+    if (!res.valid) {
+      return res.error === 'Nome é obrigatório' ? t('validation.name.required') : t('validation.name.minLength')
+    }
+    return null
+  }, [editedName, nameTouched, t])
+
+  const emailError = useMemo(() => {
+    if (!emailTouched) return null
+    const res = validateEmail(editedEmail)
+    if (!res.valid) {
+      return res.error === 'Email é obrigatório' ? t('validation.email.required') : t('validation.email.invalid')
+    }
+    return null
+  }, [editedEmail, emailTouched, t])
 
   const handleLogout = async () => {
     const confirmed = await showConfirmDialog(
@@ -27,17 +47,20 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
   }
 
   const handleSaveEdit = async () => {
+    setNameTouched(true)
+    setEmailTouched(true)
+
     // Validate name
     const nameValidation = validateName(editedName)
     if (!nameValidation.valid) {
-      await showErrorAlert(t('profile.invalidName'), nameValidation.error || '')
+      await showErrorAlert(t('profile.invalidName'), t('validation.name.minLength'))
       return
     }
 
     // Validate email
     const emailValidation = validateEmail(editedEmail)
     if (!emailValidation.valid) {
-      await showErrorAlert(t('profile.invalidEmail'), emailValidation.error || '')
+      await showErrorAlert(t('profile.invalidEmail'), t('validation.email.invalid'))
       return
     }
 
@@ -91,9 +114,11 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
                   type="text"
                   value={editedName}
                   onChange={(e) => setEditedName(e.target.value)}
-                  className="form-input"
+                  onBlur={() => setNameTouched(true)}
+                  className={`form-input ${nameError ? 'form-input-error' : ''}`}
                   disabled={isLoading}
                 />
+                {nameError && <span className="form-error-msg">⚠️ {nameError}</span>}
               </div>
 
               <div className="form-group">
@@ -102,16 +127,18 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
                   type="text"
                   value={editedEmail}
                   onChange={(e) => setEditedEmail(e.target.value)}
-                  className="form-input"
+                  onBlur={() => setEmailTouched(true)}
+                  className={`form-input ${emailError ? 'form-input-error' : ''}`}
                   disabled={isLoading}
                 />
+                {emailError && <span className="form-error-msg">⚠️ {emailError}</span>}
               </div>
 
               <div className="profile-edit-actions">
                 <button
                   className="auth-button"
                   onClick={handleSaveEdit}
-                  disabled={isLoading}
+                  disabled={isLoading || !!nameError || !!emailError}
                 >
                   {t('common.save')}
                 </button>
@@ -133,7 +160,13 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
 
               <button
                 className="profile-edit-button"
-                onClick={() => setIsEditing(true)}
+                onClick={() => {
+                  setEditedName(user.name)
+                  setEditedEmail(user.email)
+                  setNameTouched(false)
+                  setEmailTouched(false)
+                  setIsEditing(true)
+                }}
                 disabled={isLoading}
               >
                 {t('profile.editProfile')}

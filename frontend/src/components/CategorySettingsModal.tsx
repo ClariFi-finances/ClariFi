@@ -27,11 +27,18 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
   const [newEmoji, setNewEmoji] = useState('🏷️')
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [newName, setNewName] = useState('')
+  const [nameTouched, setNameTouched] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState<number | null>(null)
+
+  const nameError = useMemo(() => {
+    if (!nameTouched) return null
+    if (!newName.trim()) return t('validation.name.required')
+    return null
+  }, [newName, nameTouched, t])
 
   const headers = useMemo(() => getAuthHeaders(token, user?.cognitoId), [token, user])
 
@@ -77,6 +84,7 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
 
   const handleAddEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setNameTouched(true)
     if (!newName.trim() || !user) return
 
     setIsSubmitting(true)
@@ -123,6 +131,7 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
       
       setNewName('')
       setNewEmoji('🏷️')
+      setNameTouched(false)
       setEditingCategory(null)
       setIsFormOpen(false)
     } catch (err) {
@@ -168,6 +177,7 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
                         : cat.name
                       setNewName(nameWithoutEmoji)
                       setNewEmoji(cat.icon || '🏷️')
+                      setNameTouched(false)
                       setIsFormOpen(true)
                     }}
                     title={t('common.edit', 'Editar')}
@@ -197,6 +207,7 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
               setEditingCategory(null)
               setNewName('')
               setNewEmoji('🏷️')
+              setNameTouched(false)
               setIsFormOpen(true)
             }}
           >
@@ -228,24 +239,31 @@ export function CategorySettingsModal({ isOpen, onClose }: CategorySettingsModal
                 </div>
               )}
             </div>
-            <input
-              type="text"
-              className="name-input"
-              placeholder={t('categoryModal.newCategoryPlaceholder', 'Nova categoria...')}
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              disabled={isSubmitting}
-              required
-            />
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, position: 'relative' }}>
+              <input
+                type="text"
+                className={`name-input ${nameError ? 'form-input-error' : ''}`}
+                placeholder={t('categoryModal.newCategoryPlaceholder', 'Nova categoria...')}
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onBlur={() => setNameTouched(true)}
+                disabled={isSubmitting}
+                required
+              />
+              {nameError && <span className="form-error-msg" style={{ marginBottom: '8px' }}>⚠️ {nameError}</span>}
+            </div>
             <div className="form-actions">
-              <button type="submit" className="primary-btn add-btn" disabled={isSubmitting || !newName.trim()}>
+              <button type="submit" className="primary-btn add-btn" disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
                 {editingCategory ? t('common.save', 'Salvar') : t('common.add', 'Adicionar')}
               </button>
               <button 
                 type="button" 
                 className="secondary-btn cancel-btn"
-                onClick={() => setIsFormOpen(false)}
+                onClick={() => {
+                  setIsFormOpen(false)
+                  setNameTouched(false)
+                }}
                 disabled={isSubmitting}
               >
                 <X size={16} />

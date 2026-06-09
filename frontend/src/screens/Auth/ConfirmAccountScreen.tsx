@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { useAuth } from '@/context/useAuth'
 import { useI18n } from '@/hooks/useI18n'
 import {
@@ -16,6 +16,7 @@ interface ConfirmAccountScreenProps {
 
 export function ConfirmAccountScreen({ email, onBackToLogin }: ConfirmAccountScreenProps) {
   const [code, setCode] = useState(['', '', '', '', '', ''])
+  const [codeTouched, setCodeTouched] = useState(false)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
   const { confirmAccount, resendConfirmationCode, isLoading, clearConfirmation } = useAuth()
   const { t } = useI18n()
@@ -66,8 +67,15 @@ export function ConfirmAccountScreen({ email, onBackToLogin }: ConfirmAccountScr
 
   const fullCode = code.join('')
 
+  const codeError = useMemo(() => {
+    if (!codeTouched) return null
+    if (fullCode.length < 6) return t('auth.confirm.invalidCodeMessage')
+    return null
+  }, [fullCode, codeTouched, t])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setCodeTouched(true)
 
     if (fullCode.length !== 6) {
       await showErrorAlert(t('auth.confirm.invalidCode'), t('auth.confirm.invalidCodeMessage'))
@@ -119,7 +127,7 @@ export function ConfirmAccountScreen({ email, onBackToLogin }: ConfirmAccountScr
             <label className="form-label">
               {t('auth.confirm.codeLabel')}
             </label>
-            <div className="code-input-group" onPaste={handlePaste}>
+            <div className="code-input-group" onPaste={handlePaste} onBlur={() => setCodeTouched(true)}>
               {code.map((digit, index) => (
                 <input
                   key={index}
@@ -130,12 +138,13 @@ export function ConfirmAccountScreen({ email, onBackToLogin }: ConfirmAccountScr
                   value={digit}
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="form-input code-input"
+                  className={`form-input code-input ${codeError ? 'form-input-error' : ''}`}
                   disabled={isLoading}
                   autoComplete="one-time-code"
                 />
               ))}
             </div>
+            {codeError && <span className="form-error-msg" style={{ justifyContent: 'center' }}>⚠️ {codeError}</span>}
           </div>
 
           <button

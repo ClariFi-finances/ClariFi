@@ -28,11 +28,36 @@ export function FixedIncomeSettingsModal({ isOpen, onClose }: FixedIncomeSetting
   const [newName, setNewName] = useState('')
   const [newAmount, setNewAmount] = useState('')
   const [newDay, setNewDay] = useState('1')
+  const [nameTouched, setNameTouched] = useState(false)
+  const [amountTouched, setAmountTouched] = useState(false)
+  const [dayTouched, setDayTouched] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingItem, setEditingItem] = useState<FixedIncome | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState<number | null>(null)
+
+  const nameError = useMemo(() => {
+    if (!nameTouched) return null
+    if (!newName.trim()) return t('validation.name.required')
+    return null
+  }, [newName, nameTouched, t])
+
+  const amountError = useMemo(() => {
+    if (!amountTouched) return null
+    if (!newAmount) return t('validation.amount.required')
+    const val = parseFloat(newAmount)
+    if (isNaN(val) || val <= 0) return t('validation.amount.invalid')
+    return null
+  }, [newAmount, amountTouched, t])
+
+  const dayError = useMemo(() => {
+    if (!dayTouched) return null
+    if (!newDay) return t('validation.day.required')
+    const val = parseInt(newDay, 10)
+    if (isNaN(val) || val < 1 || val > 31) return t('validation.day.invalid')
+    return null
+  }, [newDay, dayTouched, t])
 
   const headers = useMemo(() => getAuthHeaders(token, user?.cognitoId), [token, user])
 
@@ -78,7 +103,18 @@ export function FixedIncomeSettingsModal({ isOpen, onClose }: FixedIncomeSetting
 
   const handleAddEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setNameTouched(true)
+    setAmountTouched(true)
+    setDayTouched(true)
+
     if (!newName.trim() || !newAmount || !newDay || !user) return
+
+    const amountParsed = parseFloat(newAmount)
+    const dayParsed = parseInt(newDay, 10)
+
+    if (isNaN(amountParsed) || isNaN(dayParsed) || dayParsed < 1 || dayParsed > 31 || amountParsed <= 0) {
+      return
+    }
 
     setIsSubmitting(true)
     setError(null)
@@ -88,13 +124,6 @@ export function FixedIncomeSettingsModal({ isOpen, onClose }: FixedIncomeSetting
       const url = isEditing 
         ? `/fixedincomes/${editingItem.id}/update`
         : '/fixedincomes/add'
-
-      const amountParsed = parseFloat(newAmount)
-      const dayParsed = parseInt(newDay, 10)
-
-      if (isNaN(amountParsed) || isNaN(dayParsed) || dayParsed < 1 || dayParsed > 31) {
-          throw new Error(t('fixedIncomeModal.invalidData', 'Dados inválidos. Verifique o valor e o dia.'));
-      }
         
       const payload = isEditing 
         ? {
@@ -143,6 +172,9 @@ export function FixedIncomeSettingsModal({ isOpen, onClose }: FixedIncomeSetting
     setNewName('')
     setNewAmount('')
     setNewDay('1')
+    setNameTouched(false)
+    setAmountTouched(false)
+    setDayTouched(false)
     setEditingItem(null)
     setIsFormOpen(false)
   }
@@ -152,6 +184,9 @@ export function FixedIncomeSettingsModal({ isOpen, onClose }: FixedIncomeSetting
     setNewName(item.name)
     setNewAmount(item.amount.toString())
     setNewDay(item.dayOfMonth.toString())
+    setNameTouched(false)
+    setAmountTouched(false)
+    setDayTouched(false)
     setIsFormOpen(true)
   }
 
@@ -232,9 +267,12 @@ export function FixedIncomeSettingsModal({ isOpen, onClose }: FixedIncomeSetting
                     placeholder={t('fixedIncomeModal.namePlaceholder', 'Nome da receita')}
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
+                    onBlur={() => setNameTouched(true)}
+                    className={nameError ? 'form-input-error' : ''}
                     disabled={isSubmitting}
                     required
                 />
+                {nameError && <span className="form-error-msg">⚠️ {nameError}</span>}
             </div>
             <div className="form-row">
                 <div className="form-group">
@@ -246,9 +284,12 @@ export function FixedIncomeSettingsModal({ isOpen, onClose }: FixedIncomeSetting
                         placeholder="0,00"
                         value={newAmount}
                         onChange={(e) => setNewAmount(e.target.value)}
+                        onBlur={() => setAmountTouched(true)}
+                        className={amountError ? 'form-input-error' : ''}
                         disabled={isSubmitting}
                         required
                     />
+                    {amountError && <span className="form-error-msg">⚠️ {amountError}</span>}
                 </div>
                 <div className="form-group">
                     <label>{t('fixedIncomeModal.dayLabel', 'Dia do Mês (1-31)')}</label>
@@ -259,9 +300,12 @@ export function FixedIncomeSettingsModal({ isOpen, onClose }: FixedIncomeSetting
                         placeholder="5"
                         value={newDay}
                         onChange={(e) => setNewDay(e.target.value)}
+                        onBlur={() => setDayTouched(true)}
+                        className={dayError ? 'form-input-error' : ''}
                         disabled={isSubmitting}
                         required
                     />
+                    {dayError && <span className="form-error-msg">⚠️ {dayError}</span>}
                 </div>
             </div>
             
@@ -275,7 +319,7 @@ export function FixedIncomeSettingsModal({ isOpen, onClose }: FixedIncomeSetting
                 <X size={16} />
                 {t('common.cancel', 'Cancelar')}
               </button>
-              <button type="submit" className="primary-btn add-btn" disabled={isSubmitting || !newName.trim() || !newAmount || !newDay}>
+              <button type="submit" className="primary-btn add-btn" disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
                 {editingItem ? t('common.save', 'Salvar') : t('common.add', 'Adicionar')}
               </button>
