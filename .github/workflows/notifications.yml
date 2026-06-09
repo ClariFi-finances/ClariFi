@@ -1,0 +1,55 @@
+name: CI - Notifications Service
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'API.Notifications/**'
+      - 'API.Core/**'
+      - '.github/workflows/notifications.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'API.Notifications/**'
+      - 'API.Core/**'
+      - '.github/workflows/notifications.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore API.Notifications/API.Notifications.csproj
+
+    - name: Build
+      run: dotnet build API.Notifications/API.Notifications.csproj -c Release --no-restore
+
+    - name: Build Docker Image Check
+      run: docker build -f API.Notifications/Dockerfile -t api-notifications:${{ github.sha }} .
+
+    # ==========================================
+    # FUTURE RELEASE / AWS DEPLOYMENT TEMPLATE
+    # ==========================================
+    # - name: Configure AWS Credentials
+    #   uses: aws-actions/configure-aws-credentials@v4
+    #   with:
+    #     role-to-assume: arn:aws:iam::123456789012:role/github-actions-ecr-role
+    #     aws-region: us-east-1
+    #
+    # - name: Login to Amazon ECR
+    #   id: login-ecr
+    #   uses: aws-actions/amazon-ecr-login@v2
+    #
+    # - name: Push to ECR
+    #   run: |
+    #     docker tag api-notifications:${{ github.sha }} ${{ steps.login-ecr.outputs.registry }}/api-notifications:${{ github.sha }}
+    #     docker tag api-notifications:${{ github.sha }} ${{ steps.login-ecr.outputs.registry }}/api-notifications:latest
+    #     docker push ${{ steps.login-ecr.outputs.registry }}/api-notifications --all-tags
