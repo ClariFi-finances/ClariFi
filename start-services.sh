@@ -77,9 +77,15 @@ echo "$gateway_pid" > "$PID_DIR/API.pid"
 # Helper function to wait for port to be ready
 wait_for_port() {
     local port=$1
+    local pid=${2:-}
     for i in {1..40}; do
-        if timeout 1 bash -c "cat < /dev/null > /dev/tcp/127.0.0.1/$port" 2>/dev/null; then
+        if lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
             return 0
+        fi
+
+        # If the process exits before opening the port, fail early.
+        if [ ! -z "$pid" ] && ! kill -0 "$pid" 2>/dev/null; then
+            return 2
         fi
         sleep 0.5
     done
@@ -88,10 +94,15 @@ wait_for_port() {
 
 # Wait for gateway to start
 echo "Waiting for API Gateway to be ready on port 5080..."
-if wait_for_port 5080; then
+if wait_for_port 5080 "$gateway_pid"; then
     echo "API Gateway is ready!"
 else
-    echo "API Gateway failed to start or listen on port 5080 in time."
+    wait_status=$?
+    if [ "$wait_status" -eq 2 ]; then
+        echo "API Gateway process exited before opening port 5080."
+    else
+        echo "API Gateway failed to start or listen on port 5080 in time."
+    fi
     kill "$gateway_pid" 2>/dev/null
     exit 1
 fi
