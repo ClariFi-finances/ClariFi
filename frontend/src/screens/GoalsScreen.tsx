@@ -47,12 +47,50 @@ export function GoalsScreen() {
   const [formTarget, setFormTarget] = useState('')
   const [formInitial, setFormInitial] = useState('')
   const [formDeadline, setFormDeadline] = useState('')
+  const [formNameTouched, setFormNameTouched] = useState(false)
+  const [formTargetTouched, setFormTargetTouched] = useState(false)
+  const [formInitialTouched, setFormInitialTouched] = useState(false)
 
   // Emoji picker state
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
 
   // Transaction form state
   const [transactionAmount, setTransactionAmount] = useState('')
+  const [transactionAmountTouched, setTransactionAmountTouched] = useState(false)
+
+  const formNameError = useMemo(() => {
+    if (!formNameTouched) return null
+    if (!formName.trim()) return t('validation.name.required')
+    return null
+  }, [formName, formNameTouched, t])
+
+  const formTargetError = useMemo(() => {
+    if (!formTargetTouched) return null
+    if (!formTarget) return t('validation.amount.required')
+    const val = parseFloat(formTarget)
+    if (isNaN(val) || val <= 0) return t('validation.amount.invalid')
+    return null
+  }, [formTarget, formTargetTouched, t])
+
+  const formInitialError = useMemo(() => {
+    if (!formInitialTouched) return null
+    if (formInitial) {
+      const val = parseFloat(formInitial)
+      if (isNaN(val) || val < 0) return t('validation.amount.invalid')
+    }
+    return null
+  }, [formInitial, formInitialTouched, t])
+
+  const transactionAmountError = useMemo(() => {
+    if (!transactionAmountTouched) return null
+    if (!transactionAmount) return t('validation.amount.required')
+    const val = parseFloat(transactionAmount)
+    if (isNaN(val) || val <= 0) return t('validation.amount.invalid')
+    if (modalType === 'withdraw' && selectedGoal && val > selectedGoal.currentAmount) {
+      return t('goals.transaction.excess')
+    }
+    return null
+  }, [transactionAmount, transactionAmountTouched, selectedGoal, modalType, t])
 
   const headers = useMemo(() => getAuthHeaders(token, user?.cognitoId), [token, user])
 
@@ -108,6 +146,9 @@ export function GoalsScreen() {
     setFormTarget('')
     setFormInitial('')
     setFormDeadline('')
+    setFormNameTouched(false)
+    setFormTargetTouched(false)
+    setFormInitialTouched(false)
     setModalError(null)
     setModalType('create')
   }
@@ -115,6 +156,7 @@ export function GoalsScreen() {
   const openDepositModal = (goal: ApiGoal) => {
     setSelectedGoal(goal)
     setTransactionAmount('')
+    setTransactionAmountTouched(false)
     setModalError(null)
     setModalType('deposit')
   }
@@ -122,6 +164,7 @@ export function GoalsScreen() {
   const openWithdrawModal = (goal: ApiGoal) => {
     setSelectedGoal(goal)
     setTransactionAmount('')
+    setTransactionAmountTouched(false)
     setModalError(null)
     setModalType('withdraw')
   }
@@ -130,11 +173,27 @@ export function GoalsScreen() {
     setModalType(null)
     setSelectedGoal(null)
     setModalError(null)
+    setFormNameTouched(false)
+    setFormTargetTouched(false)
+    setFormInitialTouched(false)
+    setTransactionAmountTouched(false)
   }
 
   // Create goal
   const handleCreate = async () => {
+    setFormNameTouched(true)
+    setFormTargetTouched(true)
+    setFormInitialTouched(true)
+
     if (!user || !formName.trim() || !formTarget) return
+    const targetAmount = parseFloat(formTarget)
+    if (isNaN(targetAmount) || targetAmount <= 0) return
+
+    if (formInitial) {
+      const initialAmount = parseFloat(formInitial)
+      if (isNaN(initialAmount) || initialAmount < 0) return
+    }
+
     setIsSubmitting(true)
     setModalError(null)
     try {
@@ -145,7 +204,7 @@ export function GoalsScreen() {
           name: formName.trim(),
           icon: formIcon || '🎯',
           color: formColor,
-          targetAmount: parseFloat(formTarget),
+          targetAmount,
           currentAmount: formInitial ? parseFloat(formInitial) : 0,
           deadline: formDeadline ? new Date(formDeadline).toISOString() : null,
           userId: user.id,
@@ -162,9 +221,11 @@ export function GoalsScreen() {
 
   // Deposit / Withdraw
   const handleGoalTransaction = async () => {
+    setTransactionAmountTouched(true)
     if (!selectedGoal || !transactionAmount) return
     const amount = parseFloat(transactionAmount)
     if (isNaN(amount) || amount <= 0) return
+    if (modalType === 'withdraw' && amount > selectedGoal.currentAmount) return
 
     setIsSubmitting(true)
     setModalError(null)
@@ -360,16 +421,18 @@ export function GoalsScreen() {
 
             {modalError && <div className="goals-form-error">{modalError}</div>}
 
-            <div className="goals-form-group">
+             <div className="goals-form-group">
               <label className="goals-form-label">{t('goals.create.name')}</label>
               <input
-                className="goals-form-input"
+                className={`goals-form-input ${formNameError ? 'form-input-error' : ''}`}
                 placeholder={t('goals.create.namePlaceholder')}
                 value={formName}
                 onChange={e => setFormName(e.target.value)}
+                onBlur={() => setFormNameTouched(true)}
               />
+              {formNameError && <span className="form-error-msg">⚠️ {formNameError}</span>}
             </div>
-
+ 
             <div className="goals-form-row">
               <div className="goals-form-group">
                 <label className="goals-form-label">{t('goals.create.icon')}</label>
@@ -411,34 +474,38 @@ export function GoalsScreen() {
                 </div>
               </div>
             </div>
-
+ 
             <div className="goals-form-row">
               <div className="goals-form-group">
                 <label className="goals-form-label">{t('goals.create.targetAmount')}</label>
                 <input
-                  className="goals-form-input"
+                  className={`goals-form-input ${formTargetError ? 'form-input-error' : ''}`}
                   type="number"
                   step="0.01"
                   min="0"
                   placeholder={t('goals.create.targetAmountPlaceholder')}
                   value={formTarget}
                   onChange={e => setFormTarget(e.target.value)}
+                  onBlur={() => setFormTargetTouched(true)}
                 />
+                {formTargetError && <span className="form-error-msg">⚠️ {formTargetError}</span>}
               </div>
               <div className="goals-form-group">
                 <label className="goals-form-label">{t('goals.create.initialAmount')}</label>
                 <input
-                  className="goals-form-input"
+                  className={`goals-form-input ${formInitialError ? 'form-input-error' : ''}`}
                   type="number"
                   step="0.01"
                   min="0"
                   placeholder={t('goals.create.initialAmountPlaceholder')}
                   value={formInitial}
                   onChange={e => setFormInitial(e.target.value)}
+                  onBlur={() => setFormInitialTouched(true)}
                 />
+                {formInitialError && <span className="form-error-msg">⚠️ {formInitialError}</span>}
               </div>
             </div>
-
+ 
             <div className="goals-form-group">
               <label className="goals-form-label">{t('goals.create.deadline')}</label>
               <input
@@ -448,11 +515,11 @@ export function GoalsScreen() {
                 onChange={e => setFormDeadline(e.target.value)}
               />
             </div>
-
+ 
             <button
               className="goals-form-submit"
               type="button"
-              disabled={isSubmitting || !formName.trim() || !formTarget}
+              disabled={isSubmitting}
               onClick={handleCreate}
             >
               {isSubmitting ? t('goals.create.submitting') : t('goals.create.submit')}
@@ -493,21 +560,23 @@ export function GoalsScreen() {
             <div className="goals-form-group">
               <label className="goals-form-label">{t('goals.transaction.amount')}</label>
               <input
-                className="goals-form-input"
+                className={`goals-form-input ${transactionAmountError ? 'form-input-error' : ''}`}
                 type="number"
                 step="0.01"
                 min="0"
                 placeholder={t('goals.transaction.amountPlaceholder')}
                 value={transactionAmount}
                 onChange={e => setTransactionAmount(e.target.value)}
+                onBlur={() => setTransactionAmountTouched(true)}
                 autoFocus
               />
+              {transactionAmountError && <span className="form-error-msg">⚠️ {transactionAmountError}</span>}
             </div>
-
+ 
             <button
               className="goals-form-submit"
               type="button"
-              disabled={isSubmitting || !transactionAmount || parseFloat(transactionAmount) <= 0}
+              disabled={isSubmitting}
               onClick={handleGoalTransaction}
               style={modalType === 'withdraw' ? { background: '#EF4444' } : {}}
             >

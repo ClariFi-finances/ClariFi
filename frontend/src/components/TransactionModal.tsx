@@ -37,7 +37,7 @@ interface TransactionModalProps {
     installmentInfo?: string
     goalId?: number
   }) => Promise<void>
-  t: (key: string, defaultValue?: string) => string
+  t: (key: string, options?: any, defaultValue?: string) => string
 }
 
 export function TransactionModal({
@@ -67,6 +67,12 @@ export function TransactionModal({
   const [installmentInfo, setInstallmentInfo] = useState('')
   const [goalId, setGoalId] = useState('')
 
+  const [titleTouched, setTitleTouched] = useState(false)
+  const [amountTouched, setAmountTouched] = useState(false)
+  const [dateTouched, setDateTouched] = useState(false)
+  const [categoryTouched, setCategoryTouched] = useState(false)
+  const [paymentMethodIdTouched, setPaymentMethodIdTouched] = useState(false)
+
   useEffect(() => {
     if (isOpen && initialAmount) {
       setAmount(initialAmount)
@@ -74,6 +80,38 @@ export function TransactionModal({
   }, [isOpen, initialAmount])
 
   const primaryLabel = mode === 'income' ? t('home.income') : t('home.expense')
+
+  const titleError = useMemo(() => {
+    if (!titleTouched) return null
+    if (!title.trim()) return t('validation.title.required')
+    return null
+  }, [title, titleTouched, t])
+
+  const amountError = useMemo(() => {
+    if (!amountTouched) return null
+    if (!amount) return t('validation.amount.required')
+    const parsedAmount = Number(amount)
+    if (Number.isNaN(parsedAmount) || parsedAmount <= 0) return t('validation.amount.invalid')
+    return null
+  }, [amount, amountTouched, t])
+
+  const dateError = useMemo(() => {
+    if (!dateTouched) return null
+    if (!date) return t('validation.date.required')
+    return null
+  }, [date, dateTouched, t])
+
+  const categoryError = useMemo(() => {
+    if (!categoryTouched) return null
+    if (!category) return t('validation.category.required')
+    return null
+  }, [category, categoryTouched, t])
+
+  const paymentMethodIdError = useMemo(() => {
+    if (!paymentMethodIdTouched) return null
+    if (!paymentMethodId) return t('validation.paymentMethod.required')
+    return null
+  }, [paymentMethodId, paymentMethodIdTouched, t])
 
   const isFormValid = useMemo(() => {
     const parsedAmount = Number(amount)
@@ -89,6 +127,12 @@ export function TransactionModal({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    setTitleTouched(true)
+    setAmountTouched(true)
+    setDateTouched(true)
+    setCategoryTouched(true)
+    setPaymentMethodIdTouched(true)
+
     if (!isFormValid) {
       return
     }
@@ -128,9 +172,12 @@ export function TransactionModal({
             <input
               value={title}
               onChange={event => setTitle(event.target.value)}
+              onBlur={() => setTitleTouched(true)}
               placeholder={t('home.fieldTitlePlaceholder')}
+              className={titleError ? 'form-input-error' : ''}
               required
             />
+            {titleError && <span className="form-error-msg">⚠️ {titleError}</span>}
           </label>
 
           <label className="modal-field">
@@ -149,21 +196,27 @@ export function TransactionModal({
               <input
                 value={amount}
                 onChange={event => setAmount(event.target.value)}
+                onBlur={() => setAmountTouched(true)}
                 type="number"
                 min="0"
                 step="0.01"
                 placeholder={t('home.fieldAmountPlaceholder')}
+                className={amountError ? 'form-input-error' : ''}
                 required
               />
+              {amountError && <span className="form-error-msg">⚠️ {amountError}</span>}
             </label>
             <label className="modal-field">
               <span>{t('home.fieldDate')}</span>
               <input
                 value={date}
                 onChange={event => setDate(event.target.value)}
+                onBlur={() => setDateTouched(true)}
                 type="date"
+                className={dateError ? 'form-input-error' : ''}
                 required
               />
+              {dateError && <span className="form-error-msg">⚠️ {dateError}</span>}
             </label>
           </div>
 
@@ -173,6 +226,8 @@ export function TransactionModal({
               <select
                 value={category}
                 onChange={event => setCategory(event.target.value)}
+                onBlur={() => setCategoryTouched(true)}
+                className={categoryError ? 'form-input-error' : ''}
                 required
               >
                 {categories.length === 0 ? (
@@ -185,12 +240,15 @@ export function TransactionModal({
                   ))
                 )}
               </select>
+              {categoryError && <span className="form-error-msg">⚠️ {categoryError}</span>}
             </label>
             <label className="modal-field">
               <span>{t('home.fieldPayment')}</span>
               <select
                 value={paymentMethodId}
                 onChange={event => setPaymentMethodId(event.target.value)}
+                onBlur={() => setPaymentMethodIdTouched(true)}
+                className={paymentMethodIdError ? 'form-input-error' : ''}
                 required
               >
                 {paymentMethods.length === 0 ? (
@@ -203,6 +261,7 @@ export function TransactionModal({
                   ))
                 )}
               </select>
+              {paymentMethodIdError && <span className="form-error-msg">⚠️ {paymentMethodIdError}</span>}
             </label>
           </div>
 
@@ -238,7 +297,7 @@ export function TransactionModal({
             <button className="ghost-btn" type="button" onClick={onClose}>
               {t('common.cancel')}
             </button>
-            <button className="primary-btn" type="submit" disabled={!isFormValid || isSubmitting}>
+            <button className="primary-btn" type="submit" disabled={isSubmitting}>
               {isSubmitting ? t('home.saving') : t('common.save')}
             </button>
           </div>

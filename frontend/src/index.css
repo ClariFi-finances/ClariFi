@@ -144,3 +144,20 @@ textarea,
 select {
   font-family: var(--sans);
 }
+
+/* Validation feedback classes */
+.form-input-error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+.form-error-msg {
+  color: var(--danger);
+  font-size: var(--text-xs);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+

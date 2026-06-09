@@ -12,7 +12,8 @@
     "success": "Sucesso",
     "warning": "Aviso",
     "info": "Informação",
-    "required": "obrigatório"
+    "required": "obrigatório",
+    "add": "Adicionar"
   },
   "auth": {
     "tagline": "Gerencie suas finanças com inteligência",
@@ -108,6 +109,26 @@
       "required": "CPF é obrigatório",
       "invalidLength": "CPF deve conter 11 dígitos",
       "invalid": "CPF inválido"
+    },
+    "title": {
+      "required": "O título é obrigatório"
+    },
+    "amount": {
+      "required": "O valor é obrigatório",
+      "invalid": "O valor deve ser maior que zero"
+    },
+    "date": {
+      "required": "A data é obrigatória"
+    },
+    "category": {
+      "required": "A categoria é obrigatória"
+    },
+    "paymentMethod": {
+      "required": "O método de pagamento é obrigatório"
+    },
+    "day": {
+      "required": "O dia é obrigatório",
+      "invalid": "O dia deve ser entre 1 e 31"
     }
   },
   "home": {
@@ -313,7 +334,8 @@
       "amount": "Valor",
       "amountPlaceholder": "0,00",
       "submit": "Confirmar",
-      "submitting": "Processando..."
+      "submitting": "Processando...",
+      "excess": "O valor excede o saldo atual da meta"
     },
     "confirmDelete": "Tem certeza que deseja excluir esta meta?",
     "deleteError": "Erro ao excluir a meta.",

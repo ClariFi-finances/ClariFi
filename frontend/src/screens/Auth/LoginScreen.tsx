@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useAuth } from '@/context/useAuth'
 import { useI18n } from '@/hooks/useI18n'
 import { validateEmail, validatePassword, showErrorAlert, showLoadingAlert, hideAlert, showSuccessAlert } from '@/utils/validation'
@@ -12,23 +12,43 @@ interface LoginScreenProps {
 export function LoginScreen({ onSwitchToRegister }: LoginScreenProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [emailTouched, setEmailTouched] = useState(false)
+  const [passwordTouched, setPasswordTouched] = useState(false)
   const { login, isLoading } = useAuth()
   const { t } = useI18n()
+
+  const emailError = useMemo(() => {
+    if (!emailTouched) return null
+    if (!email.trim()) return t('validation.email.required')
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) return t('validation.email.invalid')
+    return null
+  }, [email, emailTouched, t])
+
+  const passwordError = useMemo(() => {
+    if (!passwordTouched) return null
+    if (!password.trim()) return t('validation.password.required')
+    if (password.length < 6) return t('validation.password.minLength')
+    return null
+  }, [password, passwordTouched, t])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    setEmailTouched(true)
+    setPasswordTouched(true)
+
     // Validate email
     const emailValidation = validateEmail(email)
     if (!emailValidation.valid) {
-      await showErrorAlert(t('auth.login.invalidEmail'), emailValidation.error || '')
+      await showErrorAlert(t('auth.login.invalidEmail'), t('validation.email.invalid'))
       return
     }
 
     // Validate password
     const passwordValidation = validatePassword(password)
     if (!passwordValidation.valid) {
-      await showErrorAlert(t('auth.login.invalidPassword'), passwordValidation.error || '')
+      await showErrorAlert(t('auth.login.invalidPassword'), t('validation.password.minLength'))
       return
     }
 
@@ -62,11 +82,13 @@ export function LoginScreen({ onSwitchToRegister }: LoginScreenProps) {
               type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => setEmailTouched(true)}
               placeholder={t('auth.login.emailPlaceholder')}
-              className="form-input"
+              className={`form-input ${emailError ? 'form-input-error' : ''}`}
               disabled={isLoading}
               autoComplete="email"
             />
+            {emailError && <span className="form-error-msg">⚠️ {emailError}</span>}
           </div>
 
           <div className="form-group">
@@ -78,17 +100,19 @@ export function LoginScreen({ onSwitchToRegister }: LoginScreenProps) {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onBlur={() => setPasswordTouched(true)}
               placeholder={t('auth.login.passwordPlaceholder')}
-              className="form-input"
+              className={`form-input ${passwordError ? 'form-input-error' : ''}`}
               disabled={isLoading}
               autoComplete="current-password"
             />
+            {passwordError && <span className="form-error-msg">⚠️ {passwordError}</span>}
           </div>
 
           <button
             type="submit"
             className="auth-button"
-            disabled={isLoading || !email || !password}
+            disabled={isLoading || !email || !password || !!emailError || !!passwordError}
           >
             {isLoading ? t('auth.login.submitting') : t('auth.login.submitButton')}
           </button>
