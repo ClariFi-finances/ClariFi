@@ -353,5 +353,21 @@
     "goalProgressMessage": "Parabéns! Você alcançou 50% da sua meta '{{goalName}}'!",
     "goalCompletedTitle": "Meta Concluída! 🎉",
     "goalCompletedMessage": "Incrível! Você alcançou 100% da sua meta '{{goalName}}'!"
+  },
+  "paymentMethodModal": {
+    "tag": "FINANÇAS",
+    "title": "Gerenciar Métodos de Pagamento",
+    "confirmDelete": "Tem certeza que deseja excluir este método de pagamento?",
+    "deleteError": "Erro ao excluir",
+    "addError": "Erro ao adicionar",
+    "unknownError": "Erro desconhecido",
+    "empty": "Nenhum método de pagamento encontrado.",
+    "newPaymentMethodPlaceholder": "Novo método de pagamento...",
+    "typeLabel": "Tipo de pagamento",
+    "typeCredit": "Crédito",
+    "typeDebit": "Débito",
+    "typeCash": "Dinheiro/Outro",
+    "addBtn": "Adicionar Método",
+    "deleteTooltip": "Excluir"
   }
 }

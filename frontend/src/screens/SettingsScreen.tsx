@@ -3,6 +3,7 @@ import { useAuth } from '@/context/useAuth'
 import { useApp } from '@/context/useApp'
 import { CategorySettingsModal } from '@/components/CategorySettingsModal'
 import { FixedIncomeSettingsModal } from '@/components/FixedIncomeSettingsModal'
+import { PaymentMethodSettingsModal } from '@/components/PaymentMethodSettingsModal'
 import { showConfirmDialog } from '@/utils/validation'
 import { useI18n } from '@/hooks/useI18n'
 import './SettingsScreen.css'
@@ -13,6 +14,7 @@ export function SettingsScreen() {
   const { t } = useI18n()
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
   const [isFixedIncomeModalOpen, setIsFixedIncomeModalOpen] = useState(false)
+  const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false)
 
   const handleLogout = async () => {
     const confirmed = await showConfirmDialog(
@@ -116,7 +118,7 @@ export function SettingsScreen() {
                 </div>
                 <div className="item-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
               </div>
-              <div className="list-item">
+              <div className="list-item" onClick={() => setIsPaymentMethodModalOpen(true)}>
                 <div className="item-icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 </div>
@@ -184,6 +186,11 @@ export function SettingsScreen() {
       <FixedIncomeSettingsModal 
         isOpen={isFixedIncomeModalOpen} 
         onClose={() => setIsFixedIncomeModalOpen(false)} 
+      />
+
+      <PaymentMethodSettingsModal 
+        isOpen={isPaymentMethodModalOpen} 
+        onClose={() => setIsPaymentMethodModalOpen(false)} 
       />
     </div>
   )

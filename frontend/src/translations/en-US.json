@@ -353,5 +353,21 @@
     "goalProgressMessage": "Congratulations! You reached 50% of your '{{goalName}}' goal!",
     "goalCompletedTitle": "Goal Completed! 🎉",
     "goalCompletedMessage": "Amazing! You reached 100% of your '{{goalName}}' goal!"
+  },
+  "paymentMethodModal": {
+    "tag": "FINANCES",
+    "title": "Manage Payment Methods",
+    "confirmDelete": "Are you sure you want to delete this payment method?",
+    "deleteError": "Error deleting",
+    "addError": "Error adding",
+    "unknownError": "Unknown error",
+    "empty": "No payment methods found.",
+    "newPaymentMethodPlaceholder": "New payment method...",
+    "typeLabel": "Payment type",
+    "typeCredit": "Credit",
+    "typeDebit": "Debit",
+    "typeCash": "Cash/Other",
+    "addBtn": "Add Method",
+    "deleteTooltip": "Delete"
   }
 }
