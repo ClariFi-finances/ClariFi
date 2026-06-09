@@ -25,8 +25,11 @@ export function useI18n() {
     }
   }, [])
 
-  const t = useCallback((key: string, options?: Record<string, string | number>, defaultValue?: string) => {
-    return I18n.t(key, options, defaultValue)
+  const t = useCallback((key: string, optionsOrDefault?: Record<string, string | number> | string, defaultValue?: string) => {
+    if (typeof optionsOrDefault === 'string') {
+      return I18n.t(key, undefined, optionsOrDefault)
+    }
+    return I18n.t(key, optionsOrDefault, defaultValue)
   }, [])
 
   const changeLanguage = useCallback((lang: Language) => {

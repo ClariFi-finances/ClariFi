@@ -12,7 +12,8 @@
     "success": "Success",
     "warning": "Warning",
     "info": "Information",
-    "required": "required"
+    "required": "required",
+    "add": "Add"
   },
   "auth": {
     "tagline": "Manage your finances with intelligence",

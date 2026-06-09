@@ -80,6 +80,7 @@
 
 .add-category-form {
   display: flex;
+  align-items: flex-start;
   gap: 12px;
   margin-top: 8px;
   padding-top: 16px;
@@ -87,12 +88,20 @@
 }
 
 .add-category-form input {
+  width: 100%;
+  height: 42px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 999px;
   background: var(--bg-input);
   color: var(--text-h);
-  padding: 10px 14px;
+  padding: 0 16px;
   font-size: var(--text-sm);
+  transition: all 0.2s;
+}
+
+.add-category-form input:focus {
+  outline: none;
+  border-color: var(--accent-gold);
 }
 
 .emoji-picker-container {
@@ -101,10 +110,11 @@
 }
 
 .emoji-btn {
-  width: 48px;
+  width: 42px;
+  height: 42px;
   background: var(--bg-input);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 999px;
   color: var(--text-h);
   font-size: var(--text-lg);
   display: flex;
@@ -114,9 +124,11 @@
   transition: all 0.2s;
   padding: 0;
 }
+
 .emoji-btn:hover:not(:disabled) {
   border-color: var(--accent-gold);
 }
+
 .emoji-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -132,31 +144,62 @@
 }
 
 .name-input {
-  flex: 1;
+  width: 100% !important;
 }
 
-.add-category-form input:focus {
-  outline: none;
-  border-color: var(--accent-gold);
+.form-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.add-btn,
+.cancel-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 18px;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
 .add-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   background: var(--accent-gold);
-  color: var(--bg-primary);
+  color: #000000;
   border: none;
-  border-radius: 8px;
-  padding: 0 16px;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: var(--text-sm);
 }
+
 .add-btn:hover:not(:disabled) {
   background: var(--accent-gold-dark);
+  transform: translateY(-1px);
 }
+
 .add-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-h);
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
+}
+
+.cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+

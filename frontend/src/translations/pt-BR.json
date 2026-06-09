@@ -12,7 +12,8 @@
     "success": "Sucesso",
     "warning": "Aviso",
     "info": "Informação",
-    "required": "obrigatório"
+    "required": "obrigatório",
+    "add": "Adicionar"
   },
   "auth": {
     "tagline": "Gerencie suas finanças com inteligência",
