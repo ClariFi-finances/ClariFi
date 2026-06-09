@@ -1,0 +1,55 @@
+name: CI - API Gateway
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'API/**'
+      - 'API.Core/**'
+      - '.github/workflows/gateway.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'API/**'
+      - 'API.Core/**'
+      - '.github/workflows/gateway.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore API/API.csproj
+
+    - name: Build
+      run: dotnet build API/API.csproj -c Release --no-restore
+
+    - name: Build Docker Image Check
+      run: docker build -f API/Dockerfile -t api-gateway:${{ github.sha }} .
+
+    # ==========================================
+    # FUTURE RELEASE / AWS DEPLOYMENT TEMPLATE
+    # ==========================================
+    # - name: Configure AWS Credentials
+    #   uses: aws-actions/configure-aws-credentials@v4
+    #   with:
+    #     role-to-assume: arn:aws:iam::123456789012:role/github-actions-ecr-role
+    #     aws-region: us-east-1
+    #
+    # - name: Login to Amazon ECR
+    #   id: login-ecr
+    #   uses: aws-actions/amazon-ecr-login@v2
+    #
+    # - name: Push to ECR
+    #   run: |
+    #     docker tag api-gateway:${{ github.sha }} ${{ steps.login-ecr.outputs.registry }}/api-gateway:${{ github.sha }}
+    #     docker tag api-gateway:${{ github.sha }} ${{ steps.login-ecr.outputs.registry }}/api-gateway:latest
+    #     docker push ${{ steps.login-ecr.outputs.registry }}/api-gateway --all-tags

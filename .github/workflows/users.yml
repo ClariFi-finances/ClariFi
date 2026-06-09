@@ -1,0 +1,58 @@
+name: CI - Users Service
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'API.Users/**'
+      - 'API.Core/**'
+      - '.github/workflows/users.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'API.Users/**'
+      - 'API.Core/**'
+      - '.github/workflows/users.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore API.Users/API.Users.csproj
+
+    - name: Build
+      run: dotnet build API.Users/API.Users.csproj -c Release --no-restore
+
+    - name: Run Tests
+      run: dotnet test API.Tests/API.Tests.csproj --filter "FullyQualifiedName~API.Tests.Features.User"
+
+    - name: Build Docker Image Check
+      run: docker build -f API.Users/Dockerfile -t api-users:${{ github.sha }} .
+
+    # ==========================================
+    # FUTURE RELEASE / AWS DEPLOYMENT TEMPLATE
+    # ==========================================
+    # - name: Configure AWS Credentials
+    #   uses: aws-actions/configure-aws-credentials@v4
+    #   with:
+    #     role-to-assume: arn:aws:iam::123456789012:role/github-actions-ecr-role
+    #     aws-region: us-east-1
+    #
+    # - name: Login to Amazon ECR
+    #   id: login-ecr
+    #   uses: aws-actions/amazon-ecr-login@v2
+    #
+    # - name: Push to ECR
+    #   run: |
+    #     docker tag api-users:${{ github.sha }} ${{ steps.login-ecr.outputs.registry }}/api-users:${{ github.sha }}
+    #     docker tag api-users:${{ github.sha }} ${{ steps.login-ecr.outputs.registry }}/api-users:latest
+    #     docker push ${{ steps.login-ecr.outputs.registry }}/api-users --all-tags
