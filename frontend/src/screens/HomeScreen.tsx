@@ -319,6 +319,10 @@ export function HomeScreen() {
     )
   }, [userTransactions])
 
+  const recentlyAddedTransactions = useMemo(() => {
+    return [...userTransactions].sort((a, b) => b.id - a.id)
+  }, [userTransactions])
+
   const now = useMemo(() => new Date(), [])
   const monthStart = useMemo(() => new Date(now.getFullYear(), now.getMonth(), 1), [now])
   const monthEnd = useMemo(() => new Date(now.getFullYear(), now.getMonth() + 1, 1), [now])
@@ -506,6 +510,7 @@ export function HomeScreen() {
       })
       setTransactions(prev => [newTransaction, ...prev])
       setIsModalOpen(false)
+      alert(t('home.saveSuccess', 'Transaction saved successfully!'))
 
       try {
         const notifs = await apiRequest<ApiNotification[]>(`/notifications?userId=${user.id}`, { headers })
@@ -799,7 +804,7 @@ export function HomeScreen() {
                 ) : sortedTransactions.length === 0 ? (
                   <p className="empty-state">{t('home.emptyTransactions')}</p>
                 ) : (
-                  sortedTransactions.slice(0, 4).map(transaction => (
+                  recentlyAddedTransactions.slice(0, 4).map(transaction => (
                     <div key={transaction.id} className="transaction-row">
                       <div className="transaction-meta">
                         <p className="transaction-title">{transaction.title}</p>
