@@ -253,7 +253,9 @@
     "privacySecurityDesc": "Data protection and access",
     "helpSupportTitle": "Help and Support",
     "helpSupportDesc": "FAQs and tutorials",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "roleAdmin": "Administrator",
+    "roleUser": "Standard User"
   },
   "reports": {
     "title": "Reports",

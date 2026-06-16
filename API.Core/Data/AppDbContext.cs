@@ -20,6 +20,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             entity.Property(e => e.CognitoId).IsRequired().HasMaxLength(255);
             entity.HasIndex(e => e.CognitoId).IsUnique();
+            entity.Property(e => e.IsAdmin).IsRequired().HasDefaultValue(false);
         });
 
         modelBuilder.Entity<API.Models.PaymentMethod>(entity =>

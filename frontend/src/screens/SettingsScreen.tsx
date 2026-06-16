@@ -43,6 +43,11 @@ export function SettingsScreen() {
               <div className="profile-info">
                 <h2>{user?.name || 'Usuário'}</h2>
                 <p>{user?.email || 'usuario@email.com'}</p>
+                {user?.isAdmin ? (
+                  <span className="role-badge admin">{t('settings.roleAdmin', 'Administrador')}</span>
+                ) : (
+                  <span className="role-badge regular">{t('settings.roleUser', 'Usuário Padrão')}</span>
+                )}
               </div>
             </div>
             <button className="edit-profile-btn" onClick={() => setActiveScreen('profile')}>{t('settings.editProfile', 'Editar Perfil')}</button>

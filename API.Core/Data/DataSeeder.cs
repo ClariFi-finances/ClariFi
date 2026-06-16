@@ -15,7 +15,7 @@ public static class DataSeeder
 
         if (!context.Users.Any())
         {
-            var testUser = new User("admin@clarifi.com", "Admin User", "admin@clarifi.com", "00000000000"); // Standard Cognito sub
+            var testUser = new User("Admin1@clarifi.com", "Admin User", "Admin1@clarifi.com", "00000000000", isAdmin: true); // Standard Cognito sub
             context.Users.Add(testUser);
             await context.SaveChangesAsync();
 

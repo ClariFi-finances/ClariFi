@@ -54,6 +54,7 @@ public class UserHandlersTests : IDisposable
         Assert.Equal("John Doe", result.Name);
         Assert.Equal("john@example.com", result.Email);
         Assert.Equal("12345678901", result.Cpf);
+        Assert.False(result.IsAdmin);
         Assert.True(result.Id > 0);
 
         // Verify categories
@@ -67,6 +68,22 @@ public class UserHandlersTests : IDisposable
         Assert.Equal(3, paymentMethods.Count);
         Assert.Contains(paymentMethods, p => p.Name == "Cash" && p.Type == PaymentMethodType.Cash);
         Assert.Contains(paymentMethods, p => p.Name == "Credit Card" && p.Type == PaymentMethodType.Credit);
+    }
+
+    [Fact]
+    public async Task CreateUser_WithIsAdminTrue_ShouldPersistIsAdmin()
+    {
+        // Arrange
+        var user = new User("admin-cognito", "Admin User", "admin@example.com", "00000000000", isAdmin: true);
+
+        // Act
+        await _userRepo.AddAsync(user);
+        await _userRepo.SaveChangesAsync();
+
+        // Assert
+        var retrieved = await _context.Users.FindAsync(user.Id);
+        Assert.NotNull(retrieved);
+        Assert.True(retrieved!.IsAdmin);
     }
 
     [Fact]

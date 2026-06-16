@@ -38,7 +38,7 @@ async function fetchSSMParams() {
 }
 
 // https://vite.dev/config/
-export default defineConfig(async () => {
+export default defineConfig((async () => {
   const ssmParams = await fetchSSMParams()
 
   return {
@@ -94,4 +94,4 @@ export default defineConfig(async () => {
       }, {} as Record<string, string>)
     }
   }
-})
+}) as any)

@@ -8,6 +8,7 @@ export interface User {
   name: string
   email: string
   cpf: string
+  isAdmin: boolean
 }
 
 export interface AuthContextType {
@@ -48,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function initAuth() {
       setIsLoading(true)
       const currentUser = userPool.getCurrentUser()
-      
+
       if (currentUser) {
         currentUser.getSession(async (err: Error | null, currentSession: CognitoUserSession | null) => {
           if (err || !currentSession || !currentSession.isValid()) {
@@ -57,26 +58,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setIsLoading(false)
             return
           }
-          
+
           setSession(currentSession)
-          
+
           currentUser.getUserAttributes(async (err, attributes) => {
             if (err) {
               setIsLoading(false)
               return
             }
-            
+
             const attrs: Record<string, string> = {}
             attributes?.forEach(attr => {
               attrs[attr.getName()] = attr.getValue()
             })
-            
+
             const cognitoId = attrs['sub']
             const email = attrs['email'] || ''
             const name = attrs['name'] || email.split('@')[0] || 'User'
             const cpf = attrs['custom:Cpf'] || attrs['custom:cpf'] || '00000000000'
             const accessToken = currentSession.getAccessToken().getJwtToken()
-            
+
             await syncBackendUser(cognitoId, name, email, cpf, accessToken)
           })
         })
@@ -86,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false)
       }
     }
-    
+
     initAuth()
   }, [])
 
@@ -119,7 +120,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           cognitoId: data.cognitoId,
           name: data.name || name,
           email: data.email || email,
-          cpf: data.cpf || cpf
+          cpf: data.cpf || cpf,
+          isAdmin: data.isAdmin || false
         })
       }
     } catch (e) {
@@ -133,17 +135,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!email || !password) return
     setError(null)
     setIsLoading(true)
-    
+
     const authenticationDetails = new AuthenticationDetails({
       Username: email,
       Password: password
     })
-    
+
     const cognitoUser = new CognitoUser({
       Username: email,
       Pool: userPool
     })
-    
+
     return new Promise<void>((resolve, reject) => {
       cognitoUser.authenticateUser(authenticationDetails, {
         onSuccess: (result) => {
@@ -154,18 +156,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               reject(err)
               return
             }
-            
+
             const attrs: Record<string, string> = {}
             attributes?.forEach(attr => {
               attrs[attr.getName()] = attr.getValue()
             })
-            
+
             const cognitoId = attrs['sub']
             const userEmail = attrs['email'] || email
             const name = attrs['name'] || userEmail.split('@')[0] || 'User'
             const cpf = attrs['custom:Cpf'] || attrs['custom:cpf'] || '00000000000'
             const accessToken = result.getAccessToken().getJwtToken()
-            
+
             await syncBackendUser(cognitoId, name, userEmail, cpf, accessToken)
             resolve()
           })
@@ -183,13 +185,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!name || !email || !password || !cpf) return
     setError(null)
     setIsLoading(true)
-    
+
     const attributeList = [
       new CognitoUserAttribute({ Name: 'email', Value: email }),
       new CognitoUserAttribute({ Name: 'name', Value: name }),
       new CognitoUserAttribute({ Name: 'custom:Cpf', Value: cpf })
     ]
-    
+
     return new Promise<void>((resolve, reject) => {
       userPool.signUp(email, password, attributeList, [], async (err) => {
         setIsLoading(false)
@@ -198,7 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           reject(err)
           return
         }
-        
+
         // Account created - user needs to confirm email with verification code
         setPendingEmail(email)
         setPendingPassword(password)

@@ -60,7 +60,7 @@ interface ApiNotification {
 
 export function HomeScreen() {
   const { user, token } = useAuth()
-  const { t, language, changeLanguage, getAllLanguages, getLanguageLabel } = useI18n()
+  const { t, language, changeLanguage, getAllLanguages } = useI18n()
   const { 
     setActiveScreen, 
     isNewTransactionModalOpen, 

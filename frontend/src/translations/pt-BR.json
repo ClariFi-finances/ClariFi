@@ -253,7 +253,9 @@
     "privacySecurityDesc": "Proteção de dados e acesso",
     "helpSupportTitle": "Ajuda e Suporte",
     "helpSupportDesc": "Dúvidas e tutoriais",
-    "logout": "Sair da conta"
+    "logout": "Sair da conta",
+    "roleAdmin": "Administrador",
+    "roleUser": "Usuário Padrão"
   },
   "reports": {
     "title": "Relatórios",
