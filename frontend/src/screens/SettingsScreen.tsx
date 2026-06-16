@@ -108,7 +108,7 @@ export function SettingsScreen() {
                 </div>
                 <div className="item-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
               </div>
-              <div className="list-item">
+              {/* <div className="list-item">
                 <div className="item-icon">
                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2h0V5z"/><path d="M2 9v1c0 1.1.9 2 2 2h1"/><path d="M16 11h0"/></svg>
                 </div>
@@ -117,7 +117,7 @@ export function SettingsScreen() {
                   <p>{t('settings.manageReservesDesc', 'Configure suas reservas financeiras')}</p>
                 </div>
                 <div className="item-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-              </div>
+              </div> */}
               <div className="list-item" onClick={() => setIsPaymentMethodModalOpen(true)}>
                 <div className="item-icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
@@ -132,7 +132,7 @@ export function SettingsScreen() {
           </section>
 
           {/* Preferencias */}
-          <section className="settings-section">
+          {/* <section className="settings-section">
             <h3>{t('settings.preferences', 'Preferências')}</h3>
             <div className="settings-card list-card">
               <div className="list-item">
@@ -166,7 +166,7 @@ export function SettingsScreen() {
                 <div className="item-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
               </div>
             </div>
-          </section>
+          </section> */}
 
           {/* Sair da conta */}
           <button className="settings-card logout-btn" onClick={handleLogout}>

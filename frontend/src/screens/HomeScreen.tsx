@@ -60,7 +60,7 @@ interface ApiNotification {
 
 export function HomeScreen() {
   const { user, token } = useAuth()
-  const { t, language } = useI18n()
+  const { t, language, changeLanguage, getAllLanguages, getLanguageLabel } = useI18n()
   const { 
     setActiveScreen, 
     isNewTransactionModalOpen, 
@@ -91,11 +91,14 @@ export function HomeScreen() {
   const [modalError, setModalError] = useState<string | null>(null)
   const [isQuickMenuOpen, setIsQuickMenuOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false)
   const quickMenuRef = useRef<HTMLDivElement | null>(null)
   const quickMenuButtonRef = useRef<HTMLButtonElement | null>(null)
   const quickMenuFabRef = useRef<HTMLButtonElement | null>(null)
   const notificationsMenuRef = useRef<HTMLDivElement | null>(null)
   const notificationsButtonRef = useRef<HTMLButtonElement | null>(null)
+  const languageMenuRef = useRef<HTMLDivElement | null>(null)
+  const languageButtonRef = useRef<HTMLButtonElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isScanning, setIsScanning] = useState(false)
 
@@ -246,7 +249,7 @@ export function HomeScreen() {
   }, [headers, t, user])
 
   useEffect(() => {
-    if (!isQuickMenuOpen) {
+    if (!isQuickMenuOpen && !isNotificationsOpen && !isLanguageMenuOpen) {
       return
     }
 
@@ -260,11 +263,17 @@ export function HomeScreen() {
       const isNotifTrigger = notificationsButtonRef.current?.contains(target) ?? false
       const isNotifMenu = notificationsMenuRef.current?.contains(target) ?? false
 
+      const isLanguageTrigger = languageButtonRef.current?.contains(target) ?? false
+      const isLanguageMenu = languageMenuRef.current?.contains(target) ?? false
+
       if (!isQuickMenuTrigger && !isQuickMenu) {
         setIsQuickMenuOpen(false)
       }
       if (!isNotifTrigger && !isNotifMenu) {
         setIsNotificationsOpen(false)
+      }
+      if (!isLanguageTrigger && !isLanguageMenu) {
+        setIsLanguageMenuOpen(false)
       }
     }
 
@@ -272,6 +281,7 @@ export function HomeScreen() {
       if (event.key === 'Escape') {
         setIsQuickMenuOpen(false)
         setIsNotificationsOpen(false)
+        setIsLanguageMenuOpen(false)
       }
     }
 
@@ -282,7 +292,7 @@ export function HomeScreen() {
       document.removeEventListener('mousedown', handleClick)
       document.removeEventListener('keydown', handleKey)
     }
-  }, [isQuickMenuOpen])
+  }, [isQuickMenuOpen, isNotificationsOpen, isLanguageMenuOpen])
 
   useEffect(() => {
     if (isNewTransactionModalOpen) {
@@ -599,6 +609,59 @@ export function HomeScreen() {
                     </div>
                   ))
                 )}
+              </div>
+            )}
+          </div>
+          <div style={{ position: 'relative' }}>
+            <button 
+              className="ghost-btn" 
+              type="button" 
+              aria-label={t('home.language', 'Language')}
+              ref={languageButtonRef}
+              onClick={() => setIsLanguageMenuOpen(v => !v)}
+              style={{ fontSize: '12px', padding: '6px 10px' }}
+            >
+              {language === 'pt-BR' ? '🇧🇷 PT' : '🇺🇸 EN'}
+            </button>
+            {isLanguageMenuOpen && (
+              <div className="quick-menu" ref={languageMenuRef} role="menu" style={{ right: 0, left: 'auto', minWidth: '180px' }}>
+                <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)', fontWeight: 600, fontSize: '12px' }}>
+                  {t('home.selectLanguage', 'Language')}
+                </div>
+                {getAllLanguages().map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => {
+                      changeLanguage(lang)
+                      setIsLanguageMenuOpen(false)
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      background: language === lang ? 'var(--bg-secondary)' : 'transparent',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      color: language === lang ? 'var(--accent-gold)' : 'var(--text-primary)',
+                      fontWeight: language === lang ? 600 : 400,
+                      borderBottom: '1px solid var(--border)',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (language !== lang) {
+                        (e.target as HTMLButtonElement).style.background = 'var(--bg-hover)'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (language !== lang) {
+                        (e.target as HTMLButtonElement).style.background = 'transparent'
+                      }
+                    }}
+                  >
+                    {lang === 'pt-BR' ? '🇧🇷 Português (Brasil)' : '🇺🇸 English (United States)'}
+                  </button>
+                ))}
               </div>
             )}
           </div>
