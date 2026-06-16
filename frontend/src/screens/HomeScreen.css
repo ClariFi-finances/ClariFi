@@ -105,6 +105,12 @@
   align-items: center;
   gap: 6px;
   margin-bottom: 16px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+.goal-filter-bar::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 .goal-filter-icon {
@@ -650,12 +656,16 @@
     justify-content: flex-start;
   }
 
+  .header-actions .primary-btn {
+    display: none;
+  }
+
   .quick-actions {
     grid-template-columns: 1fr;
   }
 
   .quick-fab {
-    display: inline-flex;
+    display: none;
   }
 
   .quick-menu {

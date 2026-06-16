@@ -31,6 +31,9 @@
 
   .app-shell-sidebar-panel {
     min-height: 0;
+    height: auto;
+    position: static;
+    z-index: 50;
   }
 
   .app-shell-main-panel {
