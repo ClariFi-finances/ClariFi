@@ -6,6 +6,7 @@ public class User : BaseEntity
     public string Name { get; private set; }
     public string Email { get; private set; }
     public string Cpf { get; private set; }
+    public bool IsAdmin { get; private set; }
 
     private readonly List<PaymentMethod> _paymentMethods = new();
     public IReadOnlyCollection<PaymentMethod> PaymentMethods => _paymentMethods.AsReadOnly();
@@ -40,5 +41,10 @@ public class User : BaseEntity
     public void UpdateCognitoId(string cognitoId)
     {
         CognitoId = cognitoId;
+    }
+
+    public void ToggleAdmin()
+    {
+        IsAdmin = !IsAdmin;
     }
 }

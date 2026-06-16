@@ -8,6 +8,7 @@ export interface User {
   name: string
   email: string
   cpf: string
+  isAdmin?: boolean
 }
 
 export interface AuthContextType {
@@ -119,7 +120,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           cognitoId: data.cognitoId,
           name: data.name || name,
           email: data.email || email,
-          cpf: data.cpf || cpf
+          cpf: data.cpf || cpf,
+          isAdmin: data.isAdmin
         })
       }
     } catch (e) {

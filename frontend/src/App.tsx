@@ -10,6 +10,7 @@ import { LoginScreen } from '@/screens/Auth/LoginScreen'
 import { RegisterScreen } from '@/screens/Auth/RegisterScreen'
 import { ConfirmAccountScreen } from '@/screens/Auth/ConfirmAccountScreen'
 import { AppShell } from '@/components/AppShell'
+import { AdminScreen } from '@/screens/AdminScreen'
 import { useState } from 'react'
 import './App.css'
 
@@ -40,6 +41,11 @@ function App() {
 
   const handleLogout = () => {
     setActiveScreen('home')
+  }
+
+  // Admin exclusive route
+  if (user.isAdmin) {
+    return <AdminScreen />
   }
 
   // Authenticated - show app screens

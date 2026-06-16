@@ -6,6 +6,7 @@ namespace API.Features.Users;
 public record RegisterUserCommand(string CognitoId, string Name, string Email, string Cpf) : IRequest<User>;
 public record LoginUserCommand(string CognitoId) : IRequest<User?>;
 public record UpdateUserProfileCommand(int Id, string CognitoId, string Name, string Email, string Cpf) : IRequest<bool>;
+public record ToggleUserAdminCommand(int Id) : IRequest<bool>;
 public record GetAllUsersQuery() : IRequest<IEnumerable<User>>;
 
 public class UserHandlers(
@@ -15,6 +16,7 @@ public class UserHandlers(
     IRequestHandler<RegisterUserCommand, User>,
     IRequestHandler<LoginUserCommand, User?>,
     IRequestHandler<UpdateUserProfileCommand, bool>,
+    IRequestHandler<ToggleUserAdminCommand, bool>,
     IRequestHandler<GetAllUsersQuery, IEnumerable<User>>
 {
 
@@ -77,4 +79,13 @@ public class UserHandlers(
         return true;
     }
     
+    public async Task<bool> Handle(ToggleUserAdminCommand request, CancellationToken cancellationToken)
+    {
+        if (await repository.GetByIdAsync(request.Id, cancellationToken) is not { } user) return false;
+
+        user.ToggleAdmin();
+        await repository.UpdateAsync(user);
+        await repository.SaveChangesAsync(cancellationToken);
+        return true;
+    }
 }
