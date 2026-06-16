@@ -2,6 +2,9 @@ import { useState, useMemo } from 'react'
 import { useAuth } from '@/context/useAuth'
 import { useI18n } from '@/hooks/useI18n'
 import { validateName, validateEmail, showConfirmDialog, showErrorAlert, showSuccessAlert, showLoadingAlert, hideAlert } from '@/utils/validation'
+import { CategorySettingsModal } from '@/components/CategorySettingsModal'
+import { FixedIncomeSettingsModal } from '@/components/FixedIncomeSettingsModal'
+import { PaymentMethodSettingsModal } from '@/components/PaymentMethodSettingsModal'
 import './ProfileScreen.css'
 
 interface ProfileScreenProps {
@@ -16,6 +19,9 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
   const [editedEmail, setEditedEmail] = useState(user?.email || '')
   const [nameTouched, setNameTouched] = useState(false)
   const [emailTouched, setEmailTouched] = useState(false)
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
+  const [isFixedIncomeModalOpen, setIsFixedIncomeModalOpen] = useState(false)
+  const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false)
 
   const nameError = useMemo(() => {
     if (!nameTouched) return null
@@ -191,20 +197,16 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
         <div className="profile-section">
           <h3>{t('profile.settings')}</h3>
           <div className="settings-list">
-            <button className="settings-item">
-              <span>{t('profile.manageCategories')}</span>
+            <button className="settings-item" onClick={() => setIsCategoryModalOpen(true)}>
+              <span>{t('settings.manageCategoriesTitle', 'Gerenciar Categorias')}</span>
               <span className="arrow">›</span>
             </button>
-            <button className="settings-item">
-              <span>{t('profile.fixedIncome')}</span>
+            <button className="settings-item" onClick={() => setIsPaymentMethodModalOpen(true)}>
+              <span>{t('settings.paymentMethodsTitle', 'Métodos de Pagamento')}</span>
               <span className="arrow">›</span>
             </button>
-            <button className="settings-item">
-              <span>{t('profile.manageReserves')}</span>
-              <span className="arrow">›</span>
-            </button>
-            <button className="settings-item">
-              <span>{t('profile.privacyAndSecurity')}</span>
+            <button className="settings-item" onClick={() => setIsFixedIncomeModalOpen(true)}>
+              <span>{t('settings.fixedIncomeTitle', 'Receitas Fixas')}</span>
               <span className="arrow">›</span>
             </button>
           </div>
@@ -227,6 +229,21 @@ export function ProfileScreen({ onLogout }: ProfileScreenProps) {
           {t('profile.logout')}
         </button>
       </div>
+
+      <CategorySettingsModal 
+        isOpen={isCategoryModalOpen} 
+        onClose={() => setIsCategoryModalOpen(false)} 
+      />
+      
+      <FixedIncomeSettingsModal 
+        isOpen={isFixedIncomeModalOpen} 
+        onClose={() => setIsFixedIncomeModalOpen(false)} 
+      />
+
+      <PaymentMethodSettingsModal 
+        isOpen={isPaymentMethodModalOpen} 
+        onClose={() => setIsPaymentMethodModalOpen(false)} 
+      />
     </div>
   )
 }
