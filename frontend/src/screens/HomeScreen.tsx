@@ -367,10 +367,20 @@ export function HomeScreen() {
 
   const previousMonthTotals = useMemo(() => {
     const previousStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-    const previousEnd = monthStart
-    const previousTransactions = sortedTransactions.filter(transaction => {
+    const previousMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
+    const targetDay = Math.min(now.getDate(), previousMonthEnd.getDate())
+    const previousEnd = new Date(now.getFullYear(), now.getMonth() - 1, targetDay, 23, 59, 59, 999)
+    
+    let baseTransactions = sortedTransactions
+    if (transactionFilter === 'goals') {
+      baseTransactions = sortedTransactions.filter(t => t.goalId != null)
+    } else if (transactionFilter === 'regular') {
+      baseTransactions = sortedTransactions.filter(t => !t.goalId)
+    }
+
+    const previousTransactions = baseTransactions.filter(transaction => {
       const date = new Date(transaction.date)
-      return date >= previousStart && date < previousEnd
+      return date >= previousStart && date <= previousEnd
     })
 
     const expense = previousTransactions
@@ -378,7 +388,7 @@ export function HomeScreen() {
       .reduce((sum, transaction) => sum + transaction.amount, 0)
 
     return { expense }
-  }, [monthStart, now, sortedTransactions])
+  }, [now, sortedTransactions, transactionFilter])
 
   const categoryTotals = useMemo(() => {
     const grouped = filteredMonthTransactions
@@ -463,7 +473,7 @@ export function HomeScreen() {
 
   const expenseDelta = previousMonthTotals.expense > 0
     ? ((totals.expense - previousMonthTotals.expense) / previousMonthTotals.expense) * 100
-    : 0
+    : totals.expense > 0 ? 100 : 0
   const deltaLabel = expenseDelta <= 0 ? t('home.deltaLess') : t('home.deltaMore')
   const deltaValue = `${Math.abs(expenseDelta).toFixed(0)}% ${deltaLabel}`
   const savedValue = previousMonthTotals.expense > totals.expense
