@@ -292,12 +292,17 @@ export function AppSidebar() {
             // Let's make it consistent.
             setIsQuickMenuOpen(!isQuickMenuOpen)
           }}
+          onMouseDown={e => e.stopPropagation()}
         >
           <Plus size={22} />
         </button>
 
         {isQuickMenuOpen && (
-          <div className="mobile-quick-menu-overlay" onClick={() => setIsQuickMenuOpen(false)}>
+          <div 
+            className="mobile-quick-menu-overlay" 
+            onClick={() => setIsQuickMenuOpen(false)}
+            onMouseDown={e => e.stopPropagation()}
+          >
             <div className="mobile-quick-menu" onClick={e => e.stopPropagation()}>
               <button className="quick-menu-item" type="button" onClick={() => openModal('income')}>
                 <ArrowUpCircle size={18} className="quick-menu-icon" />

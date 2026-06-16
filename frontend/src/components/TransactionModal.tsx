@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import './TransactionModal.css'
 
 export interface TransactionModalCategoryOption {
@@ -163,7 +164,7 @@ export function TransactionModal({
     return null
   }
 
-  return (
+  return createPortal(
     <div className="modal-overlay" role="presentation">
       <div className={`modal-card ${mode}`} role="dialog" aria-modal="true" aria-label={primaryLabel}>
         <div className="modal-header">
@@ -313,6 +314,7 @@ export function TransactionModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
