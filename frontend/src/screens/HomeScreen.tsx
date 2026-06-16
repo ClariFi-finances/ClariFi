@@ -510,7 +510,6 @@ export function HomeScreen() {
       })
       setTransactions(prev => [newTransaction, ...prev])
       setIsModalOpen(false)
-      alert(t('home.saveSuccess', 'Transaction saved successfully!'))
 
       try {
         const notifs = await apiRequest<ApiNotification[]>(`/notifications?userId=${user.id}`, { headers })
