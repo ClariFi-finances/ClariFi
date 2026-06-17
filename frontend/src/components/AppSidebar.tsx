@@ -233,7 +233,7 @@ export function AppSidebar() {
         <nav className="sidebar-nav">
           {NAV_ITEMS.map((item) => {
             const isActive = item.targetScreen === activeScreen
-            const isDisabled = item.disabled || !item.targetScreen
+            const isDisabled = item.disabled || !item.targetScreen || (item.id === 'reports' && !user?.isAdmin)
 
             return (
               <button
@@ -275,6 +275,7 @@ export function AppSidebar() {
         <button
           className={`mobile-nav-item ${activeScreen === 'reports' ? 'active' : ''}`}
           type="button"
+          disabled={!user?.isAdmin}
           onClick={() => setActiveScreen('reports')}
         >
           <BarChart3 size={18} className="mobile-icon" />

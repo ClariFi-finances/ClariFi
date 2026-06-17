@@ -52,7 +52,7 @@ function App() {
       ) : activeScreen === 'transactions' ? (
         <TransactionsScreen />
       ) : activeScreen === 'reports' ? (
-        <ReportsScreen />
+        user.isAdmin ? <ReportsScreen /> : <HomeScreen />
       ) : activeScreen === 'goals' ? (
         <GoalsScreen />
       ) : (
